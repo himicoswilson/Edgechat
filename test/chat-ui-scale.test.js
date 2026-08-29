@@ -91,20 +91,6 @@ test("聊天侧栏跟随全屏根节点且不污染后台根节点", () => {
 	assert.match(chatPage, /\.right-sidebar-action__label\s*{[^}]*font-size:\s*10px;/s);
 });
 
-	test("GitHub 仓库入口位于添加人员左侧并复用相同按钮尺寸", () => {
-		const githubLink = chatPage.indexOf('href="https://github.com/aozorae/Edgechat"');
-		const addConversation = chatPage.indexOf(':title="t(\'chat.addPeople\')"');
-	assert.notEqual(githubLink, -1);
-	assert.ok(githubLink < addConversation);
-	assert.match(chatPage, /src="\/github\.svg"/);
-	assert.match(chatPage, /rel="noopener noreferrer"/);
-
-	const headerAction = getStyleRule(chatPage, ".header-action");
-	assert.match(headerAction, /flex:\s*0 0 36px;/);
-	assert.match(headerAction, /width:\s*36px;/);
-		assert.match(headerAction, /height:\s*36px;/);
-	});
-
 	test("语言切换入口位于聊天页右上区域且移动端保持可达", () => {
 		assert.doesNotMatch(chatPage, /right-sidebar-action--language/);
 		assert.match(chatPage, /<LanguageSwitch class="chat-header__language-switch" \/>/);

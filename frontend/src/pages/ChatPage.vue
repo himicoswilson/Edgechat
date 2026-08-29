@@ -436,19 +436,8 @@ onBeforeUnmount(() => {
           >
             <Menu :size="22" aria-hidden="true" />
           </button>
-          <h1 class="brand-title">EdgeChat</h1>
+          <h1 class="brand-title">{{ store.site.siteName }}</h1>
           <div class="sidebar-header-actions">
-            <a
-              class="header-action header-action--github"
-              href="https://github.com/aozorae/Edgechat"
-              target="_blank"
-              rel="noopener noreferrer"
-              :title="t('nav.githubRepository')"
-              :aria-label="t('nav.openGithubRepository')"
-            >
-              <img src="/github.svg" alt="" width="20" height="20" />
-              <span class="sr-only">{{ t('nav.openGithubRepository') }}</span>
-            </a>
             <button
               type="button"
               class="header-action"
@@ -670,7 +659,7 @@ onBeforeUnmount(() => {
         <LanguageSwitch class="chat-empty__language-switch" />
         <div class="empty-content">
           <div class="empty-brand">
-            <span class="empty-title">EdgeChat</span>
+            <span class="empty-title">{{ store.site.siteName }}</span>
           </div>
         </div>
       </div>
@@ -1189,12 +1178,6 @@ onBeforeUnmount(() => {
   outline-offset: 2px;
 }
 
-.header-action img {
-  display: block;
-  width: 20px;
-  height: 20px;
-}
-
 .chat-header h2 {
   margin: 0;
   padding: 0;
@@ -1563,10 +1546,6 @@ onBeforeUnmount(() => {
     flex-basis: 44px;
     width: 44px;
     height: 44px;
-  }
-
-  .header-action--github {
-    display: none;
   }
 
   .sidebar-header-actions {

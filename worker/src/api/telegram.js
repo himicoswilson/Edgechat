@@ -188,7 +188,7 @@ export function registerTelegramAdminRoutes(app) {
 				return telegramError;
 			}
 			if (String(error?.message || error).includes("UNIQUE")) {
-				return errorResponse("这个 EdgeChat 群组或 Telegram 群已经绑定");
+				return errorResponse("这个聊天群组或 Telegram 群已经绑定");
 			}
 			throw error;
 		}

@@ -88,7 +88,7 @@ watch(
   <aside class="admin-sidebar" :class="{ 'admin-sidebar--open': mobileOpen }">
     <div class="admin-sidebar__brand-row">
       <button type="button" class="admin-brand" :aria-label="t('admin.sidebar.openDashboard')" @click="navigate('/admin/dashboard')">
-        {{ t('admin.sidebar.brand') }}
+        {{ store.site.siteName || t('admin.sidebar.brand') }}
       </button>
       <button
         type="button"

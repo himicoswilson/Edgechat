@@ -4,6 +4,7 @@ import { onMounted, reactive, ref } from 'vue';
 import api from '../api.js';
 import UiButton from '../components/ui/Button.vue';
 import UiSurface from '../components/ui/Surface.vue';
+import store from '../store.js';
 import { t } from '../i18n.js';
 
 const loading = ref(false);
@@ -159,7 +160,7 @@ onMounted(loadState);
         <div class="admin-table-wrap">
           <table class="list-table telegram-mapping-table">
             <thead>
-              <tr><th>EdgeChat</th><th>Telegram</th><th>{{ t('telegram.sync') }}</th><th>{{ t('telegram.actions') }}</th></tr>
+              <tr><th>{{ store.site.siteName }}</th><th>Telegram</th><th>{{ t('telegram.sync') }}</th><th>{{ t('telegram.actions') }}</th></tr>
             </thead>
             <tbody>
               <tr v-if="loading && !state.mappings.length"><td colspan="4" class="muted">{{ t('telegram.loadingMappings') }}</td></tr>

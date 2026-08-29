@@ -64,7 +64,7 @@ const fixedErrorTranslations = new Map([
   ['请选择公开群组并填写有效的 Telegram 群 ID', 'Select a public group and enter a valid Telegram group ID'],
   ['请先连接 Telegram Bot', 'Connect the Telegram Bot first'],
   ['目标必须是 Telegram 群组或超级群组', 'The target must be a Telegram group or supergroup'],
-  ['这个 EdgeChat 群组或 Telegram 群已经绑定', 'This EdgeChat group or Telegram group is already linked'],
+  ['这个聊天群组或 Telegram 群已经绑定', 'This chat group or Telegram group is already linked'],
   ['Telegram 映射不存在', 'Telegram mapping not found'],
   ['Telegram Bot Token 格式无效', 'Invalid Telegram Bot Token format'],
   ['Telegram 文件路径无效', 'Invalid Telegram file path'],

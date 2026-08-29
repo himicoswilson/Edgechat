@@ -1,5 +1,6 @@
 import { computed, ref } from "vue";
 import { t } from "../i18n.js";
+import store from "../store.js";
 
 const STORAGE_KEY_PREFIX = "edgechat:browser-notifications";
 
@@ -125,7 +126,7 @@ export function useBrowserNotifications(options = {}) {
 			return false;
 		}
 
-		const notification = new notificationApi(room.name || "EdgeChat", {
+		const notification = new notificationApi(room.name || store.site.siteName, {
 				body: room.kind === "dm" ? t('notifications.directMessage') : t('notifications.groupMessage'),
 			tag: `edgechat:${browserNotificationRoomKey(room)}`,
 			renotify: true,
