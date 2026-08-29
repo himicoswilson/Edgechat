@@ -257,12 +257,23 @@
   }
 
   .member-chip {
-    align-items: flex-start;
-    flex-wrap: wrap;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
+  .member-chip__text {
+    min-width: 0;
+  }
+
+  .member-chip__text strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .member-chip__actions {
-    width: 100%;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
     justify-content: flex-end;
   }
 

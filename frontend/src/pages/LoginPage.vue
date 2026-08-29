@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router';
 import store from '../store.js';
 import { useCursor } from '../composables/useCursor.js';
 import { useI18n } from '../i18n.js';
-import LanguageSwitch from '../components/ui/LanguageSwitch.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -43,7 +42,6 @@ async function submit() {
 
 <template>
   <div class="login-page">
-    <LanguageSwitch class="login-language-switch" />
     <div class="login-container">
       <div class="title-group">
         <h1 class="welcome-text">{{ t('auth.welcomeBack') }}</h1>
@@ -272,13 +270,5 @@ async function submit() {
   color: #d9534f;
   margin: 0;
   text-align: center;
-}
-
-.login-language-switch {
-  position: absolute;
-  top: max(16px, env(safe-area-inset-top));
-  right: max(16px, env(safe-area-inset-right));
-  z-index: 2;
-  color: #2c4a6e;
 }
 </style>

@@ -23,8 +23,9 @@ useOverlayLifecycle({
 </script>
 
 <template>
-  <Transition name="modal-fade">
-    <div v-if="show" class="room-dialog-overlay" @click.self="emit('close')">
+  <Teleport to="body">
+    <Transition name="modal-fade">
+      <div v-if="show" class="room-dialog-overlay" @click.self="emit('close')">
       <section class="room-dialog" role="dialog" aria-modal="true" aria-labelledby="create-group-title">
         <h2 id="create-group-title">{{ t('group.create') }}</h2>
         <label class="room-dialog__field">
@@ -84,7 +85,8 @@ useOverlayLifecycle({
         </div>
       </section>
     </div>
-  </Transition>
+    </Transition>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -105,6 +107,8 @@ useOverlayLifecycle({
 
 .room-dialog {
   width: min(420px, 100%);
+  max-height: calc(100vh - 32px);
+  /* biome-ignore lint/suspicious/noDuplicateProperties: 100dvh 降级兜底,老浏览器不识别则回退上一行 100vh */
   max-height: calc(100dvh - 32px);
   overflow-y: auto;
   padding: 24px;
@@ -145,6 +149,8 @@ useOverlayLifecycle({
 
   .room-dialog {
     width: 100%;
+    max-height: calc(100vh - env(safe-area-inset-top));
+    /* biome-ignore lint/suspicious/noDuplicateProperties: 100dvh 降级兜底,老浏览器不识别则回退上一行 100vh */
     max-height: calc(100dvh - env(safe-area-inset-top));
     padding: 20px 16px max(16px, env(safe-area-inset-bottom));
     border-radius: 16px 16px 0 0;

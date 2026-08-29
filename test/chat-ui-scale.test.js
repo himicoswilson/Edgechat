@@ -91,10 +91,8 @@ test("聊天侧栏跟随全屏根节点且不污染后台根节点", () => {
 	assert.match(chatPage, /\.right-sidebar-action__label\s*{[^}]*font-size:\s*10px;/s);
 });
 
-	test("语言切换入口位于聊天页右上区域且移动端保持可达", () => {
+	test("语言切换按钮仅在个人设置页保留", () => {
+		assert.doesNotMatch(chatPage, /LanguageSwitch/);
 		assert.doesNotMatch(chatPage, /right-sidebar-action--language/);
-		assert.match(chatPage, /<LanguageSwitch class="chat-header__language-switch" \/>/);
-		assert.match(chatPage, /<LanguageSwitch class="chat-empty__language-switch" \/>/);
-		assert.match(chatPage, /<LanguageSwitch class="mobile-language-switch" \/>/);
-		assert.match(chatPage, /\.chat-empty__language-switch\s*{[^}]*position:\s*absolute;[^}]*right:\s*16px;/s);
+		assert.doesNotMatch(chatPage, /language-switch/);
 	});

@@ -15,7 +15,6 @@ import PendingAttachmentPreview from '../components/chat/PendingAttachmentPrevie
 import PublicGroupDiscovery from '../components/chat/PublicGroupDiscovery.vue';
 import PublicGroupJoinDialog from '../components/chat/PublicGroupJoinDialog.vue';
 import UiAvatar from '../components/ui/Avatar.vue';
-import LanguageSwitch from '../components/ui/LanguageSwitch.vue';
 import UiTextarea from '../components/ui/Textarea.vue';
 import { useActiveRoom } from '../composables/useActiveRoom.js';
 import { useBrowserNotifications } from '../composables/useBrowserNotifications.js';
@@ -453,7 +452,6 @@ onBeforeUnmount(() => {
                 <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
               </svg>
             </button>
-            <LanguageSwitch class="mobile-language-switch" />
           </div>
         </div>
 
@@ -560,7 +558,6 @@ onBeforeUnmount(() => {
               <Settings :size="19" aria-hidden="true" />
               <span>{{ t('chat.groupSettings') }}</span>
             </button>
-            <LanguageSwitch class="chat-header__language-switch" />
           </div>
         </header>
 
@@ -656,7 +653,6 @@ onBeforeUnmount(() => {
       </template>
 
       <div v-else class="chat-empty">
-        <LanguageSwitch class="chat-empty__language-switch" />
         <div class="empty-content">
           <div class="empty-brand">
             <span class="empty-title">{{ store.site.siteName }}</span>
@@ -795,10 +791,6 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 4px;
-}
-
-.mobile-language-switch {
-  display: none;
 }
 
 .header-action {
@@ -1138,12 +1130,6 @@ onBeforeUnmount(() => {
   flex-shrink: 0;
 }
 
-.chat-header__language-switch {
-  width: 36px;
-  min-width: 36px;
-  height: 36px;
-}
-
 .chat-header__button {
   display: inline-flex;
   align-items: center;
@@ -1449,12 +1435,6 @@ onBeforeUnmount(() => {
   justify-content: center;
 }
 
-.chat-empty__language-switch {
-  position: absolute;
-  top: 10px;
-  right: 16px;
-}
-
 .empty-content {
   display: flex;
   align-items: center;
@@ -1552,10 +1532,6 @@ onBeforeUnmount(() => {
     gap: 0;
   }
 
-  .mobile-language-switch {
-    display: inline-grid;
-  }
-
   .sidebar-list {
     padding-bottom: max(8px, env(safe-area-inset-bottom));
     overscroll-behavior: contain;
@@ -1631,15 +1607,6 @@ onBeforeUnmount(() => {
 
   .chat-header__actions {
     gap: 0;
-  }
-
-  .chat-header__language-switch {
-    width: 44px;
-    min-width: 44px;
-    height: 44px;
-    border: 0;
-    border-radius: 50%;
-    background: transparent;
   }
 
   .chat-messages {

@@ -30,12 +30,13 @@ watch(
 </script>
 
 <template>
-  <Transition name="add-conversation-fade">
-    <div
-      v-if="show"
-      class="add-conversation-overlay"
-      @click.self="emit('close')"
-    >
+  <Teleport to="body">
+    <Transition name="add-conversation-fade">
+      <div
+        v-if="show"
+        class="add-conversation-overlay"
+        @click.self="emit('close')"
+      >
       <section
         class="add-conversation-dialog"
         role="dialog"
@@ -129,7 +130,8 @@ watch(
         </div>
       </section>
     </div>
-  </Transition>
+    </Transition>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -150,6 +152,8 @@ watch(
 
 .add-conversation-dialog {
   width: min(440px, 100%);
+  max-height: min(620px, calc(100vh - 32px));
+  /* biome-ignore lint/suspicious/noDuplicateProperties: 100dvh 降级兜底,老浏览器不识别则回退上一行 100vh */
   max-height: min(620px, calc(100dvh - 32px));
   overflow: hidden;
   border-radius: 16px;
@@ -367,6 +371,8 @@ watch(
 
   .add-conversation-dialog {
     width: 100%;
+    max-height: calc(100vh - env(safe-area-inset-top));
+    /* biome-ignore lint/suspicious/noDuplicateProperties: 100dvh 降级兜底,老浏览器不识别则回退上一行 100vh */
     max-height: calc(100dvh - env(safe-area-inset-top));
     border-radius: 16px 16px 0 0;
   }
