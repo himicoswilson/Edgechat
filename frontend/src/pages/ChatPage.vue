@@ -1258,7 +1258,7 @@ onBeforeUnmount(() => {
 .message-avatar {
   width: 34px;
   height: 34px;
-  border-radius: 50%;
+  border-radius: 8px;
   box-shadow: none;
 }
 

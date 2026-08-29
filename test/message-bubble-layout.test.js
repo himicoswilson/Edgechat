@@ -43,7 +43,7 @@ test("短文本消息为右下角时间戳预留末行空间", () => {
 	assert.match(reserve, /width:\s*3\.5em;/);
 });
 
-test("非本人消息在气泡前显示圆形发送者头像", () => {
+test("非本人消息在气泡前显示圆角方形发送者头像", () => {
 	assert.match(chatPage, /<UiAvatar\s+v-if="!isOwnMessage\(msg\)"/);
 	assert.match(chatPage, /:src="msg\.sender\.avatarUrl"/);
 	assert.match(chatPage, /:fallback="msg\.sender\.displayName"/);
@@ -55,7 +55,7 @@ test("非本人消息在气泡前显示圆形发送者头像", () => {
 	const avatar = getStyleRule(".message-avatar");
 	assert.match(avatar, /width:\s*34px;/);
 	assert.match(avatar, /height:\s*34px;/);
-	assert.match(avatar, /border-radius:\s*50%;/);
+	assert.match(avatar, /border-radius:\s*8px;/);
 });
 
 test("远程头像加载失败时显示姓名缩写", () => {

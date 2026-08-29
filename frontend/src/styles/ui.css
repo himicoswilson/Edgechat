@@ -375,7 +375,7 @@ select.ui-input:focus {
 .ui-avatar {
   width: 46px;
   height: 46px;
-  border-radius: 16px;
+  border-radius: 8px;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -394,13 +394,11 @@ select.ui-input:focus {
 .ui-avatar--sm {
   width: 36px;
   height: 36px;
-  border-radius: 14px;
 }
 
 .ui-avatar--lg {
   width: 64px;
   height: 64px;
-  border-radius: 20px;
 }
 
 .ui-avatar img {

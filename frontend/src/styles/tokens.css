@@ -875,7 +875,7 @@
 .chat-group-editor__avatar-tile .ui-avatar {
   width: 56px;
   height: 56px;
-  border-radius: 18px;
+  border-radius: 8px;
   border-color: rgba(255, 255, 255, 0.24);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08)),
