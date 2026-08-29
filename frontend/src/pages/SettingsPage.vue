@@ -29,6 +29,7 @@ const uploadingAvatar = ref(false);
 const avatarInputEl = ref(null);
 
 const showCropper = ref(false);
+const avatarMenuOpen = ref(false);
 const cropperCanvas = ref(null);
 const cropZoom = ref(1);
 const cropFile = ref(null);
@@ -70,6 +71,16 @@ async function saveProfile() {
 
 function openAvatarPicker() {
   avatarInputEl.value?.click();
+}
+
+function chooseAvatar() {
+  avatarMenuOpen.value = false;
+  openAvatarPicker();
+}
+
+async function removeAvatarFromMenu() {
+  avatarMenuOpen.value = false;
+  await removeAvatar();
 }
 
 function onAvatarFileSelected(event) {
@@ -279,7 +290,13 @@ async function changePassword() {
         <div class="settings-header__right">
           <LanguageSwitch />
           <div class="avatar-block">
-            <button type="button" class="avatar-trigger" @click="openAvatarPicker" :title="t('settings.changeAvatarTitle')">
+            <button
+              type="button"
+              class="avatar-trigger"
+              :aria-label="t('settings.changeAvatar')"
+              :aria-expanded="avatarMenuOpen"
+              @click="avatarMenuOpen = !avatarMenuOpen"
+            >
               <UiAvatar
                 :src="session?.avatarUrl"
                 :alt="t('settings.avatarAlt')"
@@ -297,18 +314,28 @@ async function changePassword() {
               accept="image/*"
               @change="onAvatarFileSelected"
             />
-            <div class="avatar-actions">
-              <span class="avatar-hint">{{ uploadingAvatar ? t('common.processing') : t('settings.changeAvatarHint') }}</span>
-              <button
-                v-if="session?.avatarUrl"
-                type="button"
-                class="avatar-remove"
-                :disabled="uploadingAvatar"
-                @click="removeAvatar"
-              >
-                {{ t('settings.removeAvatar') }}
-              </button>
-            </div>
+            <Transition name="avatar-menu">
+              <div v-if="avatarMenuOpen" class="avatar-menu-backdrop" @click="avatarMenuOpen = false"></div>
+            </Transition>
+            <Transition name="avatar-menu">
+              <div v-if="avatarMenuOpen" class="avatar-menu" role="menu" :aria-label="t('settings.changeAvatar')">
+                <button type="button" class="avatar-menu__item" role="menuitem" @click="chooseAvatar">
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" role="img" :aria-label="t('settings.changeAvatar')"><title>{{ t('settings.changeAvatar') }}</title><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                  {{ t('settings.changeAvatar') }}
+                </button>
+                <button
+                  v-if="session?.avatarUrl"
+                  type="button"
+                  class="avatar-menu__item avatar-menu__item--danger"
+                  role="menuitem"
+                  :disabled="uploadingAvatar"
+                  @click="removeAvatarFromMenu"
+                >
+                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" role="img" :aria-label="t('settings.removeAvatar')"><title>{{ t('settings.removeAvatar') }}</title><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  {{ t('settings.removeAvatar') }}
+                </button>
+              </div>
+            </Transition>
           </div>
         </div>
       </header>
@@ -535,31 +562,76 @@ async function changePassword() {
   border: 0;
 }
 
-.avatar-hint {
-  font-size: 0.74rem;
-  color: var(--text-faint);
-  white-space: nowrap;
+/* 头像菜单（换头像 / 移除头像） */
+.avatar-block {
+  position: relative;
 }
 
-.avatar-actions {
-  display: flex;
-  align-items: flex-start;
-  flex-direction: column;
+.avatar-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+}
+
+.avatar-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 40;
+  min-width: 168px;
+  padding: 6px;
+  display: grid;
   gap: 2px;
+  border-radius: var(--radius-control);
+  background: var(--surface-solid);
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow-md);
 }
 
-.avatar-remove {
+.avatar-menu__item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
   border: 0;
-  padding: 0;
+  border-radius: 6px;
   background: transparent;
-  color: var(--danger);
-  font-size: 0.74rem;
+  color: var(--text);
+  font-size: 0.85rem;
   cursor: pointer;
 }
 
-.avatar-remove:disabled {
-  cursor: default;
+.avatar-menu__item svg {
+  flex-shrink: 0;
+}
+
+.avatar-menu__item:hover {
+  background: var(--surface-1);
+}
+
+.avatar-menu__item--danger {
+  color: var(--danger);
+}
+
+.avatar-menu__item--danger:hover {
+  background: var(--danger-soft);
+}
+
+.avatar-menu__item:disabled {
   opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.avatar-menu-enter-active,
+.avatar-menu-leave-active {
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.avatar-menu-enter-from,
+.avatar-menu-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 
 .info-banner,

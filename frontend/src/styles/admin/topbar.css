@@ -34,6 +34,33 @@
   gap: var(--admin-space-xs);
 }
 
+.admin-topbar__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: var(--admin-radius-control);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color var(--admin-duration), box-shadow var(--admin-duration);
+}
+
+.admin-topbar__avatar .ui-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--admin-radius-control);
+}
+
+.admin-topbar__avatar:hover {
+  box-shadow: 0 0 0 3px var(--admin-border);
+}
+
+.admin-topbar__avatar:focus-visible {
+  outline: 2px solid var(--admin-focus);
+  outline-offset: 2px;
+}
+
 .admin-topbar__settings {
   min-height: 42px;
   display: inline-flex;

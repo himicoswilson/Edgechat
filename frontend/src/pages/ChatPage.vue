@@ -1326,6 +1326,8 @@ onBeforeUnmount(() => {
   margin-left: 0;
   margin-right: 0;
   border-radius: 0;
+  max-width: none;
+  width: auto;
 }
 
 .composer-attachment {

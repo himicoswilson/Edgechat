@@ -9,19 +9,80 @@ import {
 } from './auth-storage.js';
 
 const DEFAULT_SITE_ICON_URL = '/logo.svg';
+const SITE_CACHE_KEY = 'edgechat.site';
+const SESSION_CACHE_KEY = 'edgechat.session';
+
+function readCache(key) {
+  try {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+    const raw = window.localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCache(key, value) {
+  try {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(key, JSON.stringify(value));
+    }
+  } catch {
+    // 存储不可用时静默降级，不影响功能
+  }
+}
+
+function removeCache(key) {
+  try {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(key);
+    }
+  } catch {
+    // 忽略
+  }
+}
+
+function normalizeSessionCached(cached) {
+  if (!cached || typeof cached !== 'object') {
+    return null;
+  }
+  return {
+    userId: Number(cached.userId) || 0,
+    username: String(cached.username || ''),
+    displayName: String(cached.displayName || ''),
+    avatarUrl: String(cached.avatarUrl || ''),
+    isAdmin: Boolean(cached.isAdmin)
+  };
+}
+
+const cachedSession = normalizeSessionCached(readCache(SESSION_CACHE_KEY));
 
 const state = reactive({
   ready: false,
   token: isDemoMode ? runtimeSessionToken : getStoredToken(),
-  session: null,
+  // 先用本地缓存填充展示字段，避免每次进入都从数据库拉取导致闪现/抖动
+  session: cachedSession,
   site: {
     siteName: 'Edgechat',
     siteIconUrl: ''
   }
 });
 
+// 站点元数据（站名/图标）也在模块加载时同步恢复，登录页等公共页面无闪现
+const cachedSite = readCache(SITE_CACHE_KEY);
+if (cachedSite && typeof cachedSite === 'object') {
+  state.site = {
+    siteName: String(cachedSite.siteName || 'Edgechat').trim() || 'Edgechat',
+    siteIconUrl: String(cachedSite.siteIconUrl || '').trim()
+  };
+  applySiteMetadata(state.site);
+}
+
 function clearAuthState() {
   clearStoredToken();
+  removeCache(SESSION_CACHE_KEY);
   state.token = '';
   state.session = null;
 }
@@ -69,6 +130,7 @@ async function initialize() {
   try {
     const payload = await api.session();
     state.session = payload.session;
+    writeCache(SESSION_CACHE_KEY, payload.session);
   } catch {
     clearAuthState();
   } finally {
@@ -82,6 +144,7 @@ async function login(credentials) {
   state.session = payload.session;
   state.ready = true;
   setStoredToken(payload.token);
+  writeCache(SESSION_CACHE_KEY, payload.session);
 }
 
 async function logout() {
@@ -96,6 +159,7 @@ async function logout() {
 
 function setSession(session) {
   state.session = session;
+  writeCache(SESSION_CACHE_KEY, session);
 }
 
 function setSite(site) {
@@ -104,6 +168,7 @@ function setSite(site) {
     siteIconUrl: String(site?.siteIconUrl || '').trim()
   };
   applySiteMetadata(state.site);
+  writeCache(SITE_CACHE_KEY, state.site);
 }
 
 if (typeof window !== 'undefined') {

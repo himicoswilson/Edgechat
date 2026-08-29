@@ -32,6 +32,8 @@ function navigate(event) {
 function resetDemo() {
   resetRuntime();
   localStorage.removeItem('customBackground');
+  localStorage.removeItem('edgechat.site');
+  localStorage.removeItem('edgechat.session');
   window.location.assign('/');
 }
 </script>
