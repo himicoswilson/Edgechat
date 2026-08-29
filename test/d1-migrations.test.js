@@ -210,57 +210,6 @@ test("部分迁移状态会阻断部署，避免继续发布不兼容代码", as
 	);
 });
 
-test("软删除群组可复用名称：部分唯一索引只约束未删除行", async () => {
-	const nameReuse = D1_MIGRATIONS.find(
-		(migration) => migration.id === "2026-08-30-channel-name-reuse",
-	);
-	const db = new SQL.Database();
-	db.exec(`
-		CREATE TABLE users (
-			id INTEGER PRIMARY KEY,
-			username TEXT NOT NULL UNIQUE
-		);
-		CREATE TABLE channels (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT NOT NULL UNIQUE,
-			description TEXT NOT NULL DEFAULT '',
-			avatar_key TEXT,
-			kind TEXT NOT NULL CHECK (kind IN ('public', 'private', 'dm')),
-			dm_key TEXT UNIQUE,
-			created_by INTEGER,
-			mute_everyone INTEGER NOT NULL DEFAULT 0,
-			created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			deleted_at TEXT
-		);
-		INSERT INTO users (id, username) VALUES (1, 'alice');
-		INSERT INTO channels (id, name, kind, created_by, deleted_at)
-		VALUES (1, 'test', 'private', 1, '2026-08-29 10:00:00');
-	`);
-	db.exec(`BEGIN;\n${readMigration(nameReuse.file)}\nCOMMIT;`);
-
-	// 列级 UNIQUE 已移除，改为只覆盖未删除行的部分唯一索引
-	const tableSql = db.exec("SELECT sql FROM sqlite_master WHERE name = 'channels'")[0].values[0][0];
-	assert.doesNotMatch(tableSql, /name TEXT NOT NULL UNIQUE/);
-	assert.equal(
-		db.exec("SELECT name FROM sqlite_master WHERE name = 'idx_channels_name_active'").length,
-		1,
-	);
-
-	// 已删除的 test 存在时，新建同名（公开）成功
-	db.exec("INSERT INTO channels (name, kind, created_by) VALUES ('test', 'public', 1)");
-	assert.equal(
-		db.exec("SELECT COUNT(*) FROM channels WHERE name = 'test' AND deleted_at IS NULL")[0].values[0][0],
-		1,
-	);
-
-	// 活跃同名仍被部分唯一索引拒绝
-	assert.throws(
-		() => db.exec("INSERT INTO channels (name, kind, created_by) VALUES ('test', 'private', 1)"),
-		/UNIQUE constraint failed/,
-	);
-	db.close();
-});
-
 test("Windows CRLF 迁移校验值会在 Linux Actions 中自动归一化", async () => {
 	const sql = "CREATE TABLE example (id INTEGER);\n";
 	const legacyChecksum = createHash("sha256")

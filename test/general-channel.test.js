@@ -110,9 +110,11 @@ test("软删除的群组不占用名称，同名可重新创建", async () => {
 	});
 
 	assert.equal(response.status, 200);
-	// 唯一性校验必须过滤已删除的群组
-	assert.match(harness.calls[0].sql, /WHERE name = \?/);
-	assert.match(harness.calls[0].sql, /deleted_at IS NULL/);
+	// 先释放同名软删除行，再对未删除群组做唯一性校验
+	assert.match(harness.calls[0].sql, /deleted_at IS NOT NULL/);
+	assert.match(harness.calls[0].sql, /SET name = 'deleted:'/);
+	assert.match(harness.calls[1].sql, /WHERE name = \?/);
+	assert.match(harness.calls[1].sql, /deleted_at IS NULL/);
 });
 
 test("未删除的同名群组仍禁止创建", async () => {
@@ -125,7 +127,9 @@ test("未删除的同名群组仍禁止创建", async () => {
 
 	assert.equal(response.status, 400);
 	assert.deepEqual(await response.json(), { error: "群组名称已存在" });
-	assert.equal(harness.calls.length, 1);
+	// 释放软删除 + 活跃同名检查共两条查询
+	assert.equal(harness.calls.length, 2);
+	assert.match(harness.calls[0].sql, /deleted_at IS NOT NULL/);
 });
 
 test("改名时同样只拦截未删除的同名群组", async () => {

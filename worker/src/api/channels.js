@@ -49,6 +49,20 @@ async function ensureValidInvitees(db, userIds) {
   return results.map((row) => Number(row.id));
 }
 
+async function releaseDeletedGroupNames(db, name) {
+  // 软删除的群组不再占用名称：把同名软删除行改名让出 UNIQUE 槽位，
+  // 时间戳后缀避免占位名与真实群组名碰撞。
+  await db
+    .prepare(
+      `UPDATE channels
+       SET name = 'deleted:' || id || ':' || strftime('%s', 'now')
+       WHERE name = ?
+         AND deleted_at IS NOT NULL`
+    )
+    .bind(name)
+    .run();
+}
+
 export function registerChannelRoutes(app) {
   app.get('/api/channels', async (c) => {
     const session = c.get('session');
@@ -80,7 +94,8 @@ export function registerChannelRoutes(app) {
       return errorResponse('general 是系统群组名称');
     }
 
-    // 软删除的群组不占用名称：只对未删除群组做唯一性校验
+    // 软删除的群组不占用名称：先释放同名软删除行，再拦截活跃同名
+    await releaseDeletedGroupNames(c.env.DB, name);
     const existingName = await c.env.DB.prepare(
       `SELECT id
        FROM channels
@@ -237,7 +252,8 @@ export function registerChannelRoutes(app) {
         : payload.muteEveryone ? 1 : 0;
 
     if (name !== undefined) {
-      // 改名同样只看未删除群组：已删除群组同名可复用
+      // 改名同样先释放软删除同名占位，再拦截活跃同名
+      await releaseDeletedGroupNames(c.env.DB, name);
       const existingName = await c.env.DB.prepare(
         `SELECT id
          FROM channels

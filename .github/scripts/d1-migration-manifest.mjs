@@ -96,9 +96,4 @@ export const D1_MIGRATIONS = [
     file: "worker/migrations/2026-08-29-channel-mute-everyone.sql",
     artifacts: ["column:channels.mute_everyone"],
   },
-  {
-    id: "2026-08-30-channel-name-reuse",
-    file: "worker/migrations/2026-08-30-channel-name-reuse.sql",
-    artifacts: ["index:idx_channels_name_active"],
-  },
 ];
