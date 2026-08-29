@@ -212,7 +212,6 @@ export default {
   'admin.sidebar.noResults': '没有匹配的后台页面',
   'admin.sidebar.superAdmin': '超级管理员',
   'admin.topbar.defaultTitle': '管理后台',
-  'admin.topbar.settings': '设置',
   'dashboard.metrics.users': '用户',
   'dashboard.metrics.groups': '群组',
   'dashboard.metrics.directMessages': '私信会话',

@@ -91,7 +91,7 @@ onMounted(loadSiteSettings);
     </label>
     <div class="inline-actions">
       <input ref="iconFileInputEl" type="file" accept="image/*" hidden @change="uploadSiteIcon" />
-      <UiButton variant="secondary" size="sm" :disabled="iconUploading" @click="openIconPicker">
+      <UiButton variant="secondary" :disabled="iconUploading" @click="openIconPicker">
         {{ iconUploading ? t('common.uploading') : t('site.uploadIcon') }}
       </UiButton>
       <UiButton :disabled="saving" @click="saveSiteSettings">

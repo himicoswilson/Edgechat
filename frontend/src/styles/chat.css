@@ -191,10 +191,16 @@
   padding: 14px 20px;
   display: grid;
   gap: 10px;
-  border-bottom: 1px solid var(--line-soft);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04)),
-    transparent;
+  background: var(--surface-1);
+}
+
+/* 同一行的按钮/控件高度统一 */
+.chat-member-panel__header .ui-button {
+  min-height: 44px;
+}
+
+.chat-member-panel > .chat-member-panel__actions:last-child .ui-button {
+  min-height: 46px;
 }
 
 .chat-member-panel__header {
@@ -244,8 +250,8 @@
   }
 
   .chat-member-panel {
-    min-height: 100%;
-    padding: 16px;
+    /* 不撑满全高，避免成员少时头部占比过大 + 底部大片空白 */
+    padding: 16px 16px 24px;
   }
 
   .chat-member-panel__header {

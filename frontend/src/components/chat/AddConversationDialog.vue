@@ -232,9 +232,9 @@ watch(
 
 .add-conversation-choice:hover,
 .add-conversation-person:hover:not(:disabled) {
-  border-color: #93c5fd;
-  background: #eff6ff;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+  border-color: #d0d5dd;
+  background: #f5f6f6;
+  box-shadow: none;
 }
 
 .add-conversation-choice__icon {

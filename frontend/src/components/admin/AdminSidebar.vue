@@ -1,10 +1,11 @@
 <script setup>
-import { ChevronDown, CircleUserRound, Home, Menu, Search, Settings, X } from '@lucide/vue';
+import { ChevronDown, Home, Menu, Search, Settings, X } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { adminNavigation } from '../../admin/navigation.js';
 import { useI18n } from '../../i18n.js';
 import store from '../../store.js';
+import UiAvatar from '../ui/Avatar.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -160,7 +161,11 @@ watch(
 
       <div class="admin-sidebar__footer">
         <div class="admin-identity">
-          <CircleUserRound :size="20" aria-hidden="true" />
+          <UiAvatar
+            :src="store.session?.avatarUrl"
+            :fallback="store.session?.displayName?.[0] || store.session?.username?.[0] || 'A'"
+            size="sm"
+          />
           <div>
             <strong>{{ adminName }}</strong>
             <span>{{ t('admin.sidebar.superAdmin') }}</span>

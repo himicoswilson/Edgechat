@@ -212,7 +212,6 @@ export default {
   'admin.sidebar.noResults': 'No matching admin pages',
   'admin.sidebar.superAdmin': 'Super administrator',
   'admin.topbar.defaultTitle': 'Admin',
-  'admin.topbar.settings': 'Settings',
   'dashboard.metrics.users': 'Users',
   'dashboard.metrics.groups': 'Groups',
   'dashboard.metrics.directMessages': 'Direct messages',

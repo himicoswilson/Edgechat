@@ -72,7 +72,7 @@
   gap: var(--admin-space-sm);
   padding: var(--admin-space-lg);
   border: 0;
-  background: var(--admin-subtle);
+  background: var(--admin-panel);
   color: var(--admin-text);
   text-align: start;
   transition: background-color var(--admin-duration);
