@@ -99,7 +99,7 @@ useOverlayLifecycle({
   max-height: calc(100dvh - 32px);
   overflow-y: auto;
   padding: 32px 28px 24px;
-  border-radius: 16px;
+  border-radius: 10px;
   background: #ffffff;
   box-shadow: 0 20px 60px rgba(11, 20, 26, 0.18);
   text-align: center;
@@ -138,7 +138,7 @@ useOverlayLifecycle({
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: #008069;
+  color: #54656f;
   font-size: 12px;
   font-weight: 600;
 }
@@ -220,9 +220,14 @@ useOverlayLifecycle({
 }
 
 .public-group-dialog__primary {
-  border: 1px solid #008069;
-  background: #008069;
+  border: 1px solid var(--btn);
+  background: var(--btn);
   color: #ffffff;
+}
+
+.public-group-dialog__primary:hover:not(:disabled) {
+  background: var(--btn-hover);
+  border-color: var(--btn-hover);
 }
 
 .public-group-dialog button:disabled {
@@ -231,7 +236,7 @@ useOverlayLifecycle({
 }
 
 .public-group-dialog button:focus-visible {
-  outline: 3px solid rgba(0, 128, 105, 0.24);
+  outline: 3px solid rgba(15, 23, 42, 0.16);
   outline-offset: 2px;
 }
 
@@ -258,7 +263,7 @@ useOverlayLifecycle({
     width: 100%;
     max-height: calc(100dvh - env(safe-area-inset-top));
     padding: 28px 20px max(20px, env(safe-area-inset-bottom));
-    border-radius: 16px 16px 0 0;
+    border-radius: 10px 10px 0 0;
   }
 }
 

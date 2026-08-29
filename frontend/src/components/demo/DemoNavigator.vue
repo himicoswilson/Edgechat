@@ -65,12 +65,11 @@ function resetDemo() {
   gap: 7px;
   min-height: 38px;
   padding: 5px 6px 5px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.78);
-  border-radius: 8px;
-  background: rgba(248, 251, 254, 0.88);
-  box-shadow: 0 8px 24px rgba(35, 54, 76, 0.16);
-  backdrop-filter: blur(18px) saturate(150%);
-  color: #23405f;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-control);
+  background: var(--surface-solid);
+  box-shadow: var(--shadow-md);
+  color: var(--text);
 }
 
 .demo-navigator__badge {
@@ -82,10 +81,10 @@ function resetDemo() {
 .demo-navigator select {
   width: 138px;
   height: 28px;
-  border: 1px solid rgba(70, 105, 139, 0.22);
+  border: 1px solid var(--line-strong);
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.82);
-  color: #203b57;
+  background: var(--surface-solid);
+  color: var(--text);
   font: inherit;
   font-size: 12px;
   padding: 0 24px 0 8px;
@@ -99,13 +98,13 @@ function resetDemo() {
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: #426584;
+  color: var(--text-soft);
   cursor: pointer;
 }
 
 .demo-navigator button:hover,
 .demo-navigator button:focus-visible {
-  background: rgba(80, 126, 167, 0.12);
+  background: var(--accent-soft);
   outline: none;
 }
 

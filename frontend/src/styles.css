@@ -1,2 +1,71 @@
-﻿:root{--p-content-border-radius:1rem;--p-form-field-border-radius:0.875rem;--p-border-radius:0.875rem;--p-border-radius-lg:1rem;--p-border-radius-xl:1.25rem;--glass-blur:30px;--glass-saturate:125%;--glass-radius:1.25rem;--glass-bg:rgba(252,252,252,0.55);--glass-border:rgba(255,255,255,0.55);--glass-shadow:0 8px 24px rgba(0,0,0,0.12),inset 0 0 0 1px rgba(255,255,255,0.18);--ease-smooth:cubic-bezier(0.22,1,0.36,1);--enter-duration:480ms;--enter-translate:22px;--enter-scale:0.94;--stagger-step:70ms;--pop-duration:320ms}.glass{position:relative;background:var(--glass-bg);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-saturate));backdrop-filter:blur(var(--glass-blur)) saturate(var(--glass-saturate));border:1px solid var(--glass-border);box-shadow:var(--glass-shadow);border-radius:var(--glass-radius)}.glass::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0.04;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:180px 180px}@keyframes enter-fade-up{from{opacity:0;transform:translateY(var(--enter-translate,22px)) scale(var(--enter-scale,0.94))}to{opacity:1;transform:translateY(0) scale(1)}}.enter-fade-up{animation:enter-fade-up var(--enter-duration,480ms) var(--ease-smooth) backwards;animation-delay:calc(var(--stagger-i,0) * var(--stagger-step,70ms))}.list-pop-enter-active{transition:opacity var(--pop-duration,320ms) var(--ease-smooth),transform var(--pop-duration,320ms) var(--ease-smooth);transition-delay:calc(var(--stagger-i,0) * var(--stagger-step,70ms))}.list-pop-leave-active{transition:opacity 200ms var(--ease-smooth),transform 200ms var(--ease-smooth);position:absolute}.list-pop-enter-from{opacity:0;transform:scale(0.9) translateY(16px)}.list-pop-leave-to{opacity:0;transform:scale(0.85)}.fade-slide-enter-active,.fade-slide-leave-active{transition:opacity 250ms var(--ease-smooth),transform 250ms var(--ease-smooth)}.fade-slide-enter-from{opacity:0;transform:translateX(12px)}.fade-slide-leave-to{opacity:0;transform:translateX(-12px)}
+/* ============================================================
+   Edgechat 统一主题令牌 — 黑白系
+   中性浅灰底 · 白色表面 · 黑色按钮/链接/焦点 · 8~10px 小圆角
+   保留例外：自己发的消息气泡蓝色、会话实时连接指示绿色
+   ============================================================ */
 
+:root {
+  /* 颜色 */
+  --bg: #f6f7f8;
+  --surface-solid: #ffffff;
+  --surface-0: #ffffff;
+  --surface-1: #f9fafb;
+  --surface-2: #ffffff;
+  --surface-3: #ffffff;
+  --line-soft: #e5e7eb;
+  --line-strong: #d0d5dd;
+
+  /* 文本（仅中性色） */
+  --text: #1f2329;
+  --text-soft: #6b7280;
+  --text-faint: #9aa1ad;
+
+  /* 强调色（链接/焦点/激活态）— 黑白系 */
+  --accent: #1f2329;
+  --accent-hover: #000000;
+  --accent-soft: rgba(15, 23, 42, 0.08);
+
+  /* 按钮：纯黑实色 */
+  --btn: #1f2329;
+  --btn-hover: #000000;
+
+  /* 兼容旧变量名，全部指向同一套黑白 */
+  --warm: #1f2329;
+  --warm-soft: rgba(15, 23, 42, 0.08);
+  --cool: #1f2329;
+  --cool-soft: rgba(15, 23, 42, 0.06);
+  --sky: #6b7280;
+  --sky-soft: rgba(15, 23, 42, 0.05);
+
+  /* 语义色：仅用于成功/危险/警告状态 */
+  --danger: #dc2626;
+  --danger-soft: rgba(220, 38, 38, 0.1);
+  --success: #16a34a;
+  --success-soft: rgba(22, 163, 74, 0.12);
+
+  /* 阴影：克制的灰影 */
+  --shadow-lg: 0 16px 48px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.06);
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.05);
+
+  /* 玻璃效果全局关闭 */
+  --blur-lg: blur(0);
+  --blur-md: blur(0);
+
+  /* 圆角：控件 8px，卡片/弹窗 10px，仅角标用胶囊 */
+  --radius-window: 10px;
+  --radius-panel: 10px;
+  --radius-control: 8px;
+  --radius-pill: 999px;
+
+  /* 布局与动效 */
+  --page-padding: 24px;
+  --transition-soft: 150ms ease;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+html {
+  color-scheme: light;
+}

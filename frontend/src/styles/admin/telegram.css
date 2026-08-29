@@ -110,8 +110,8 @@
 }
 
 .telegram-switch input:checked + span {
-  border-color: #229ed9;
-  background: #229ed9;
+  border-color: var(--admin-ink);
+  background: var(--admin-ink);
 }
 
 .telegram-switch input:checked + span::after {

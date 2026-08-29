@@ -2,7 +2,6 @@
 import { computed, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import store from '../store.js';
-import { useCursor } from '../composables/useCursor.js';
 import { useI18n } from '../i18n.js';
 
 const route = useRoute();
@@ -15,16 +14,6 @@ const form = reactive({
   password: ''
 });
 const registered = computed(() => route.query.registered === '1');
-
-const usernameInput = ref(null);
-const passwordInput = ref(null);
-const usernameCursor = ref(null);
-const passwordCursor = ref(null);
-
-useCursor([
-  [usernameInput, usernameCursor],
-  [passwordInput, passwordCursor]
-]);
 
 async function submit() {
   loading.value = true;
@@ -42,37 +31,33 @@ async function submit() {
 
 <template>
   <div class="login-page">
-    <div class="login-container">
-      <div class="title-group">
-        <h1 class="welcome-text">{{ t('auth.welcomeBack') }}</h1>
-        <h2 class="brand-name">{{ store.site.siteName }}</h2>
-      </div>
+    <div class="login-card">
+      <h1 class="login-title">{{ store.site.siteName }}</h1>
+      <p class="login-subtitle">{{ t('auth.welcomeBack') }}</p>
 
       <p v-if="registered" class="success-hint">{{ t('auth.registerSuccess') }}</p>
 
       <form class="login-form" @submit.prevent="submit">
-        <div class="input-wrapper">
-          <span ref="usernameCursor" class="custom-cursor"></span>
+        <label class="login-field">
+          <span>{{ t('auth.account') }}</span>
           <input
-            ref="usernameInput"
             v-model.trim="form.username"
             class="login-input"
             :placeholder="t('auth.account')"
             autocomplete="username"
             type="text"
           />
-        </div>
-        <div class="input-wrapper">
-          <span ref="passwordCursor" class="custom-cursor"></span>
+        </label>
+        <label class="login-field">
+          <span>{{ t('auth.password') }}</span>
           <input
-            ref="passwordInput"
             v-model="form.password"
             class="login-input"
             :placeholder="t('auth.password')"
             autocomplete="current-password"
             type="password"
           />
-        </div>
+        </label>
 
         <button class="login-btn" :disabled="loading" type="submit">
           {{ loading ? t('auth.signingIn') : t('auth.signIn') }}
@@ -85,190 +70,111 @@ async function submit() {
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@500;700&display=swap');
-
 .login-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background-color: #f5f5f5;
-  position: relative;
-  overflow: hidden;
+  background: var(--bg);
 }
 
-.login-page::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  background: linear-gradient(to bottom, transparent 0%, #e1ecf5 25%, #e6eff6 100%);
-  transform: translateY(100%);
-  animation: tideRise 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  pointer-events: none;
-}
-
-@keyframes tideRise {
-  to { transform: translateY(0); }
-}
-
-.login-container {
-  width: 100%;
-  max-width: 420px;
+.login-card {
+  width: min(400px, 100%);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  position: relative;
-  z-index: 1;
+  padding: 32px;
+  border-radius: var(--radius-panel);
+  background: var(--surface-solid);
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow-md);
 }
 
-.title-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.welcome-text {
-  font-family: 'Dancing Script', cursive;
-  font-size: 56px;
+.login-title {
+  margin: 0;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #2c4a6e;
-  margin: 0 0 10px;
-  letter-spacing: 1px;
-  opacity: 0;
-  animation: fadeUp 0.7s ease-out 0.8s forwards;
+  color: var(--text);
+  letter-spacing: -0.02em;
 }
 
-.brand-name {
-  font-family: 'Great Vibes', cursive;
-  font-size: 52px;
-  font-weight: 400;
-  color: #5b8dbf;
-  margin: -8px 0 48px;
-  letter-spacing: 2px;
-  opacity: 0;
-  animation: fadeUp 0.7s ease-out 1s forwards;
-  text-shadow: 0 2px 8px rgba(91, 141, 191, 0.15);
-}
-
-@keyframes fadeUp {
-  0% { opacity: 0; transform: translateY(18px); }
-  100% { opacity: 1; transform: translateY(0); }
+.login-subtitle {
+  margin: 4px 0 24px;
+  font-size: 0.88rem;
+  color: var(--text-soft);
 }
 
 .success-hint {
-  font-size: 13px;
-  color: #4a8d6e;
-  margin: 0 0 20px;
-  text-align: center;
+  margin: 0 0 16px;
+  font-size: 0.85rem;
+  color: var(--success);
 }
 
 .login-form {
-  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
-.input-wrapper {
-  position: relative;
-  width: 100%;
-  opacity: 0;
-  animation: slideInRight 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+.login-field {
+  display: grid;
+  gap: 6px;
 }
 
-.input-wrapper:first-of-type {
-  animation-delay: 1.2s;
-}
-
-.input-wrapper:last-of-type {
-  animation-delay: 1.4s;
-}
-
-@keyframes slideInRight {
-  0% { opacity: 0; transform: translateX(32px); }
-  100% { opacity: 1; transform: translateX(0); }
-}
-
-.custom-cursor {
-  position: absolute;
-  width: 3px;
-  background-color: #2c4a6e;
-  border-radius: 2px;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 2;
-}
-
-.custom-cursor.visible {
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
+.login-field span {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-soft);
 }
 
 .login-input {
   width: 100%;
-  height: 56px;
-  padding: 0 4px;
-  border: none;
-  background: transparent;
-  font-size: 18px;
-  font-weight: 500;
-  color: #2c4a6e;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-solid);
+  font-size: 0.95rem;
+  color: var(--text);
   outline: none;
-  caret-color: transparent;
+  transition: border-color var(--transition-soft), box-shadow var(--transition-soft);
 }
 
 .login-input::placeholder {
-  color: #2c4a6e;
-  text-decoration: underline;
-  text-decoration-color: #5b8dbf;
-  text-decoration-thickness: 3px;
-  text-underline-offset: 8px;
+  color: var(--text-faint);
+}
+
+.login-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .login-btn {
-  width: fit-content;
-  height: auto;
+  height: 44px;
+  margin-top: 4px;
   border: none;
-  border-bottom: 3px solid #5b8dbf;
-  background: transparent;
-  color: #2c4a6e;
-  font-size: 24px;
-  font-weight: 700;
+  border-radius: var(--radius-control);
+  background: var(--btn);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.2s, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  margin: 8px auto 0;
-  letter-spacing: 2px;
-  padding: 0 4px 8px;
-  opacity: 0;
-  animation: riseUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) 1.6s forwards;
-}
-
-@keyframes riseUp {
-  0% { opacity: 0; transform: translateY(24px); }
-  100% { opacity: 1; transform: translateY(0); }
+  transition: background var(--transition-soft);
 }
 
 .login-btn:hover:not(:disabled) {
-  border-bottom-color: #2c4a6e;
-  transform: scale(1.04);
+  background: var(--btn-hover);
 }
 
 .login-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  animation: none;
 }
 
 .error-text {
-  font-size: 13px;
-  color: #d9534f;
   margin: 0;
+  font-size: 0.85rem;
+  color: var(--danger);
   text-align: center;
 }
 </style>

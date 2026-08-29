@@ -32,9 +32,9 @@ const actionLabel = computed(() =>
   display: inline-grid;
   place-items: center;
   padding: 0;
-  border: 1px solid rgba(88, 107, 124, 0.22);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-solid);
   color: currentColor;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
   cursor: pointer;
@@ -43,8 +43,8 @@ const actionLabel = computed(() =>
 }
 
 .language-switch:hover {
-  border-color: rgba(45, 156, 151, 0.42);
-  background: rgba(255, 255, 255, 0.94);
+  border-color: var(--accent);
+  background: var(--surface-solid);
 }
 
 .language-switch:active {
@@ -52,7 +52,7 @@ const actionLabel = computed(() =>
 }
 
 .language-switch:focus-visible {
-  outline: 2px solid rgba(45, 156, 151, 0.62);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 

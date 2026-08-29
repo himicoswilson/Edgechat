@@ -431,12 +431,12 @@ async function changePassword() {
 
 <style scoped>
 .settings-page {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  padding: 40px 24px;
+  background: var(--bg);
 }
 
 .settings-container {
@@ -445,18 +445,10 @@ async function changePassword() {
   flex-direction: column;
   gap: 16px;
   padding: 28px;
-  border-radius: 24px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(247, 250, 253, 0.68)),
-    rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow:
-    0 24px 60px rgba(91, 141, 191, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  opacity: 0;
-  animation: containerRise 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+  border-radius: var(--radius-panel);
+  background: var(--surface-solid);
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow-md);
 }
 
 .settings-header {
@@ -474,19 +466,19 @@ async function changePassword() {
 
 .settings-header__left h1 {
   margin: 0;
-  font-size: 22px;
+  font-size: 1.35rem;
   font-weight: 700;
-  color: #2c4a6e;
+  color: var(--text);
   letter-spacing: -0.02em;
 }
 
 .settings-kicker {
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: rgba(91, 141, 191, 0.08);
-  border: 1px solid rgba(91, 141, 191, 0.12);
-  color: #5b8dbf;
-  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--line-soft);
+  color: var(--text-soft);
+  font-size: 0.72rem;
   font-weight: 600;
 }
 
@@ -494,22 +486,17 @@ async function changePassword() {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-direction: row;
 }
 
 .avatar-trigger {
   position: relative;
+  display: inline-flex;
   border: none;
   background: none;
   cursor: pointer;
   padding: 0;
-  border-radius: 16px;
+  border-radius: var(--radius-control);
   overflow: hidden;
-  transition: transform 0.2s ease;
-}
-
-.avatar-trigger:hover {
-  transform: scale(1.05);
 }
 
 .avatar-overlay {
@@ -518,17 +505,18 @@ async function changePassword() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(26, 35, 50, 0.45);
+  background: rgba(15, 23, 42, 0.55);
   color: #fff;
   opacity: 0;
-  transition: opacity 0.2s ease;
-  border-radius: 16px;
+  transition: opacity var(--transition-soft);
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .settings-header__right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .avatar-trigger:hover .avatar-overlay {
@@ -548,8 +536,8 @@ async function changePassword() {
 }
 
 .avatar-hint {
-  font-size: 11px;
-  color: #6b8aab;
+  font-size: 0.74rem;
+  color: var(--text-faint);
   white-space: nowrap;
 }
 
@@ -564,8 +552,8 @@ async function changePassword() {
   border: 0;
   padding: 0;
   background: transparent;
-  color: #b34a57;
-  font-size: 11px;
+  color: var(--danger);
+  font-size: 0.74rem;
   cursor: pointer;
 }
 
@@ -576,21 +564,21 @@ async function changePassword() {
 
 .info-banner,
 .error-banner {
-  padding: 10px 16px;
-  border-radius: 12px;
-  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: var(--radius-control);
+  font-size: 0.85rem;
 }
 
 .info-banner {
-  background: rgba(91, 141, 191, 0.08);
-  border: 1px solid rgba(91, 141, 191, 0.15);
-  color: #5b8dbf;
+  background: var(--accent-soft);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  color: var(--accent);
 }
 
 .error-banner {
-  background: rgba(217, 83, 79, 0.08);
-  border: 1px solid rgba(217, 83, 79, 0.15);
-  color: #d9534f;
+  background: var(--danger-soft);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  color: var(--danger);
 }
 
 .banner-enter-active,
@@ -615,31 +603,18 @@ async function changePassword() {
   flex-direction: column;
   gap: 12px;
   padding: 20px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow:
-    0 4px 16px rgba(91, 141, 191, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  opacity: 0;
-  animation: sectionRise 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.settings-section:nth-child(1) {
-  animation-delay: 0.2s;
-}
-
-.settings-section:nth-child(2) {
-  animation-delay: 0.3s;
+  border-radius: var(--radius-panel);
+  background: var(--surface-1);
+  border: 1px solid var(--line-soft);
 }
 
 .settings-section h2 {
   margin: 0;
-  font-size: 14px;
+  font-size: 0.9rem;
   font-weight: 700;
-  color: #2c4a6e;
+  color: var(--text);
   padding-bottom: 10px;
-  border-bottom: 1px solid rgba(91, 141, 191, 0.08);
+  border-bottom: 1px solid var(--line-soft);
 }
 
 .field-compact {
@@ -649,54 +624,52 @@ async function changePassword() {
 }
 
 .field-compact span {
-  font-size: 11px;
+  font-size: 0.74rem;
   font-weight: 600;
-  color: #6b8aab;
+  color: var(--text-soft);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 .field-compact input {
   width: 100%;
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.6);
-  color: #2c4a6e;
-  font-size: 14px;
+  padding: 9px 12px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--line-strong);
+  background: var(--surface-solid);
+  color: var(--text);
+  font-size: 0.9rem;
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: border-color var(--transition-soft), box-shadow var(--transition-soft);
   box-sizing: border-box;
 }
 
 .field-compact input:focus {
-  border-color: rgba(91, 141, 191, 0.35);
-  box-shadow: 0 0 0 3px rgba(91, 141, 191, 0.08);
-  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .field-compact input::placeholder {
-  color: rgba(107, 138, 171, 0.5);
-  font-size: 13px;
+  color: var(--text-faint);
+  font-size: 0.85rem;
 }
 
 .save-btn {
+  width: fit-content;
   margin-top: 6px;
-  padding: 10px 20px;
+  padding: 9px 18px;
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(91, 141, 191, 0.85), rgba(69, 121, 186, 0.8));
+  border-radius: var(--radius-control);
+  background: var(--btn);
   color: #fff;
-  font-size: 13px;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(91, 141, 191, 0.2);
+  transition: background var(--transition-soft);
 }
 
 .save-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(91, 141, 191, 0.3);
+  background: var(--btn-hover);
 }
 
 .save-btn:disabled {
@@ -709,30 +682,26 @@ async function changePassword() {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  opacity: 0;
-  animation: sectionRise 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.4s forwards;
 }
 
 .nav-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(91, 141, 191, 0.1);
-  background: rgba(255, 255, 255, 0.4);
-  color: #6b8aab;
-  font-size: 12px;
+  padding: 7px 14px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--line-soft);
+  background: var(--surface-solid);
+  color: var(--text-soft);
+  font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background var(--transition-soft), color var(--transition-soft);
 }
 
 .nav-link:hover {
-  background: rgba(255, 255, 255, 0.7);
-  border-color: rgba(91, 141, 191, 0.2);
-  color: #2c4a6e;
-  transform: translateY(-1px);
+  background: var(--surface-1);
+  color: var(--text);
 }
 
 .nav-link svg {
@@ -746,8 +715,7 @@ async function changePassword() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(26, 35, 50, 0.5);
-  backdrop-filter: blur(8px);
+  background: rgba(15, 23, 42, 0.5);
   z-index: 100;
   padding: 24px;
 }
@@ -758,33 +726,26 @@ async function changePassword() {
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  padding: 36px;
-  border-radius: 28px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(247, 250, 253, 0.72)),
-    rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow:
-    0 30px 80px rgba(26, 35, 50, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(24px) saturate(180%);
+  padding: 28px;
+  border-radius: var(--radius-panel);
+  background: var(--surface-solid);
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow-lg);
 }
 
 .crop-panel h3 {
   margin: 0;
-  font-size: 20px;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: #2c4a6e;
+  color: var(--text);
 }
 
 .crop-stage {
   width: 280px;
   height: 280px;
-  border-radius: 16px;
+  border-radius: var(--radius-control);
   overflow: hidden;
-  box-shadow:
-    0 8px 32px rgba(91, 141, 191, 0.15),
-    inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--line-strong);
 }
 
 .crop-canvas {
@@ -806,9 +767,9 @@ async function changePassword() {
 }
 
 .crop-controls span {
-  font-size: 15px;
+  font-size: 0.85rem;
   font-weight: 600;
-  color: #6b8aab;
+  color: var(--text-soft);
   flex-shrink: 0;
 }
 
@@ -817,29 +778,27 @@ async function changePassword() {
   height: 6px;
   appearance: none;
   border-radius: 3px;
-  background: rgba(91, 141, 191, 0.15);
+  background: var(--line-soft);
   outline: none;
 }
 
 .crop-zoom::-webkit-slider-thumb {
   appearance: none;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #5b8dbf, #4579ba);
-  box-shadow: 0 2px 6px rgba(91, 141, 191, 0.3);
+  background: var(--accent);
   cursor: pointer;
-  transition: transform 0.15s ease;
 }
 
 .crop-zoom::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
+  transform: scale(1.1);
 }
 
 .crop-hint {
   margin: 0;
-  font-size: 13px;
-  color: #6b8aab;
+  font-size: 0.8rem;
+  color: var(--text-soft);
   text-align: center;
 }
 
@@ -851,55 +810,53 @@ async function changePassword() {
 
 .crop-cancel {
   flex: 1;
-  padding: 14px;
-  border: 1px solid rgba(91, 141, 191, 0.15);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.5);
-  color: #6b8aab;
-  font-size: 16px;
+  padding: 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-control);
+  background: var(--surface-solid);
+  color: var(--text-soft);
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background var(--transition-soft);
 }
 
 .crop-cancel:hover {
-  background: rgba(255, 255, 255, 0.8);
-  color: #2c4a6e;
+  background: var(--surface-1);
+  color: var(--text);
 }
 
 .crop-confirm {
   flex: 1;
-  padding: 14px;
+  padding: 10px;
   border: none;
-  border-radius: 14px;
-  background: linear-gradient(135deg, rgba(91, 141, 191, 0.85), rgba(69, 121, 186, 0.8));
+  border-radius: var(--radius-control);
+  background: var(--btn);
   color: #fff;
-  font-size: 16px;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(91, 141, 191, 0.2);
-  transition: all 0.2s ease;
+  transition: background var(--transition-soft);
 }
 
 .crop-confirm:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(91, 141, 191, 0.3);
+  background: var(--btn-hover);
 }
 
 .modal-enter-active {
-  transition: opacity 250ms ease;
-}
-
-.modal-enter-active .crop-panel {
-  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1), opacity 250ms ease;
-}
-
-.modal-leave-active {
   transition: opacity 200ms ease;
 }
 
-.modal-leave-active .crop-panel {
+.modal-enter-active .crop-panel {
   transition: transform 200ms ease, opacity 200ms ease;
+}
+
+.modal-leave-active {
+  transition: opacity 150ms ease;
+}
+
+.modal-leave-active .crop-panel {
+  transition: transform 150ms ease, opacity 150ms ease;
 }
 
 .modal-enter-from {
@@ -907,7 +864,7 @@ async function changePassword() {
 }
 
 .modal-enter-from .crop-panel {
-  transform: scale(0.92) translateY(12px);
+  transform: scale(0.96);
   opacity: 0;
 }
 
@@ -916,30 +873,8 @@ async function changePassword() {
 }
 
 .modal-leave-to .crop-panel {
-  transform: scale(0.96);
+  transform: scale(0.97);
   opacity: 0;
-}
-
-@keyframes containerRise {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes sectionRise {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @media (max-width: 640px) {
@@ -948,8 +883,8 @@ async function changePassword() {
   }
 
   .settings-container {
-    padding: 24px;
-    gap: 20px;
+    padding: 20px;
+    gap: 16px;
   }
 
   .settings-grid {
@@ -966,20 +901,6 @@ async function changePassword() {
   .settings-header__right {
     width: 100%;
     justify-content: space-between;
-  }
-
-  .avatar-compact {
-    width: 100%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .settings-container,
-  .settings-section,
-  .settings-nav {
-    animation: none;
-    opacity: 1;
-    transform: none;
   }
 }
 </style>

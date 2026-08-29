@@ -642,7 +642,7 @@ onBeforeUnmount(() => {
               :aria-label="t('chat.sendMessage')"
               @click="sendMessage"
             >
-              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#111b21" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <title>{{ t('chat.send') }}</title>
                 <line x1="4" y1="12" x2="20" y2="12"/>
                 <polyline points="14 6 20 12 14 18"/>
@@ -745,7 +745,7 @@ onBeforeUnmount(() => {
   height: var(--chat-viewport-height, 100dvh);
   min-height: 100dvh;
   overflow: hidden;
-  background: #efeae2;
+  background: #f0f1f2;
 }
 
 .left-sidebar {
@@ -783,7 +783,7 @@ onBeforeUnmount(() => {
   margin: 0;
   font-size: 20px;
   font-weight: 700;
-  color: #008069;
+  color: #1f2329;
   font-family: system-ui, -apple-system, sans-serif;
 }
 
@@ -876,7 +876,7 @@ onBeforeUnmount(() => {
   margin: 4px 8px;
   padding: 12px 16px;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   background: transparent;
   cursor: pointer;
   text-align: left;
@@ -940,7 +940,7 @@ onBeforeUnmount(() => {
   height: 20px;
   padding: 0 6px;
   border-radius: 999px;
-  background: #25d366;
+  background: #111b21;
   color: #ffffff;
   font-size: 11px;
   font-weight: 700;
@@ -999,6 +999,11 @@ onBeforeUnmount(() => {
   touch-action: manipulation;
 }
 
+/* 头像按钮的悬停高亮跟随头像方形圆角，而非圆形 */
+.right-sidebar-user {
+  border-radius: var(--radius-control);
+}
+
 .sidebar-muted-indicator {
   display: inline-flex;
   flex: 0 0 auto;
@@ -1035,8 +1040,8 @@ onBeforeUnmount(() => {
 }
 
 .right-sidebar-action--notification-active {
-  background: rgba(0, 128, 105, 0.1);
-  color: #008069;
+  background: rgba(15, 23, 42, 0.06);
+  color: #111b21;
 }
 
 .right-sidebar-action:disabled {
@@ -1087,7 +1092,7 @@ onBeforeUnmount(() => {
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  background: #efeae2;
+  background: #f0f1f2;
 }
 
 .chat-header {
@@ -1154,13 +1159,13 @@ onBeforeUnmount(() => {
 }
 
 .chat-header__button--active {
-  border-color: rgba(0, 128, 105, 0.28);
-  background: rgba(0, 128, 105, 0.08);
-  color: #008069;
+  border-color: rgba(15, 23, 42, 0.2);
+  background: rgba(15, 23, 42, 0.06);
+  color: #111b21;
 }
 
 .header-action:focus-visible {
-  outline: 2px solid #008069;
+  outline: 2px solid #111b21;
   outline-offset: 2px;
 }
 
@@ -1206,7 +1211,7 @@ onBeforeUnmount(() => {
   margin: 0 auto 16px;
   padding: 6px 16px;
   border: 1px solid #e8ecf0;
-  border-radius: 16px;
+  border-radius: 8px;
   background: #fff;
   color: #54656f;
   font-size: 12px;
@@ -1269,7 +1274,7 @@ onBeforeUnmount(() => {
 }
 
 .message-row--own .message-bubble {
-  background: #d9fdd3;
+  background: #dbeafe;
 }
 
 .message-sender-name {
@@ -1278,7 +1283,7 @@ onBeforeUnmount(() => {
   gap: 5px;
   font-size: 12.5px;
   font-weight: 600;
-  color: #008069;
+  color: #111b21;
   margin-bottom: 4px;
 }
 
@@ -1452,8 +1457,6 @@ onBeforeUnmount(() => {
 .empty-title {
   font-size: 28px;
   font-weight: 400;
-  font-family: 'Georgia', 'Times New Roman', serif;
-  font-style: italic;
   letter-spacing: 0.02em;
   color: #111b21;
 }

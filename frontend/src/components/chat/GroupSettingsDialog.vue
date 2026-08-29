@@ -72,7 +72,7 @@ function openAvatarPicker() {
     max(16px, env(safe-area-inset-left));
   background: rgba(0, 0, 0, 0.4);
 }
-.room-dialog { width: min(420px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; padding: 24px; border-radius: 16px; background: #fff; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15); }
+.room-dialog { width: min(420px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; padding: 24px; border-radius: 10px; background: #fff; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15); }
 .room-dialog h2 { margin: 0 0 20px; font-size: 18px; color: #111b21; }
 .room-dialog__avatar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
 .room-dialog__file { display: none; }
@@ -81,7 +81,8 @@ function openAvatarPicker() {
 .room-dialog__actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
 .room-dialog__secondary, .room-dialog__primary { min-height: 44px; padding: 10px 20px; border-radius: 8px; cursor: pointer; touch-action: manipulation; }
 .room-dialog__secondary { border: 1px solid #e8ecf0; background: #fff; }
-.room-dialog__primary { border: 0; background: #008069; color: #fff; }
+.room-dialog__primary { border: 0; background: var(--btn); color: #fff; }
+.room-dialog__primary:hover:not(:disabled) { background: var(--btn-hover); }
 .room-dialog__primary:disabled, .room-dialog__secondary:disabled { cursor: not-allowed; opacity: 0.55; }
 .modal-fade-enter-active { transition: opacity 200ms; }
 .modal-fade-leave-active { transition: opacity 150ms; }
@@ -97,7 +98,7 @@ function openAvatarPicker() {
     width: 100%;
     max-height: calc(100dvh - env(safe-area-inset-top));
     padding: 20px 16px max(16px, env(safe-area-inset-bottom));
-    border-radius: 16px 16px 0 0;
+    border-radius: 10px 10px 0 0;
   }
 
   .room-dialog__avatar-row {

@@ -162,8 +162,8 @@ test('后台视觉令牌匹配参考图并按职责拆分样式文件', () => {
   assert.match(adminTokens, /--admin-workspace: #f0f3f8;/);
   assert.match(adminTokens, /--admin-panel: #ffffff;/);
   assert.match(adminTokens, /--admin-ink: #0d1731;/);
-  assert.match(adminTokens, /--admin-green-bg: #f1fdfb;/);
-  assert.match(adminTokens, /--admin-green: #168c87;/);
+  assert.match(adminTokens, /--admin-green-bg: #f3f4f6;/);
+  assert.match(adminTokens, /--admin-green: #111827;/);
   assert.doesNotMatch(adminTokens, /backdrop-filter|linear-gradient/);
   assert.doesNotMatch(legacyTokens, /admin-shell|admin-grid--two|admin-metric-grid--wide/);
 });

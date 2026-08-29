@@ -53,10 +53,11 @@
 .tag {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
+  padding: 3px 10px;
   border-radius: var(--radius-pill);
-  background: var(--warm-soft);
-  color: var(--warm);
+  background: var(--surface-1);
+  border: 1px solid var(--line-soft);
+  color: var(--text-soft);
   font-size: 0.78rem;
   font-weight: 600;
   margin-bottom: 16px;
@@ -85,14 +86,10 @@
   padding: 12px 14px;
   border-radius: var(--radius-control);
   border: 1px solid rgba(88, 107, 124, 0.22);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.56), rgba(236, 243, 249, 0.4)),
-    rgba(228, 236, 243, 0.26);
+  background: var(--surface-solid);
   color: var(--text);
   outline: none;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.52),
-    0 1px 2px rgba(88, 107, 124, 0.06);
+  box-shadow: none;
   transition: border-color var(--transition-soft), box-shadow var(--transition-soft), background var(--transition-soft);
 }
 
@@ -104,8 +101,8 @@
 .field input:focus,
 .field textarea:focus,
 .field select:focus {
-  border-color: rgba(45, 156, 151, 0.42);
-  box-shadow: 0 0 0 3px rgba(45, 156, 151, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .field textarea {
@@ -121,36 +118,38 @@
   border: none;
   padding: 12px 18px;
   border-radius: var(--radius-control);
-  background: linear-gradient(180deg, rgba(90, 143, 203, 0.92), rgba(69, 121, 186, 0.88)), var(--warm);
-  color: #fffaf2;
+  background: var(--btn);
+  color: #ffffff;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition:
-    transform 280ms cubic-bezier(0.37, 0, 0.63, 1),
-    box-shadow 280ms cubic-bezier(0.37, 0, 0.63, 1),
-    opacity 220ms ease;
-  box-shadow: 0 4px 16px rgba(90, 143, 203, 0.22);
+  transition: background var(--transition-soft), opacity var(--transition-soft);
 }
 
 .button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(90, 143, 203, 0.3);
+  background: var(--btn-hover);
 }
 
 .button.secondary {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.14)), rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.34);
+  background: var(--surface-solid);
+  border: 1px solid var(--line-soft);
+  color: var(--text-soft);
+}
+
+.button.secondary:hover:not(:disabled) {
+  background: var(--surface-1);
   color: var(--text);
-  box-shadow: 0 2px 10px rgba(62, 49, 32, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .button.danger {
-  background: linear-gradient(180deg, rgba(189, 87, 74, 0.9), rgba(161, 60, 50, 0.86)), var(--danger);
-  box-shadow: 0 4px 16px rgba(173, 75, 64, 0.18);
+  background: var(--danger);
+}
+
+.button.danger:hover:not(:disabled) {
+  background: #b91c1c;
 }
 
 .button:disabled {
@@ -578,8 +577,8 @@
   gap: 12px;
   padding: 12px 14px;
   border-radius: var(--radius-panel);
-  background: rgba(255, 255, 255, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.34);
+  background: var(--surface-solid);
+  border: 1px solid var(--line-soft);
 }
 
 .member-chip__text {

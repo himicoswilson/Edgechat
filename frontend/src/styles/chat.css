@@ -90,7 +90,7 @@
 .conversation-item {
   width: 100%;
   border: 1px solid transparent;
-  border-radius: 18px;
+  border-radius: var(--radius-panel);
   background: rgba(255, 255, 255, 0.24);
   padding: 12px 14px;
   color: inherit;
@@ -221,9 +221,9 @@
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-panel);
+  background: var(--surface-solid);
+  border: 1px solid var(--line-soft);
 }
 
 .member-chip__text {

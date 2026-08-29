@@ -103,7 +103,7 @@ onBeforeUnmount(() => {
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: #c62828;
+  color: #dc2626;
   font: inherit;
   font-size: 14px;
   text-align: left;
@@ -116,7 +116,7 @@ onBeforeUnmount(() => {
 }
 
 .message-context-menu button:focus-visible {
-  outline: 2px solid #008069;
+  outline: 2px solid #111b21;
   outline-offset: -2px;
 }
 

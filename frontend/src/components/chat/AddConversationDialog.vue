@@ -156,7 +156,7 @@ watch(
   /* biome-ignore lint/suspicious/noDuplicateProperties: 100dvh 降级兜底,老浏览器不识别则回退上一行 100vh */
   max-height: min(620px, calc(100dvh - 32px));
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: 10px;
   background: #fff;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
 }
@@ -232,9 +232,9 @@ watch(
 
 .add-conversation-choice:hover,
 .add-conversation-person:hover:not(:disabled) {
-  border-color: #b7d8d2;
-  background: #f5fbf9;
-  box-shadow: 0 4px 14px rgba(0, 128, 105, 0.08);
+  border-color: #93c5fd;
+  background: #eff6ff;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
 }
 
 .add-conversation-choice__icon {
@@ -244,8 +244,8 @@ watch(
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #e7f4f1;
-  color: #008069;
+  background: #f0f2f5;
+  color: #54656f;
 }
 
 .add-conversation-choice span:nth-child(2) {
@@ -279,7 +279,7 @@ watch(
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: #008069;
+  color: #111b21;
   cursor: pointer;
 }
 
@@ -322,7 +322,7 @@ watch(
 }
 
 .add-conversation-person__status {
-  color: #008069;
+  color: #54656f;
   font-size: 12px;
   font-weight: 600;
 }
@@ -346,7 +346,7 @@ watch(
 }
 
 .add-conversation-dialog button:focus-visible {
-  outline: 3px solid rgba(0, 128, 105, 0.24);
+  outline: 3px solid rgba(15, 23, 42, 0.16);
   outline-offset: 2px;
 }
 
@@ -374,7 +374,7 @@ watch(
     max-height: calc(100vh - env(safe-area-inset-top));
     /* biome-ignore lint/suspicious/noDuplicateProperties: 100dvh 降级兜底,老浏览器不识别则回退上一行 100vh */
     max-height: calc(100dvh - env(safe-area-inset-top));
-    border-radius: 16px 16px 0 0;
+    border-radius: 10px 10px 0 0;
   }
 
   .add-conversation-dialog__header,

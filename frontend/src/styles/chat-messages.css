@@ -33,58 +33,50 @@
 
 .chat-bubble {
   max-width: min(78%, 720px);
-  padding: 14px 16px;
-  border-radius: 22px 22px 22px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.46);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.34)),
-    rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 14px rgba(62, 49, 32, 0.05);
-  backdrop-filter: var(--blur-md);
-  -webkit-backdrop-filter: var(--blur-md);
-  transition:
-    border-color var(--transition-soft),
-    background var(--transition-soft);
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line-soft);
+  background: var(--surface-solid);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-soft), background var(--transition-soft);
 }
 
 .chat-bubble--own {
-  border-color: rgba(45, 156, 151, 0.22);
-  border-radius: 22px 22px 10px 22px;
-  background:
-    linear-gradient(180deg, rgba(46, 134, 125, 0.9), rgba(34, 109, 103, 0.84)),
-    rgba(45, 156, 151, 0.8);
-  color: #f6fbfa;
-  box-shadow: 0 4px 14px rgba(45, 156, 151, 0.12);
+  border-color: transparent;
+  border-radius: 8px;
+  background: #dbeafe;
+  color: var(--text);
+  box-shadow: none;
 }
 
 /* 连续消息：隐藏上边框，形成无缝堆叠 */
 .chat-bubble--continued {
-  border-radius: 6px 22px 22px 10px;
+  border-radius: 8px;
   border-top: none;
   padding-top: 6px;
 }
 
 .chat-bubble--own.chat-bubble--continued {
-  border-radius: 22px 6px 10px 22px;
+  border-radius: 8px;
   border-top: none;
 }
 
 /* 尾部消息：隐藏下边框，avatar 缩小 */
 .chat-bubble--tail-hidden {
-  border-radius: 22px 22px 6px 10px;
+  border-radius: 8px;
   border-bottom: none;
   padding-bottom: 6px;
 }
 
 .chat-bubble--own.chat-bubble--tail-hidden {
-  border-radius: 22px 22px 22px 6px;
+  border-radius: 8px;
   border-bottom: none;
 }
 
 /* 首尾都有：单独一条消息时不应用 */
 
 .chat-bubble--continued.chat-bubble--tail-hidden {
-  border-radius: 6px 22px 6px 10px;
+  border-radius: 8px;
   border-top: none;
   border-bottom: none;
   padding-top: 6px;
@@ -92,7 +84,7 @@
 }
 
 .chat-bubble--own.chat-bubble--continued.chat-bubble--tail-hidden {
-  border-radius: 22px 6px 22px 6px;
+  border-radius: 8px;
 }
 
 .chat-bubble__meta {
@@ -109,7 +101,7 @@
 }
 
 .chat-bubble--own .chat-bubble__meta span {
-  color: rgba(246, 251, 250, 0.72);
+  color: var(--text-faint);
 }
 
 .chat-bubble p {
@@ -122,12 +114,12 @@
 .chat-bubble__attachment {
   display: inline-flex;
   margin-top: 10px;
-  color: #2e82d2;
+  color: var(--accent);
   font-weight: 600;
 }
 
 .chat-bubble--own .chat-bubble__attachment {
-  color: #2e82d2;
+  color: var(--accent);
 }
 
 .chat-composer-shell {
@@ -135,11 +127,7 @@
   gap: 8px;
   padding: 14px 28px 18px;
   border-top: 1px solid var(--line-soft);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06)),
-    transparent;
-  backdrop-filter: var(--blur-md);
-  -webkit-backdrop-filter: var(--blur-md);
+  background: var(--surface-1);
 }
 
 .chat-composer {

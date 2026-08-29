@@ -24,7 +24,7 @@ defineProps({
   justify-content: center;
   padding-inline: 4px;
   border-radius: 4px;
-  background: #229ed9;
+  background: #111827;
   color: #ffffff;
   font-size: 9px;
   font-weight: 800;

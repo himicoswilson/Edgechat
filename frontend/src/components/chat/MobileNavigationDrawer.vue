@@ -178,7 +178,7 @@ useOverlayLifecycle({
 }
 
 .mobile-navigation-drawer__actions .mobile-navigation-drawer__danger {
-  color: #c62828;
+  color: #dc2626;
 }
 
 .mobile-drawer-enter-active,
