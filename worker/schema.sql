@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS channels (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
   description TEXT NOT NULL DEFAULT '',
   avatar_key TEXT,
   kind TEXT NOT NULL CHECK (kind IN ('public', 'private', 'dm')),
@@ -30,6 +30,9 @@ CREATE TABLE IF NOT EXISTS channels (
   deleted_at TEXT,
   FOREIGN KEY (created_by) REFERENCES users(id)
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_channels_name_active
+  ON channels(name) WHERE deleted_at IS NULL;
 
 CREATE TABLE IF NOT EXISTS channel_members (
   channel_id INTEGER NOT NULL,

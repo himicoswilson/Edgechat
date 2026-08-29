@@ -61,13 +61,22 @@ test("全员禁言时仅群主可发言，其余成员被拒绝", async () => {
 	assert.equal(persisted, 1);
 	assert.equal(result.message.id, 1);
 
+	// 管理员（非群主）：同样可发言
+	const adminResult = await submit(
+		{},
+		{ room, principal: { userId: 7, isAdmin: true } },
+		{ content: "hello" },
+	);
+	assert.equal(persisted, 2);
+	assert.equal(adminResult.message.id, 1);
+
 	// 未开启禁言时普通成员照常发言
 	const result2 = await submit(
 		{},
 		{ room: { id: 3, mute_everyone: 0, created_by: 9 }, principal: { userId: 7 } },
 		{ content: "hello" },
 	);
-	assert.equal(persisted, 2);
+	assert.equal(persisted, 3);
 	assert.equal(result2.message.id, 1);
 });
 

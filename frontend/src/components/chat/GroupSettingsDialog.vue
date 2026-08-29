@@ -47,10 +47,10 @@ function openAvatarPicker() {
           <input ref="nameInputEl" v-model="form.name" type="text" class="room-dialog__input" :disabled="room?.isGeneral" />
         </label>
 
-        <label v-if="!room?.isGeneral" class="room-dialog__toggle">
+        <label class="room-dialog__toggle">
           <span class="room-dialog__toggle-copy">
             <strong>{{ t('group.muteEveryone') }}</strong>
-            <small>{{ t('group.muteEveryoneHint') }}</small>
+            <small>{{ room?.isGeneral ? t('group.muteEveryoneHintAdmin') : t('group.muteEveryoneHint') }}</small>
           </span>
           <span class="room-dialog__switch" :class="{ 'room-dialog__switch--on': form.muteEveryone }">
             <input v-model="form.muteEveryone" type="checkbox" class="room-dialog__switch-input" />

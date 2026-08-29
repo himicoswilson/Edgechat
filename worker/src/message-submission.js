@@ -9,12 +9,14 @@ export class MessageSubmissionError extends Error {
 
 export function createMessageSubmission({ persistMessage = insertMessage } = {}) {
 	return async function submitRoomMessage(env, meta, payload) {
-		// 全员禁言：仅群主可发言，其余成员直接拒绝
+		// 全员禁言：仅群主和管理员可发言，其余成员直接拒绝
+		// （general 群无群主，禁言后只有管理员还能发言）
 		const room = meta.room;
 		if (
 			room &&
 			Number(room.mute_everyone || 0) === 1 &&
-			Number(room.created_by) !== Number(meta.principal.userId)
+			Number(room.created_by) !== Number(meta.principal.userId) &&
+			!meta.principal.isAdmin
 		) {
 			throw new MessageSubmissionError("已开启全员禁言");
 		}

@@ -77,7 +77,8 @@ const activeRoomMuted = computed(() => isRoomMuted(activeRoom.value));
 const roomEveryoneMuted = computed(
   () =>
     Boolean(activeRoom.value?.muteEveryone) &&
-    activeRoom.value?.myRole !== 'owner'
+    activeRoom.value?.myRole !== 'owner' &&
+    !session.value?.isAdmin
 );
 
 function handleRoomActivity({ room, message }) {
