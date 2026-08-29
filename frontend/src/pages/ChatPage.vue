@@ -63,6 +63,7 @@ const {
   notificationsEnabled,
   notificationStateLabel,
   notificationActionLabel,
+  notificationInstallHint,
   notificationToggleDisabled,
   syncNotificationPermission,
   toggleNotifications,
@@ -706,6 +707,7 @@ onBeforeUnmount(() => {
       :notifications-enabled="notificationsEnabled"
       :notification-label="notificationActionLabel"
       :notification-disabled="notificationToggleDisabled"
+      :notification-hint="notificationInstallHint"
       @close="closeMobileNavigation"
       @settings="navigateFromMobileDrawer(openSettings)"
       @admin="navigateFromMobileDrawer(openAdmin)"

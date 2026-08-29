@@ -81,6 +81,24 @@ export function useBrowserNotifications(options = {}) {
 		() => !supported.value || permission.value === "denied",
 	);
 
+	// iOS Safari 仅在安装到主屏幕(PWA)后暴露 Notification API,非安装态给出引导文案
+	const iosInstallHint = computed(() => {
+		const navigator = browserWindow?.navigator;
+		const userAgent = navigator?.userAgent || "";
+		if (
+			supported.value ||
+			!/iphone|ipad|ipod/i.test(userAgent) ||
+			!/safari/i.test(userAgent) ||
+			/crios|fxios|edgios/i.test(userAgent)
+		) {
+			return "";
+		}
+		const standalone =
+			navigator?.standalone === true ||
+			browserWindow?.matchMedia?.("(display-mode: standalone)").matches;
+		return standalone ? "" : t("notifications.iosInstallHint");
+	});
+
 	async function toggleNotifications() {
 		syncPermission();
 		if (notificationToggleDisabled.value) {
@@ -145,6 +163,7 @@ export function useBrowserNotifications(options = {}) {
 		notificationStateLabel,
 		notificationActionLabel,
 		notificationToggleDisabled,
+		notificationInstallHint: iosInstallHint,
 		syncNotificationPermission: syncPermission,
 		toggleNotifications,
 		isRoomMuted,

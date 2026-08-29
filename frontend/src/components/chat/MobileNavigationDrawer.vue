@@ -11,7 +11,8 @@ const props = defineProps({
   showAdmin: { type: Boolean, default: false },
   notificationsEnabled: { type: Boolean, default: false },
   notificationLabel: { type: String, default: '' },
-  notificationDisabled: { type: Boolean, default: false }
+  notificationDisabled: { type: Boolean, default: false },
+  notificationHint: { type: String, default: '' }
 });
 
 const emit = defineEmits(['close', 'settings', 'admin', 'notification', 'logout']);
@@ -62,6 +63,9 @@ useOverlayLifecycle({
               <BellOff v-else :size="21" aria-hidden="true" />
               <span>{{ notificationLabel }}</span>
             </button>
+            <p v-if="notificationHint" class="mobile-navigation-drawer__hint">
+              {{ notificationHint }}
+            </p>
             <button v-if="showAdmin" type="button" @click="emit('admin')">
               <LayoutDashboard :size="21" aria-hidden="true" />
               <span>{{ t('nav.admin') }}</span>
@@ -163,6 +167,16 @@ useOverlayLifecycle({
   text-align: left;
   text-decoration: none;
   touch-action: manipulation;
+}
+
+.mobile-navigation-drawer__hint {
+  margin: 2px 14px 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f0f2f5;
+  color: #667781;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .mobile-navigation-drawer__actions button:active,

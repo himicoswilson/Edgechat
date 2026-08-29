@@ -123,6 +123,7 @@ export default {
   'notifications.enable': 'Enable notifications',
   'notifications.directMessage': 'You received a new direct message',
   'notifications.groupMessage': 'You received a new group message',
+  'notifications.iosInstallHint': 'On iOS, install the app to your Home Screen first (Share → Add to Home Screen), then come back to enable notifications.',
   'conversation.chooseContact': 'Choose a contact you have not chatted with',
   'conversation.chooseType': 'Choose a conversation type',
   'conversation.startNew': 'Start a new conversation',

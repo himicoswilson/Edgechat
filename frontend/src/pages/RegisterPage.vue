@@ -124,11 +124,13 @@ onMounted(() => {
 <style scoped>
 .login-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
   background: var(--bg);
+  overflow-y: auto;
 }
 
 .login-card {
@@ -186,7 +188,7 @@ onMounted(() => {
   border: 1px solid var(--line-strong);
   border-radius: var(--radius-control);
   background: var(--surface-solid);
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--text);
   outline: none;
   transition: border-color var(--transition-soft), box-shadow var(--transition-soft);
