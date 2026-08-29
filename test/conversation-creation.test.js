@@ -37,7 +37,7 @@ function createHarness(overrides = {}) {
 	return { creation, users, error, calls, conversationItems };
 }
 
-test("添加人员入口同时保留新私聊和创建群聊动作", () => {
+test("添加好友入口同时保留新私聊和创建群聊动作", () => {
 	const { creation, users, calls } = createHarness();
 	assert.deepEqual(
 		creation.usersWithoutDm.value.map((user) => user.id),

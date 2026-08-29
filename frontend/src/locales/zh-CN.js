@@ -90,7 +90,7 @@ export default {
   'chat.roomAccessRevokedNamed': '你已无法访问“{name}”。',
   'chat.roomAccessRevoked': '你已无法访问这个会话。',
   'chat.deleteMessageConfirm': '确认删除这条消息吗？删除后会话中的所有人都将看不到它。',
-  'chat.addPeople': '添加人员',
+  'chat.addPeople': '添加好友',
   'chat.loadingConversations': '加载中...',
   'chat.noConversations': '暂无会话',
   'chat.muted': '已设为免打扰',
