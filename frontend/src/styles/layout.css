@@ -101,25 +101,6 @@
   gap: 10px;
 }
 
-.window-controls__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
-}
-
-.window-controls__dot--warm {
-  background: rgba(90, 143, 203, 0.72);
-}
-
-.window-controls__dot--danger {
-  background: rgba(173, 75, 64, 0.72);
-}
-
-.window-controls__dot--cool {
-  background: rgba(45, 156, 151, 0.7);
-}
-
 .window-heading,
 .hero-copy {
   display: grid;
@@ -247,9 +228,9 @@
 }
 
 .info-banner {
-  background: rgba(45, 156, 151, 0.12);
-  border-color: rgba(45, 156, 151, 0.18);
-  color: var(--cool);
+  background: var(--accent-soft);
+  border-color: rgba(15, 23, 42, 0.12);
+  color: var(--accent);
 }
 
 .error-banner {
