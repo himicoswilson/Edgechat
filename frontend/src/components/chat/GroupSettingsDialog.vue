@@ -28,8 +28,9 @@ function openAvatarPicker() {
 </script>
 
 <template>
-  <Transition name="modal-fade">
-    <div v-if="show" class="room-dialog-overlay" @click.self="emit('close')">
+  <Teleport to="body">
+    <Transition name="modal-fade">
+      <div v-if="show" class="room-dialog-overlay" @click.self="emit('close')">
       <section class="room-dialog" role="dialog" aria-modal="true" aria-labelledby="group-settings-title">
         <h2 id="group-settings-title">{{ t('group.settings') }}</h2>
 
@@ -54,7 +55,8 @@ function openAvatarPicker() {
         </div>
       </section>
     </div>
-  </Transition>
+    </Transition>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -72,7 +74,7 @@ function openAvatarPicker() {
     max(16px, env(safe-area-inset-left));
   background: rgba(0, 0, 0, 0.4);
 }
-.room-dialog { width: min(420px, 100%); max-height: calc(100dvh - 32px); overflow-y: auto; padding: 24px; border-radius: 10px; background: #fff; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15); }
+.room-dialog { width: min(420px, 100%); max-height: calc(100vh - 32px); /* biome-ignore lint/suspicious/noDuplicateProperties: 100dvh 降级兜底,老浏览器不识别则回退上一行 100vh */ max-height: calc(100dvh - 32px); overflow-y: auto; padding: 24px; border-radius: 10px; background: #fff; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15); }
 .room-dialog h2 { margin: 0 0 20px; font-size: 18px; color: #111b21; }
 .room-dialog__avatar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
 .room-dialog__file { display: none; }
@@ -96,6 +98,8 @@ function openAvatarPicker() {
 
   .room-dialog {
     width: 100%;
+    max-height: calc(100vh - env(safe-area-inset-top));
+    /* biome-ignore lint/suspicious/noDuplicateProperties: 100dvh 降级兜底,老浏览器不识别则回退上一行 100vh */
     max-height: calc(100dvh - env(safe-area-inset-top));
     padding: 20px 16px max(16px, env(safe-area-inset-bottom));
     border-radius: 10px 10px 0 0;

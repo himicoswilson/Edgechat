@@ -33,7 +33,7 @@ function createQueryDb(results) {
 	};
 }
 
-test("可见频道查询保持七个数值身份绑定与既有 projection", async () => {
+test("可见频道查询保持八个数值身份绑定与既有 projection", async () => {
 	const { db, capture } = createQueryDb([
 			{
 				id: "9",
@@ -54,7 +54,7 @@ test("可见频道查询保持七个数值身份绑定与既有 projection", asy
 
 	const channels = await listVisibleChannels(db, "7");
 
-	assert.deepEqual(capture.binds, [7, 7, 7, 7, 7, 7, 7]);
+	assert.deepEqual(capture.binds, [7, 7, 7, 7, 7, 7, 7, 7]);
 	assert.deepEqual(channels[0], {
 		id: 9,
 			name: "General",

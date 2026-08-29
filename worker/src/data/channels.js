@@ -12,7 +12,7 @@ function mapVisibleChannel(row) {
 		ownerDisplayName: row.owner_display_name || "",
 		isMember: Boolean(Number(row.is_member)),
 		myRole: row.my_role || "",
-		canManage: Boolean(Number(row.can_manage)),
+		canManage: Boolean(Number(row.can_manage) || Number(row.is_admin_manage)),
 		memberCount: Number(row.member_count || 0),
 		lastMessageAt: row.last_message_at || null,
 		unreadCount: Number(row.unread_count || 0),
@@ -49,6 +49,7 @@ export async function listVisibleChannels(db, userId) {
 			   EXISTS (SELECT 1 FROM channel_members cm WHERE cm.channel_id = c.id AND cm.user_id = ?) AS is_member,
 			   COALESCE((SELECT cm.role FROM channel_members cm WHERE cm.channel_id = c.id AND cm.user_id = ? LIMIT 1), '') AS my_role,
 			   EXISTS (SELECT 1 FROM channel_members cm WHERE cm.channel_id = c.id AND cm.user_id = ? AND cm.role = 'owner') AS can_manage,
+			   EXISTS (SELECT 1 FROM users u WHERE u.id = ? AND u.is_admin = 1) AS is_admin_manage,
 			   (SELECT COUNT(*) FROM channel_members cm WHERE cm.channel_id = c.id) AS member_count,
 			   (SELECT MAX(m.created_at) FROM messages m WHERE m.channel_id = c.id AND m.deleted_at IS NULL) AS last_message_at,
 				   CASE WHEN EXISTS (SELECT 1 FROM channel_members cm WHERE cm.channel_id = c.id AND cm.user_id = ?)
@@ -68,6 +69,7 @@ export async function listVisibleChannels(db, userId) {
 				   c.name ASC`,
 		)
 			.bind(
+				normalizedUserId,
 				normalizedUserId,
 				normalizedUserId,
 				normalizedUserId,
