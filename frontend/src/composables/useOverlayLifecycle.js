@@ -38,7 +38,8 @@ export function useOverlayLifecycle({ open, onClose, focusTarget }) {
 		lockPageScroll();
 		window.addEventListener("keydown", handleKeydown);
 		await nextTick();
-		if (active) {
+		if (active && window.matchMedia?.("(pointer: fine)").matches) {
+			// 触屏设备不自动聚焦,避免一打开弹窗就弹键盘挡住表单项
 			const target = typeof focusTarget === "function" ? focusTarget() : focusTarget?.value;
 			target?.focus();
 		}

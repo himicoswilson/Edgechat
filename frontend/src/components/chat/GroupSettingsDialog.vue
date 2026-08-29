@@ -175,6 +175,8 @@ function openAvatarPicker() {
 
 @media (max-width: 480px) {
   .room-dialog-overlay {
+    top: var(--chat-viewport-offset-top, 0px);
+    height: var(--chat-viewport-height, 100dvh);
     align-items: flex-end;
     padding: env(safe-area-inset-top) 0 0;
   }
@@ -182,8 +184,8 @@ function openAvatarPicker() {
   .room-dialog {
     width: 100%;
     max-height: calc(100vh - env(safe-area-inset-top));
-    /* biome-ignore lint/suspicious/noDuplicateProperties: 100dvh 降级兜底,老浏览器不识别则回退上一行 100vh */
-    max-height: calc(100dvh - env(safe-area-inset-top));
+    /* biome-ignore lint/suspicious/noDuplicateProperties: 视觉视口高度降级,旧浏览器回退上一行 100vh */
+    max-height: calc(var(--chat-viewport-height, 100dvh) - env(safe-area-inset-top));
     padding: 20px 16px max(16px, env(safe-area-inset-bottom));
     border-radius: 10px 10px 0 0;
   }

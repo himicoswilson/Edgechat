@@ -365,6 +365,8 @@ watch(
 
 @media (max-width: 480px) {
   .add-conversation-overlay {
+    top: var(--chat-viewport-offset-top, 0px);
+    height: var(--chat-viewport-height, 100dvh);
     align-items: flex-end;
     padding: 0;
   }
@@ -372,8 +374,8 @@ watch(
   .add-conversation-dialog {
     width: 100%;
     max-height: calc(100vh - env(safe-area-inset-top));
-    /* biome-ignore lint/suspicious/noDuplicateProperties: 100dvh 降级兜底,老浏览器不识别则回退上一行 100vh */
-    max-height: calc(100dvh - env(safe-area-inset-top));
+    /* biome-ignore lint/suspicious/noDuplicateProperties: 视觉视口高度降级,旧浏览器回退上一行 100vh */
+    max-height: calc(var(--chat-viewport-height, 100dvh) - env(safe-area-inset-top));
     border-radius: 10px 10px 0 0;
   }
 

@@ -42,6 +42,12 @@ a:hover {
   text-decoration: underline;
 }
 
+/* iOS 会自动把文本中的号码/日期/地址渲染成蓝色链接,桌面端看不到,统一中和为正文选色 */
+a[x-apple-data-detectors] {
+  color: inherit;
+  text-decoration: none;
+}
+
 button,
 input,
 textarea,
