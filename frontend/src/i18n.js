@@ -56,18 +56,30 @@ export function toggleLocale() {
 }
 
 export function formatDateTime(value, options = { dateStyle: 'medium', timeStyle: 'short' }) {
-  const date = value instanceof Date ? value : new Date(value);
+  const date = parseUtcTime(value);
   return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat(locale.value, options).format(date);
 }
 
 export function formatDate(value, options = { dateStyle: 'medium' }) {
-  const date = value instanceof Date ? value : new Date(value);
+  const date = parseUtcTime(value);
   return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat(locale.value, options).format(date);
 }
 
 export function formatTime(value, options = { hour: '2-digit', minute: '2-digit' }) {
-  const date = value instanceof Date ? value : new Date(value);
+  const date = parseUtcTime(value);
   return Number.isNaN(date.getTime()) ? '' : new Intl.DateTimeFormat(locale.value, options).format(date);
+}
+
+// SQLite CURRENT_TIMESTAMP 输出无时区的 UTC 时间串(如 "2026-08-30 07:17:51"),
+// new Date() 会按本地时区解析导致显示偏移(东八区显示少 8 小时),统一补 Z 按 UTC 解析。
+// 带时区后缀(Z / ±HH:MM)的 ISO 字符串不受影响。
+const SQLITE_UTC_PATTERN = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?$/;
+
+export function parseUtcTime(value) {
+  if (typeof value === "string" && SQLITE_UTC_PATTERN.test(value)) {
+    return new Date(`${value.replace(" ", "T")}Z`);
+  }
+  return value instanceof Date ? value : new Date(value);
 }
 
 export function compareLocalized(left, right) {
@@ -86,6 +98,7 @@ export function useI18n() {
     setLocale,
     toggleLocale,
     formatDate,
+    parseUtcTime,
     formatDateTime,
     formatTime,
     compareLocalized

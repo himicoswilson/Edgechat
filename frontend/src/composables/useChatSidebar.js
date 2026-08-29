@@ -1,6 +1,6 @@
 import { computed, ref } from "vue";
 import api from "../api.js";
-import { compareLocalized, formatDate, t } from "../i18n.js";
+import { compareLocalized, formatDate, parseUtcTime, t } from "../i18n.js";
 
 function mapChannelItem(channel, subtitle) {
 	return {
@@ -57,10 +57,10 @@ export function useChatSidebar({ applyActiveChannel, selectDm, sidebarApi = api 
 				}
 
 				const leftTime = left.lastMessageAt
-				? new Date(left.lastMessageAt).getTime()
+				? parseUtcTime(left.lastMessageAt).getTime()
 				: 0;
 			const rightTime = right.lastMessageAt
-				? new Date(right.lastMessageAt).getTime()
+				? parseUtcTime(right.lastMessageAt).getTime()
 				: 0;
 			if (leftTime !== rightTime) {
 				return rightTime - leftTime;
@@ -112,9 +112,9 @@ export function useChatSidebar({ applyActiveChannel, selectDm, sidebarApi = api 
 
 		if (lastMessageAt) {
 			const currentTime = source.lastMessageAt
-				? new Date(source.lastMessageAt).getTime()
+				? parseUtcTime(source.lastMessageAt).getTime()
 				: 0;
-			const nextTime = new Date(lastMessageAt).getTime();
+			const nextTime = parseUtcTime(lastMessageAt).getTime();
 			if (!currentTime || nextTime >= currentTime) {
 				source.lastMessageAt = lastMessageAt;
 			}

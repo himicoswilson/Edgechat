@@ -1,6 +1,6 @@
 export function storageTimestampValue(value) {
   if (value === null || value === undefined || value === '') return 0;
-  const timestamp = new Date(value).getTime();
+  const timestamp = parseUtcTime(value).getTime();
   return Number.isNaN(timestamp) ? 0 : timestamp;
 }
 
@@ -127,4 +127,4 @@ export function sortStorageRows(rows, sort) {
 function compareNames(left, right) {
   return compareLocalized(left.displayName, right.displayName);
 }
-import { compareLocalized, formatDateTime, t } from './i18n.js';
+import { compareLocalized, formatDateTime, parseUtcTime, t } from './i18n.js';

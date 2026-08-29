@@ -18,15 +18,22 @@ export function useChatViewport({ activeRoom }) {
 
 	function syncViewportHeight() {
 		const visualViewport = window.visualViewport;
-		const viewportHeight = visualViewport?.height || window.innerHeight;
-		// 部分移动浏览器会在键盘弹出时平移视觉视口，只同步高度会让输入栏停在旧位置。
+		const layoutHeight = window.innerHeight;
+		// 仅当键盘明显可见(视觉视口远矮于布局视口)时跟随视觉视口高度;
+		// 地址栏收展等场景不再改动布局高度,避免整页反向位移。
+		const keyboardVisible = Boolean(
+			visualViewport && visualViewport.height < layoutHeight * 0.75,
+		);
+		const viewportHeight = keyboardVisible
+			? visualViewport.height
+			: layoutHeight;
 		document.documentElement.style.setProperty(
 			"--chat-viewport-height",
 			`${Math.round(viewportHeight)}px`,
 		);
 		document.documentElement.style.setProperty(
 			"--chat-viewport-offset-top",
-			`${Math.round(visualViewport?.offsetTop || 0)}px`,
+			`${Math.round(keyboardVisible ? visualViewport.offsetTop : 0)}px`,
 		);
 	}
 

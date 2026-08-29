@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { checkForUpdates, getBuildInfo } from "../../update-check.js";
-import { formatDateTime, t } from "../../i18n.js";
+import { formatDateTime, parseUtcTime, t } from "../../i18n.js";
 import UiButton from "../ui/Button.vue";
 import UiSurface from "../ui/Surface.vue";
 
@@ -61,7 +61,7 @@ const statusDetail = computed(() => {
 });
 
 function formatDate(value) {
-	const date = new Date(value);
+	const date = parseUtcTime(value);
 		return Number.isNaN(date.getTime()) ? "" : formatDateTime(date);
 }
 
