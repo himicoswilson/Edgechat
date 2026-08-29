@@ -35,6 +35,7 @@ export function useRoomManagement({
 		name: "",
 		avatarUrl: "",
 		avatarKey: "",
+		muteEveryone: false,
 	});
 
 	const availableInviteUsers = computed(() => {
@@ -48,6 +49,7 @@ export function useRoomManagement({
 		groupSettingsForm.name = activeRoom.value?.name || "";
 		groupSettingsForm.avatarUrl = activeRoom.value?.avatarUrl || "";
 		groupSettingsForm.avatarKey = activeRoom.value?.avatarKey || "";
+		groupSettingsForm.muteEveryone = Boolean(activeRoom.value?.muteEveryone);
 	}
 
 	function openCreateGroup() {
@@ -255,10 +257,12 @@ export function useRoomManagement({
 			const payload = await roomApi.updateChannel(activeRoom.value.id, {
 				name,
 				avatarKey: groupSettingsForm.avatarKey || null,
+				muteEveryone: groupSettingsForm.muteEveryone,
 			});
 			activeRoom.value.name = payload.channel.name;
 			activeRoom.value.avatarKey = payload.channel.avatarKey || "";
 			activeRoom.value.avatarUrl = payload.channel.avatarUrl || "";
+			activeRoom.value.muteEveryone = Boolean(groupSettingsForm.muteEveryone);
 			syncGroupSettingsForm();
 
 			const channel = channels.value.find(
@@ -268,6 +272,7 @@ export function useRoomManagement({
 				channel.name = activeRoom.value.name;
 				channel.avatarKey = activeRoom.value.avatarKey;
 				channel.avatarUrl = activeRoom.value.avatarUrl;
+				channel.muteEveryone = activeRoom.value.muteEveryone;
 			}
 			closeGroupEditor();
 			await refreshSidebar();

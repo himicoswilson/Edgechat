@@ -91,4 +91,9 @@ export const D1_MIGRATIONS = [
     file: "worker/migrations/2026-08-20-user-ban-expiry.sql",
     artifacts: ["column:users.disabled_until"],
   },
+  {
+    id: "2026-08-29-channel-mute-everyone",
+    file: "worker/migrations/2026-08-29-channel-mute-everyone.sql",
+    artifacts: ["column:channels.mute_everyone"],
+  },
 ];

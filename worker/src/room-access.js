@@ -82,7 +82,7 @@ export async function authorizeRoom(db, principal, kind, roomId) {
 		? "1 = 1"
 		: "EXISTS (SELECT 1 FROM channel_members cm WHERE cm.channel_id = c.id AND cm.user_id = ?)";
 	const statement = db.prepare(
-		`SELECT c.id, c.name, c.description, c.avatar_key, c.kind, c.dm_key
+		`SELECT c.id, c.name, c.description, c.avatar_key, c.kind, c.dm_key, c.created_by, c.mute_everyone
 		 FROM channels c
 		 WHERE c.id = ?
 		   AND c.kind = ?

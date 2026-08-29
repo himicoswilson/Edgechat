@@ -9,6 +9,15 @@ export class MessageSubmissionError extends Error {
 
 export function createMessageSubmission({ persistMessage = insertMessage } = {}) {
 	return async function submitRoomMessage(env, meta, payload) {
+		// 全员禁言：仅群主可发言，其余成员直接拒绝
+		const room = meta.room;
+		if (
+			room &&
+			Number(room.mute_everyone || 0) === 1 &&
+			Number(room.created_by) !== Number(meta.principal.userId)
+		) {
+			throw new MessageSubmissionError("已开启全员禁言");
+		}
 		try {
 			const message = await persistMessage(env, {
 				channelId: meta.room.id,

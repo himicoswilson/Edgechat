@@ -58,6 +58,7 @@ export function useActiveRoom({ activeRoom }) {
 			avatarUrl: channel.avatarUrl || "",
 			avatarKey: channel.avatarKey || "",
 			ownerDisplayName: channel.ownerDisplayName || "",
+			muteEveryone: Boolean(channel.muteEveryone),
 			canManage: Boolean(channel.canManage),
 			myRole: channel.myRole || "",
 			memberCount: Number(channel.memberCount || 0),

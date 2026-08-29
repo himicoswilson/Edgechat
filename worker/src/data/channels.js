@@ -43,7 +43,7 @@ export async function listVisibleChannels(db, userId) {
 	const { results } = await db
 		.prepare(
 				`SELECT
-				   c.id, c.name, c.description, c.avatar_key, c.kind,
+				   c.id, c.name, c.description, c.avatar_key, c.kind, c.mute_everyone,
 				   CASE WHEN c.name = 'general' THEN 1 ELSE 0 END AS is_general,
 			   owner.display_name AS owner_display_name,
 			   EXISTS (SELECT 1 FROM channel_members cm WHERE cm.channel_id = c.id AND cm.user_id = ?) AS is_member,
@@ -86,7 +86,7 @@ export async function listAdminChannels(db, { includeAvatar = true } = {}) {
 	const { results } = await db
 		.prepare(
 				`SELECT
-				   c.id, c.name, c.description, c.avatar_key, c.kind, c.created_at,
+				   c.id, c.name, c.description, c.avatar_key, c.kind, c.mute_everyone, c.created_at,
 				   CASE WHEN c.name = 'general' THEN 1 ELSE 0 END AS is_general,
 			   owner.display_name AS owner_display_name,
 			   (SELECT COUNT(*) FROM channel_members cm WHERE cm.channel_id = c.id) AS member_count,

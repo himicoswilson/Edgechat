@@ -31,6 +31,46 @@ test("消息提交 module 统一持久化参数与广播 packet", async () => {
 	assert.deepEqual(JSON.parse(result.packet), { type: "message", message });
 });
 
+test("全员禁言时仅群主可发言，其余成员被拒绝", async () => {
+	let persisted = 0;
+	const submit = createMessageSubmission({
+		async persistMessage() {
+			persisted += 1;
+			return { id: 1, content: "hello" };
+		},
+	});
+	const room = { id: 3, mute_everyone: 1, created_by: 9 };
+
+	// 非群主：拒绝且不落库
+	await assert.rejects(
+		submit(
+			{},
+			{ room, principal: { userId: 7 } },
+			{ content: "hello" },
+		),
+		(error) => error instanceof MessageSubmissionError && error.message === "已开启全员禁言",
+	);
+	assert.equal(persisted, 0);
+
+	// 群主：正常发言
+	const result = await submit(
+		{},
+		{ room, principal: { userId: 9 } },
+		{ content: "hello" },
+	);
+	assert.equal(persisted, 1);
+	assert.equal(result.message.id, 1);
+
+	// 未开启禁言时普通成员照常发言
+	const result2 = await submit(
+		{},
+		{ room: { id: 3, mute_everyone: 0, created_by: 9 }, principal: { userId: 7 } },
+		{ content: "hello" },
+	);
+	assert.equal(persisted, 2);
+	assert.equal(result2.message.id, 1);
+});
+
 test("消息提交只转换可预期的空消息错误", async () => {
 	const submitEmpty = createMessageSubmission({
 		async persistMessage() {

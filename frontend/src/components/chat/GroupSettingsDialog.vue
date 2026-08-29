@@ -47,6 +47,17 @@ function openAvatarPicker() {
           <input ref="nameInputEl" v-model="form.name" type="text" class="room-dialog__input" :disabled="room?.isGeneral" />
         </label>
 
+        <label v-if="!room?.isGeneral" class="room-dialog__toggle">
+          <span class="room-dialog__toggle-copy">
+            <strong>{{ t('group.muteEveryone') }}</strong>
+            <small>{{ t('group.muteEveryoneHint') }}</small>
+          </span>
+          <span class="room-dialog__switch" :class="{ 'room-dialog__switch--on': form.muteEveryone }">
+            <input v-model="form.muteEveryone" type="checkbox" class="room-dialog__switch-input" />
+            <span aria-hidden="true"></span>
+          </span>
+        </label>
+
         <div class="room-dialog__actions">
           <button type="button" class="room-dialog__secondary" @click="emit('close')">{{ t('common.cancel') }}</button>
           <button type="button" class="room-dialog__primary" :disabled="!form.name.trim() || saving" @click="emit('save')">
@@ -80,6 +91,78 @@ function openAvatarPicker() {
 .room-dialog__file { display: none; }
 .room-dialog__field { display: grid; gap: 8px; color: #6b7c93; font-size: 13px; }
 .room-dialog__input { width: 100%; min-height: 44px; padding: 10px 14px; border: 1px solid #e8ecf0; border-radius: 8px; background: #f9fafb; font-size: 16px; }
+.room-dialog__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.room-dialog__toggle-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.room-dialog__toggle-copy strong {
+  font-size: 13px;
+  color: #111b21;
+}
+
+.room-dialog__toggle-copy small {
+  font-size: 12px;
+  color: #667781;
+}
+
+.room-dialog__switch {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.room-dialog__switch-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.room-dialog__switch > span[aria-hidden="true"] {
+  display: block;
+  width: 38px;
+  height: 22px;
+  border: 1px solid #d0d5dd;
+  border-radius: 999px;
+  background: #eef1f4;
+  transition: background-color 150ms, border-color 150ms;
+}
+
+.room-dialog__switch > span[aria-hidden="true"]::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+  transition: transform 150ms;
+}
+
+.room-dialog__switch--on > span[aria-hidden="true"] {
+  border-color: #111827;
+  background: #111827;
+}
+
+.room-dialog__switch--on > span[aria-hidden="true"]::after {
+  transform: translateX(16px);
+}
+
+.room-dialog__switch-input:focus-visible + span {
+  outline: 2px solid #111827;
+  outline-offset: 2px;
+}
+
 .room-dialog__actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
 .room-dialog__secondary, .room-dialog__primary { min-height: 44px; padding: 10px 20px; border-radius: 8px; cursor: pointer; touch-action: manipulation; }
 .room-dialog__secondary { border: 1px solid #e8ecf0; background: #fff; }

@@ -194,6 +194,7 @@ export function registerChannelRoutes(app) {
         avatarUrl: channel.avatar_key ? publicFileUrl(channel.avatar_key) : '',
         kind: channel.kind,
         isGeneral: isGeneralChannel(channel),
+        muteEveryone: Boolean(Number(channel.mute_everyone || 0)),
         myRole: membership?.role || '',
         canManage: session.isAdmin || membership?.role === 'owner'
       },
@@ -230,6 +231,10 @@ export function registerChannelRoutes(app) {
     }
 
     const avatarUpdate = await resolveAvatarKeyUpdate(c.env.DB, session.userId, payload);
+    const muteEveryone =
+      payload.muteEveryone === undefined
+        ? undefined
+        : payload.muteEveryone ? 1 : 0;
 
     if (name !== undefined) {
       // 改名同样只看未删除群组：已删除群组同名可复用
@@ -257,6 +262,10 @@ export function registerChannelRoutes(app) {
     if (avatarUpdate.provided) {
       updates.push('avatar_key = ?');
       binds.push(avatarUpdate.key);
+    }
+    if (muteEveryone !== undefined) {
+      updates.push('mute_everyone = ?');
+      binds.push(muteEveryone);
     }
 
     if (!updates.length) {

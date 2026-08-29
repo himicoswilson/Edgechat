@@ -159,6 +159,7 @@ function getChannelRoom(channel) {
     kind: channel.kind,
     name: channel.name,
     isGeneral: channel.isGeneral,
+    muteEveryone: Boolean(channel.muteEveryone),
     canManage: channel.canManage,
     myRole: channel.myRole,
     avatarKey: channel.avatarKey,
@@ -180,6 +181,7 @@ function createGroup(body) {
     description: '',
     avatarKey: '',
     avatarUrl: '',
+    muteEveryone: false,
     isGeneral: false,
     ownerId,
     ownerDisplayName: demoState.session.displayName,
@@ -316,6 +318,9 @@ export async function requestDemo(path, options = {}) {
     channel.name = String(body.name || channel.name).trim();
     channel.avatarKey = body.avatarKey || '';
     channel.avatarUrl = channel.avatarKey ? demoState.files.get(channel.avatarKey) || '' : '';
+    if (body.muteEveryone !== undefined) {
+      channel.muteEveryone = Boolean(body.muteEveryone);
+    }
     return { channel: projectDemoChannel(channel) };
   }
   if (method === 'DELETE' && match) {

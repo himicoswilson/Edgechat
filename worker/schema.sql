@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS channels (
   kind TEXT NOT NULL CHECK (kind IN ('public', 'private', 'dm')),
   dm_key TEXT UNIQUE,
   created_by INTEGER,
+  mute_everyone INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
   deleted_at TEXT,
   FOREIGN KEY (created_by) REFERENCES users(id)

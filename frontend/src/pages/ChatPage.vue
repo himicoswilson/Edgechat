@@ -74,6 +74,11 @@ const {
   onOpenRoom: openRoomFromNotification
 });
 const activeRoomMuted = computed(() => isRoomMuted(activeRoom.value));
+const roomEveryoneMuted = computed(
+  () =>
+    Boolean(activeRoom.value?.muteEveryone) &&
+    activeRoom.value?.myRole !== 'owner'
+);
 
 function handleRoomActivity({ room, message }) {
   applyConversationActivity({
@@ -620,7 +625,7 @@ onBeforeUnmount(() => {
             <button
               type="button"
               class="composer-btn"
-              :disabled="!activeRoom"
+              :disabled="!activeRoom || roomEveryoneMuted"
               :title="t('chat.addAttachment')"
               :aria-label="t('chat.addAttachment')"
               @click="openFilePicker"
@@ -632,12 +637,14 @@ onBeforeUnmount(() => {
             </button>
             <UiTextarea
               v-model="composerText" class="composer-input" auto-grow :max-height="120" rows="1"
-              :disabled="!activeRoom" :placeholder="t('chat.messagePlaceholder')" @keydown="handleComposerKeydown"
+              :disabled="!activeRoom || roomEveryoneMuted"
+              :placeholder="roomEveryoneMuted ? t('chat.muteEveryoneEnabled') : t('chat.messagePlaceholder')"
+              @keydown="handleComposerKeydown"
             />
             <button
               type="button"
               class="composer-send"
-              :disabled="sending || !activeRoom || (!composerText.trim() && !pendingAttachment)"
+              :disabled="sending || !activeRoom || roomEveryoneMuted || (!composerText.trim() && !pendingAttachment)"
               :title="t('chat.sendMessage')"
               :aria-label="t('chat.sendMessage')"
               @click="sendMessage"
