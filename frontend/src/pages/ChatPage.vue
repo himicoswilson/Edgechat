@@ -352,6 +352,17 @@ function confirmDeleteMessage() {
   deleteMessage(message.id);
 }
 
+function handleMessagesScroll() {
+  const element = messagesEl.value;
+  if (!element || loading.value || !hasMoreMessages.value) {
+    return;
+  }
+  // 接近顶部时自动加载更早消息
+  if (element.scrollTop < 160) {
+    void loadOlder();
+  }
+}
+
 onMounted(() => {
   startViewportSync();
   window.addEventListener('focus', syncNotificationPermission);
@@ -567,8 +578,8 @@ onBeforeUnmount(() => {
           </div>
         </header>
 
-        <section ref="messagesEl" class="chat-messages">
-          <button v-if="messages.length" type="button" class="load-more-btn" @click="loadOlder">{{ t('chat.loadEarlier') }}</button>
+        <section ref="messagesEl" class="chat-messages" @scroll.passive="handleMessagesScroll">
+          <button v-if="messages.length && hasMoreMessages" type="button" class="load-more-btn" :disabled="loading" @click="loadOlder">{{ t('chat.loadEarlier') }}</button>
           <div v-if="loading" class="messages-hint">{{ t('chat.loadingMessages') }}</div>
           <div v-else-if="!messages.length" class="messages-hint">{{ t('chat.noMessages') }}</div>
 

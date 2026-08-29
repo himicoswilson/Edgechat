@@ -26,9 +26,34 @@ export function useChatRoom({
 	const composerText = ref("");
 	const pendingAttachment = ref(null);
 	const sending = ref(false);
+	const hasMoreMessages = ref(true);
 	const messagesEl = ref(null);
 	const fileInputEl = ref(null);
 	let messageLoadGeneration = 0;
+
+	// 距底多远以内视为"正在跟看最新消息",新消息到达时跟随滚底
+	const STICKY_SCROLL_THRESHOLD = 120;
+
+	function isNearBottom() {
+		const element = messagesEl.value;
+		if (!element) {
+			return true;
+		}
+		return element.scrollHeight - element.scrollTop - element.clientHeight < STICKY_SCROLL_THRESHOLD;
+	}
+
+	function scrollToBottomIfSticky(force = false) {
+		const element = messagesEl.value;
+		if (!element) {
+			return;
+		}
+		if (!force && !isNearBottom()) {
+			return;
+		}
+		requestAnimationFrame(() => {
+			element.scrollTop = element.scrollHeight;
+		});
+	}
 
 	function roomKey(room = activeRoom.value) {
 		return room?.kind && room?.id ? `${room.kind}:${room.id}` : "";
@@ -108,8 +133,9 @@ export function useChatRoom({
 					return;
 				}
 				messages.value = [...messages.value, payload.message];
+				// 自己发送的消息强制跟随;他人的消息仅在贴近底部时跟随,读历史不被拽走
+				scrollToBottomIfSticky(isOwnMessage(payload.message));
 				applyActiveRoomActivity(payload.message);
-				nextTick().then(scrollToBottom);
 			}
 			if (payload.type === "message_deleted") {
 				const messageId = Number(payload.messageId);
@@ -130,6 +156,9 @@ export function useChatRoom({
 			return false;
 		}
 
+		const scrollElement = messagesEl.value;
+		const previousScrollTop = scrollElement?.scrollTop ?? 0;
+		const previousHeight = scrollElement?.scrollHeight ?? 0;
 		const generation = ++messageLoadGeneration;
 		loading.value = true;
 		error.value = "";
@@ -138,11 +167,21 @@ export function useChatRoom({
 			if (generation !== messageLoadGeneration || roomKey() !== key) {
 				return false;
 			}
+			if (append && payload.messages.length === 0) {
+				hasMoreMessages.value = false;
+			}
 			messages.value = append
 				? [...payload.messages, ...messages.value]
 				: payload.messages;
 			await nextTick();
-			if (!append) {
+			if (append) {
+				// 前插后保持滚动锚点:滚动位置随新增高度下移,阅读位置不跳变
+				const element = messagesEl.value;
+				if (element) {
+					element.scrollTop =
+						previousScrollTop + (element.scrollHeight - previousHeight);
+				}
+			} else {
 				scrollToBottom();
 			}
 			return true;
@@ -162,6 +201,7 @@ export function useChatRoom({
 		messageLoadGeneration += 1;
 		messages.value = [];
 		loading.value = false;
+		hasMoreMessages.value = true;
 		connectSocket();
 		return loadMessages();
 	}
@@ -268,7 +308,7 @@ export function useChatRoom({
 	}
 
 	async function loadOlder() {
-		if (loading.value) {
+		if (loading.value || !hasMoreMessages.value) {
 			return;
 		}
 		const firstMessage = messages.value[0];
@@ -284,7 +324,7 @@ export function useChatRoom({
 				current.length > previous.length &&
 				current.at(-1)?.id !== previous.at(-1)?.id;
 			if (receivedNewLastMessage) {
-				nextTick().then(scrollToBottom);
+				scrollToBottomIfSticky();
 			}
 		},
 		{ flush: "post" },
@@ -297,6 +337,7 @@ export function useChatRoom({
 		composerText,
 		pendingAttachment,
 		sending,
+		hasMoreMessages,
 		messagesEl,
 		fileInputEl,
 		isOwnMessage,
