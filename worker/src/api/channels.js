@@ -80,6 +80,20 @@ export function registerChannelRoutes(app) {
       return errorResponse('general 是系统群组名称');
     }
 
+    // 软删除的群组不占用名称：只对未删除群组做唯一性校验
+    const existingName = await c.env.DB.prepare(
+      `SELECT id
+       FROM channels
+       WHERE name = ?
+         AND deleted_at IS NULL
+       LIMIT 1`
+    )
+      .bind(name)
+      .first();
+    if (existingName) {
+      return errorResponse('群组名称已存在');
+    }
+
     const inviteUserIds = normalizeMemberIds(payload).filter((userId) => userId !== session.userId);
     const validInvitees = await ensureValidInvitees(c.env.DB, inviteUserIds);
     const result = await c.env.DB.prepare(
@@ -216,6 +230,23 @@ export function registerChannelRoutes(app) {
     }
 
     const avatarUpdate = await resolveAvatarKeyUpdate(c.env.DB, session.userId, payload);
+
+    if (name !== undefined) {
+      // 改名同样只看未删除群组：已删除群组同名可复用
+      const existingName = await c.env.DB.prepare(
+        `SELECT id
+         FROM channels
+         WHERE name = ?
+           AND deleted_at IS NULL
+           AND id != ?
+         LIMIT 1`
+      )
+        .bind(name, channelId)
+        .first();
+      if (existingName) {
+        return errorResponse('群组名称已存在');
+      }
+    }
 
     const updates = [];
     const binds = [];

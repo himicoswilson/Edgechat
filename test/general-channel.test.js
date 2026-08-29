@@ -50,6 +50,10 @@ function createRouteHarness(resultSets = []) {
 				async all() {
 					return { results: resultSets[resultIndex++] || [] };
 				},
+				async first() {
+					const set = resultSets[resultIndex++] || [];
+					return set[0];
+				},
 				async run() {
 					call.ran = true;
 					return { meta: {} };
@@ -95,6 +99,48 @@ test("general 系统群识别与数据库保持精确一致", () => {
 	assert.equal(isGeneralChannel({ name: "team", kind: "public" }), false);
 	assert.equal(isReservedGeneralChannelName(" General "), true);
 	assert.equal(isReservedGeneralChannelName("team"), false);
+});
+
+test("软删除的群组不占用名称，同名可重新创建", async () => {
+	const harness = createRouteHarness([[]]);
+	const response = await harness.request("/api/channels", {
+		method: "POST",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({ name: "test", kind: "public" }),
+	});
+
+	assert.equal(response.status, 200);
+	// 唯一性校验必须过滤已删除的群组
+	assert.match(harness.calls[0].sql, /WHERE name = \?/);
+	assert.match(harness.calls[0].sql, /deleted_at IS NULL/);
+});
+
+test("未删除的同名群组仍禁止创建", async () => {
+	const harness = createRouteHarness([[{ id: 5, name: "test", kind: "private" }]]);
+	const response = await harness.request("/api/channels", {
+		method: "POST",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({ name: "test", kind: "public" }),
+	});
+
+	assert.equal(response.status, 400);
+	assert.deepEqual(await response.json(), { error: "群组名称已存在" });
+	assert.equal(harness.calls.length, 1);
+});
+
+test("改名时同样只拦截未删除的同名群组", async () => {
+	const harness = createRouteHarness([
+		[{ id: 1, name: "old", kind: "private", avatar_key: null }],
+		[{ id: 2, name: "test", kind: "private" }],
+	]);
+	const response = await harness.request("/api/channels/1", {
+		method: "PATCH",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({ name: "test" }),
+	});
+
+	assert.equal(response.status, 400);
+	assert.deepEqual(await response.json(), { error: "群组名称已存在" });
 });
 
 test("频道 API 拒绝创建 general 的大小写变体", async () => {
