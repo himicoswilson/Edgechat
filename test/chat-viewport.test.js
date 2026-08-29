@@ -63,7 +63,7 @@ test("移动端首次进入只显示会话列表，选择后可进入并返回",
 	assert.equal(viewport.isMobileViewport.value, true);
 	assert.equal(viewport.mobileView.value, "list");
 	assert.equal(browser.properties.get("--chat-viewport-height"), "740px");
-	assert.equal(browser.properties.get("--chat-viewport-offset-top"), "0px");
+	assert.equal(browser.properties.has("--chat-viewport-offset-top"), false);
 
 	window.visualViewport.height = 420;
 	window.visualViewport.offsetTop = 96;
@@ -71,7 +71,8 @@ test("移动端首次进入只显示会话列表，选择后可进入并返回",
 		listener();
 	}
 	assert.equal(browser.properties.get("--chat-viewport-height"), "420px");
-	assert.equal(browser.properties.get("--chat-viewport-offset-top"), "96px");
+	// 不做 offsetTop 平移,布局始终贴视口顶
+	assert.equal(browser.properties.has("--chat-viewport-offset-top"), false);
 
 	// 地址栏收展时视觉视口只略矮于布局视口,不应改变布局高度(否则整页反向位移)
 	window.visualViewport.height = 680;
@@ -80,7 +81,7 @@ test("移动端首次进入只显示会话列表，选择后可进入并返回",
 		listener();
 	}
 	assert.equal(browser.properties.get("--chat-viewport-height"), "740px");
-	assert.equal(browser.properties.get("--chat-viewport-offset-top"), "0px");
+	assert.equal(browser.properties.has("--chat-viewport-offset-top"), false);
 
 	activeRoom.value = { kind: "dm", id: 3 };
 	viewport.openConversationView();

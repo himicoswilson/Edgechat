@@ -365,7 +365,7 @@ watch(
 
 @media (max-width: 480px) {
   .add-conversation-overlay {
-    top: var(--chat-viewport-offset-top, 0px);
+    top: 0;
     height: var(--chat-viewport-height, 100dvh);
     align-items: flex-end;
     padding: 0;

@@ -57,7 +57,7 @@ test('attachment upload reports when the deployment has no R2 binding', async ()
   });
 });
 
-test('authorized attachment download decrypts bytes and disables shared caching', async () => {
+test('authorized attachment download decrypts bytes and serves immutable cache', async () => {
   const objectKey = '42/example.bin';
   const plaintext = Uint8Array.from([1, 2, 3, 4]);
   const ciphertext = await encryptAttachment(keyring, plaintext, objectKey);
@@ -91,7 +91,7 @@ test('authorized attachment download decrypts bytes and disables shared caching'
 
   assert.equal(response.status, 200);
   assert.deepEqual(new Uint8Array(await response.arrayBuffer()), plaintext);
-  assert.equal(response.headers.get('cache-control'), 'private, no-store');
+  assert.equal(response.headers.get('cache-control'), 'public, max-age=31536000, immutable');
   assert.match(response.headers.get('content-disposition'), /%E6%8A%A5%E5%91%8A\.bin/);
 });
 

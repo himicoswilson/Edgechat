@@ -759,7 +759,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .chat-layout {
   position: fixed;
-  top: var(--chat-viewport-offset-top, 0px);
+  top: 0;
   left: 0;
   display: flex;
   width: 100%;

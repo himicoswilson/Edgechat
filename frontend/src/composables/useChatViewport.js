@@ -21,19 +21,14 @@ export function useChatViewport({ activeRoom }) {
 		const layoutHeight = window.innerHeight;
 		// 仅当键盘明显可见(视觉视口远矮于布局视口)时跟随视觉视口高度;
 		// 地址栏收展等场景不再改动布局高度,避免整页反向位移。
+		// 不做 offsetTop 平移:固定定位布局始终贴视口顶(键盘弹出时底部自然贴键盘上方),
+		// 跟随 offsetTop 会把整个布局顶到键盘下方,输入框出现"弹飞"。
 		const keyboardVisible = Boolean(
 			visualViewport && visualViewport.height < layoutHeight * 0.75,
 		);
-		const viewportHeight = keyboardVisible
-			? visualViewport.height
-			: layoutHeight;
 		document.documentElement.style.setProperty(
 			"--chat-viewport-height",
-			`${Math.round(viewportHeight)}px`,
-		);
-		document.documentElement.style.setProperty(
-			"--chat-viewport-offset-top",
-			`${Math.round(keyboardVisible ? visualViewport.offsetTop : 0)}px`,
+			`${Math.round(keyboardVisible ? visualViewport.height : layoutHeight)}px`,
 		);
 	}
 
@@ -52,7 +47,6 @@ export function useChatViewport({ activeRoom }) {
 		window.visualViewport?.removeEventListener("resize", syncViewportHeight);
 		window.visualViewport?.removeEventListener("scroll", syncViewportHeight);
 		document.documentElement.style.removeProperty("--chat-viewport-height");
-		document.documentElement.style.removeProperty("--chat-viewport-offset-top");
 	}
 
 	function openConversationView() {

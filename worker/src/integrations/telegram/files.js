@@ -12,7 +12,8 @@ export const TELEGRAM_FILE_SKIP_REASON = Object.freeze({
 	STORAGE_UNAVAILABLE: "storage_unavailable",
 	NOT_FOUND: "not_found",
 });
-const FILE_RESPONSE_CACHE_CONTROL = "private, no-store";
+// 附件 key 内容寻址不可变,可长期缓存(删除后旧缓存最多残留一年)
+const FILE_RESPONSE_CACHE_CONTROL = "public, max-age=31536000, immutable";
 
 function telegramObjectKey({ telegramChatId, telegramMessageId, filename }) {
 	const extension = safeFilenameExtension(filename);

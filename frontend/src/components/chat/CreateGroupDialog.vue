@@ -144,7 +144,7 @@ useOverlayLifecycle({
 
 @media (max-width: 480px) {
   .room-dialog-overlay {
-    top: var(--chat-viewport-offset-top, 0px);
+    top: 0;
     height: var(--chat-viewport-height, 100dvh);
     align-items: flex-end;
     padding: env(safe-area-inset-top) 0 0;

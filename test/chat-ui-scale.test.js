@@ -30,7 +30,7 @@ test("聊天界面使用原始控件尺寸铺满整个视口", () => {
 	assert.match(layout, /width:\s*100%;/);
 	assert.match(layout, /height:\s*var\(--chat-viewport-height,\s*100dvh\);/);
 	assert.match(layout, /position:\s*fixed;/);
-	assert.match(layout, /top:\s*var\(--chat-viewport-offset-top,\s*0px\);/);
+	assert.match(layout, /top:\s*0;/);
 	assert.match(layout, /overflow:\s*hidden;/);
 	assert.match(indexHtml, /interactive-widget=resizes-content/);
 	assert.doesNotMatch(chatPage, /--chat-interface-scale/);

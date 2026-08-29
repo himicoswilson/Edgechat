@@ -4,7 +4,9 @@ import { normalizeContentType, sanitizeFilename } from '../attachment-metadata.j
 import { validateSession } from '../session.js';
 import { errorResponse, requestBodyTooLarge } from '../utils.js';
 
-const FILE_RESPONSE_CACHE_CONTROL = 'private, no-store';
+// 附件 key 为 userId/时间戳-uuid 内容寻址,上传后不覆盖不重用,可长期缓存;
+// 删除后旧缓存最多残留一年,换头/删附件时前端用新 key 或清 URL,不受影响
+const FILE_RESPONSE_CACHE_CONTROL = 'public, max-age=31536000, immutable';
 const UPLOAD_BODY_OVERHEAD_BYTES = 1024 * 1024;
 const BLOCKED_MIME_TYPES = new Set([
   'text/html',
