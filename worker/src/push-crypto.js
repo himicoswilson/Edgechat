@@ -286,11 +286,11 @@ export async function sendPushNotification(env, subscription, payloadText) {
 		},
 		body,
 	});
+	const detail = await response.text().catch(() => "");
 	if (response.status === 404 || response.status === 410) {
 		throw new PushSubscriptionGoneError(subscription.endpoint);
 	}
 	if (!response.ok) {
-		const detail = await response.text().catch(() => "");
 		if (detail.includes("VapidPkHashMismatch")) {
 			throw new Error(
 				`Push service responded ${response.status}: ${detail} (订阅绑定旧 VAPID 密钥——脚本换了密钥后需在页面重新订阅:关闭再开启通知)`,
@@ -298,7 +298,12 @@ export async function sendPushNotification(env, subscription, payloadText) {
 		}
 		throw new Error(`Push service responded ${response.status}: ${detail}`);
 	}
-	return { sent: true };
+	return {
+		sent: true,
+		status: response.status,
+		body: detail.slice(0, 200),
+		headers: Object.fromEntries(response.headers),
+	};
 }
 
 export function decodeVapidJwt(token) {

@@ -52,11 +52,14 @@ export function createPushProjection({
 			await Promise.allSettled(
 				subscriptions.map((subscription) =>
 					sendPush(env, subscription, payload)
-						.then(() => {
+						.then((result) => {
 							console.log(JSON.stringify({
 								message: "push sent",
 								roomId: Number(room.id),
 								endpoint: subscription.endpoint,
+								status: result?.status ?? 0,
+								responseBody: result?.body || "",
+								responseHeaders: result?.headers || {},
 							}));
 						})
 						.catch(async (error) => {
