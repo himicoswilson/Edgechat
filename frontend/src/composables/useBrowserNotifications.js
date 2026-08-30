@@ -126,8 +126,9 @@ export function useBrowserNotifications(options = {}) {
 			await apiClient.savePushSubscription(subscription);
 			webPushReady.value = true;
 			return { ready: true, issue: "" };
-		} catch {
+		} catch (error) {
 			// 订阅不可用时保持本地通知可用,但如实标记推送未就绪,下次启动自愈
+			console.warn("[edgechat] web push subscribe failed:", error);
 			webPushIssue.value = "failed";
 			return { ready: false, issue: "failed" };
 		}
