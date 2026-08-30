@@ -229,6 +229,23 @@ export class PushSubscriptionGoneError extends Error {
 	}
 }
 
+// RFC 2606 保留占位域名:Apple 的 web.push.apple.com 会拒绝(403 BadJwtToken),
+// 用 Set 确保每个 isolate 只告警一次,避免随消息刷屏。
+const PLACEHOLDER_VAPID_HOSTS = ["localhost", "example.com", "example.org", "example.net"];
+const warnedVapidSubjects = new Set();
+
+function warnPlaceholderVapidSubject(subject) {
+	if (warnedVapidSubjects.has(subject)) {
+		return;
+	}
+	warnedVapidSubjects.add(subject);
+	console.warn(JSON.stringify({
+		message: "vapid subject looks like a placeholder domain",
+		subject,
+		hint: "Apple 推送服务拒绝 @localhost/@example.com 等占位域名(403 BadJwtToken),请把 VAPID_SUBJECT 换成真实邮箱或网址后重新部署",
+	}));
+}
+
 export async function sendPushNotification(env, subscription, payloadText) {
 	if (
 		!env.VAPID_PRIVATE_KEY ||
@@ -236,6 +253,17 @@ export async function sendPushNotification(env, subscription, payloadText) {
 		!env.VAPID_SUBJECT
 	) {
 		return { skipped: true };
+	}
+	const rawSubject = String(env.VAPID_SUBJECT || "");
+	let subjectHost = "";
+	if (/^mailto:/i.test(rawSubject)) {
+		subjectHost = rawSubject.replace(/^mailto:/i, "").split("@")[1] || "";
+	} else if (/^https:\/\//i.test(rawSubject)) {
+		subjectHost = rawSubject.replace(/^https:\/\//i, "").replace(/[/:].*$/, "");
+	}
+	subjectHost = subjectHost.toLowerCase();
+	if (PLACEHOLDER_VAPID_HOSTS.includes(subjectHost)) {
+		warnPlaceholderVapidSubject(env.VAPID_SUBJECT);
 	}
 	const audience = new URL(subscription.endpoint).origin;
 	const authorization = await createVapidAuthorization({

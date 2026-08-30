@@ -68,4 +68,6 @@ crons = ["0 19 * * *"]
 
 # Web Push (VAPID) 通过部署时注入的 secrets 配置(GitHub Actions 的
 # VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / VAPID_SUBJECT),无需写在此文件。
+# 注意:VAPID_SUBJECT 必须是真实邮箱(mailto:you@your-domain.com)或网址(https://...),
+# Apple 推送服务拒绝 @localhost/@example.com 等占位域名(返回 403 BadJwtToken),FCM 不查。
 # 本地调试:  node .github/scripts/generate-vapid-keys.mjs

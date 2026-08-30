@@ -51,20 +51,28 @@ export function createPushProjection({
 
 			await Promise.allSettled(
 				subscriptions.map((subscription) =>
-					sendPush(env, subscription, payload).catch(async (error) => {
-						if (error instanceof PushSubscriptionGoneError) {
-							// 订阅已被推送服务丢弃(410/404),同步清理
-							await removeSubscription(env.DB, subscription.endpoint).catch(
-								() => {},
-							);
-							return;
-						}
-						logFailure("push projection failed", {
-							roomId: Number(room.id),
-							endpoint: subscription.endpoint,
-							error: error instanceof Error ? error.message : String(error),
-						});
-					}),
+					sendPush(env, subscription, payload)
+						.then(() => {
+							console.log(JSON.stringify({
+								message: "push sent",
+								roomId: Number(room.id),
+								endpoint: subscription.endpoint,
+							}));
+						})
+						.catch(async (error) => {
+							if (error instanceof PushSubscriptionGoneError) {
+								// 订阅已被推送服务丢弃(410/404),同步清理
+								await removeSubscription(env.DB, subscription.endpoint).catch(
+									() => {},
+								);
+								return;
+							}
+							logFailure("push projection failed", {
+								roomId: Number(room.id),
+								endpoint: subscription.endpoint,
+								error: error instanceof Error ? error.message : String(error),
+							});
+						}),
 				),
 			);
 		} catch (error) {

@@ -1,4 +1,4 @@
-import { upsertPushSubscription, deletePushSubscription, listSubscriptionsForUsers } from "../data/push-subscriptions.js";
+import { upsertPushSubscription, deletePushSubscription } from "../data/push-subscriptions.js";
 
 function parseSubscriptionBody(session, payload) {
 	const endpoint = String(payload?.endpoint || "").trim();
@@ -12,15 +12,6 @@ function parseSubscriptionBody(session, payload) {
 }
 
 export function registerPushSubscriptionRoutes(app) {
-	// 读回当前账号已登记的订阅,用于排查"已保存但查不到"的落库问题
-	app.get("/api/push-subscriptions", async (c) => {
-		const session = c.get("session");
-		const rows = await listSubscriptionsForUsers(c.env.DB, [session.userId]);
-		return c.json({
-			subscriptions: rows.map((row) => ({ endpoint: row.endpoint })),
-		});
-	});
-
 	// 浏览器保存或刷新 PushSubscription 后上报
 	app.post("/api/push-subscriptions", async (c) => {
 		const session = c.get("session");
