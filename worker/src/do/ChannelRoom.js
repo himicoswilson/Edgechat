@@ -163,6 +163,23 @@ export class ChannelRoom {
     );
   }
 
+  async receiveReadBroadcast(request) {
+    if (!isVerifiedInternalRequest(request)) {
+      return new Response('Unauthorized', { status: 401 });
+    }
+
+    const payload = await request.json();
+    const messageId = Number(payload.messageId);
+    if (!Number.isInteger(messageId) || messageId <= 0) {
+      return new Response('Invalid payload', { status: 400 });
+    }
+
+    // 让同一会话内其他客户端刷新已读回执;messageId 已由
+    // markRoomRead 在本房间内解析,这里的校验只防非法内部调用。
+    await this.broadcast(JSON.stringify({ type: 'message_read', messageId }));
+    return Response.json({ ok: true });
+  }
+
   async receiveExternalMessage(request) {
     if (!isVerifiedInternalRequest(request)) {
       return new Response('Unauthorized', { status: 401 });
@@ -190,6 +207,10 @@ export class ChannelRoom {
 
     if (url.pathname === '/external-message' && request.method === 'POST') {
       return this.receiveExternalMessage(request);
+    }
+
+    if (url.pathname === '/read-broadcast' && request.method === 'POST') {
+      return this.receiveReadBroadcast(request);
     }
 
     if (request.headers.get('Upgrade') !== 'websocket') {

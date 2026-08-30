@@ -1,11 +1,12 @@
 import { ref, watch } from 'vue';
 import api from '../api.js';
 
-const POLL_INTERVAL_MS = 8000;
-const TRACK_LIMIT = 30;
-
 // 已读回执数据源是单调水位(message_reads.last_read_message_id)，
-// 前端只对自己发出的可见消息批量拉取“谁已读”，轮询 + 事件触发刷新。
+// 前端只对自己发出的可见消息批量拉取“谁已读”。
+// 实时更新靠 WS 的 message_read 事件推送触发刷新；
+// 这里的轮询只是兜底(事件丢失、经 GET /messages 副作用推进的水位)，频率放慢。
+const POLL_INTERVAL_MS = 30000;
+const TRACK_LIMIT = 30;
 export function useReadReceipts({
   activeRoom,
   messages,

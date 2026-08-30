@@ -1,5 +1,6 @@
 import { listMessages } from '../data/messages.js';
 import { listMessageReaders, markRoomRead, readersByMessage } from '../data/unread.js';
+import { broadcastRoomRead } from '../do-bridge.js';
 import { authorizeRoom, isRoomKind } from '../room-access.js';
 import { errorResponse, parseJsonRequest, sanitizeLimit } from '../utils.js';
 
@@ -97,6 +98,17 @@ export function registerMessageRoutes(app) {
       userId: session.userId,
       messageId
     });
+
+    // 已读推进是高频小操作:异步广播给同房间其他客户端刷新回执,不阻塞响应。
+    // 兜底仍由前端低频轮询保证(读水位也可能经 GET /messages 副作用推进,
+    // 那些场景不广播,靠轮询收敛)。
+    c.executionCtx.waitUntil(
+      broadcastRoomRead(c.env, {
+        kind,
+        roomId,
+        messageId: lastReadMessageId
+      }).catch(() => {})
+    );
 
     return c.json({ ok: true, lastReadMessageId });
   });

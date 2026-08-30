@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { ChannelRoom } from "../worker/src/do/ChannelRoom.js";
 import {
 	listMessageReaders,
 	readersByMessage,
@@ -23,6 +24,50 @@ function createReaderDb(results, { record = () => {} } = {}) {
 		},
 	};
 }
+
+test("read-broadcast 内部端点校验后向房间广播 message_read", async () => {
+	const room = new ChannelRoom({ getWebSockets: () => [] }, { env: {} });
+	const sent = [];
+	room.broadcast = async (packet) => {
+		sent.push(packet);
+	};
+
+	const response = await room.fetch(
+		new Request("https://internal/read-broadcast", {
+			method: "POST",
+			headers: {
+				"content-type": "application/json",
+				"x-cfchat-internal-auth": "worker-verified",
+			},
+			body: JSON.stringify({ messageId: 42 }),
+		}),
+	);
+
+	assert.equal(response.status, 200);
+	assert.deepEqual(sent, [JSON.stringify({ type: "message_read", messageId: 42 })]);
+});
+
+test("read-broadcast 拒绝非内部调用与非法 messageId", async () => {
+	const room = new ChannelRoom({ getWebSockets: () => [] }, { env: {} });
+	room.broadcast = async () => {};
+
+	const unauthorized = await room.fetch(
+		new Request("https://internal/read-broadcast", {
+			method: "POST",
+			body: JSON.stringify({ messageId: 42 }),
+		}),
+	);
+	assert.equal(unauthorized.status, 401);
+
+	const invalid = await room.fetch(
+		new Request("https://internal/read-broadcast", {
+			method: "POST",
+			headers: {"x-cfchat-internal-auth": "worker-verified"},
+			body: JSON.stringify({ messageId: "abc" }),
+		}),
+	);
+	assert.equal(invalid.status, 400);
+});
 
 test("listMessageReaders 返回已读水位并按成员过滤、排除自己", async () => {
 	const rows = [

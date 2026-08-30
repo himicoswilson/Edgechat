@@ -89,6 +89,14 @@ export async function notifyUserInbox(env, userId, payload) {
 	return response;
 }
 
+export async function broadcastRoomRead(env, { kind, roomId, messageId }) {
+	return getChannelRoomStub(env, kind, roomId).fetch(`${INTERNAL_ORIGIN}/read-broadcast`, {
+		method: "POST",
+		headers: createInternalHeaders({ "Content-Type": "application/json" }),
+		body: JSON.stringify({ messageId: Number(messageId) }),
+	});
+}
+
 export async function submitExternalRoomMessage(env, payload) {
 	const room = payload.room;
 	return getChannelRoomStub(env, room.kind, room.id).fetch(
