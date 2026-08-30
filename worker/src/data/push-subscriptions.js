@@ -1,11 +1,11 @@
-export async function listSubscriptionsForUsers(db, userIds) {
+	export async function listSubscriptionsForUsers(db, userIds) {
 	if (!userIds.length) {
 		return [];
 	}
 	const placeholders = userIds.map(() => "?").join(",");
 	const { results } = await db
 		.prepare(
-			`SELECT user_id, endpoint, p256dh, auth
+			`SELECT user_id, endpoint, p256dh, auth, origin
 			 FROM push_subscriptions
 			 WHERE user_id IN (${placeholders})`,
 		)
@@ -14,21 +14,23 @@ export async function listSubscriptionsForUsers(db, userIds) {
 	return results.map((row) => ({
 		userId: Number(row.user_id),
 		endpoint: String(row.endpoint),
+		origin: String(row.origin || ""),
 		keys: { p256dh: String(row.p256dh), auth: String(row.auth) },
 	}));
 }
 
-export async function upsertPushSubscription(db, { userId, endpoint, p256dh, auth }) {
+export async function upsertPushSubscription(db, { userId, endpoint, p256dh, auth, origin }) {
 	await db
 		.prepare(
-			`INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth)
-			 VALUES (?, ?, ?, ?)
+			`INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth, origin)
+			 VALUES (?, ?, ?, ?, ?)
 			 ON CONFLICT(endpoint) DO UPDATE
 			 SET user_id = excluded.user_id,
 			     p256dh = excluded.p256dh,
-			     auth = excluded.auth`,
+			     auth = excluded.auth,
+			     origin = excluded.origin`,
 		)
-		.bind(Number(userId), String(endpoint), String(p256dh), String(auth))
+		.bind(Number(userId), String(endpoint), String(p256dh), String(auth), String(origin || ""))
 		.run();
 }
 

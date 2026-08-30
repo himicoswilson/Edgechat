@@ -5,10 +5,11 @@ function parseSubscriptionBody(session, payload) {
 	const keys = payload?.keys || {};
 	const p256dh = String(keys.p256dh || "").trim();
 	const auth = String(keys.auth || "").trim();
+	const origin = String(payload?.origin || "").trim();
 	if (!endpoint || !p256dh || !auth) {
 		return null;
 	}
-	return { userId: session.userId, endpoint, p256dh, auth };
+	return { userId: session.userId, endpoint, p256dh, auth, origin };
 }
 
 export function registerPushSubscriptionRoutes(app) {

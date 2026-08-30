@@ -45,21 +45,24 @@ export function createPushProjection({
 			// Declarative Web Push (WebKit 落地版):web_push: 8030 魔法值声明信封,
 			// iOS 26+/Safari 26+ 直接在平台层展示 immutable 通知,不唤醒 SW;
 			// 老客户端把该 payload 当作普通推送交给 SW 的 push 事件,sw.js 已兼容解析。
-			const origin = String(env.SITE_URL || "").replace(/\/+$/, "");
-			const payload = JSON.stringify({
-				web_push: 8030,
-				notification: {
-					title,
-					body: body || "收到一条新消息",
-					tag: `${room.kind}:${room.id}`,
-					renotify: true,
-					navigate: origin ? `${origin}/` : "/",
-				},
-			});
+			// navigate 用订阅保存时捎带的站点 origin,拼绝对地址便于点击跳转。
+			const payloadFor = (subscription) => {
+				const origin = String(subscription.origin || "").replace(/\/+$/, "");
+				return JSON.stringify({
+					web_push: 8030,
+					notification: {
+						title,
+						body: body || "收到一条新消息",
+						tag: `${room.kind}:${room.id}`,
+						renotify: true,
+						navigate: origin ? `${origin}/` : "/",
+					},
+				});
+			};
 
 			await Promise.allSettled(
 				subscriptions.map((subscription) =>
-					sendPush(env, subscription, payload)
+					sendPush(env, subscription, payloadFor(subscription))
 						.then((result) => {
 							console.log(JSON.stringify({
 								message: "push sent",

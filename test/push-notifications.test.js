@@ -60,6 +60,7 @@ test("发送 Declarative Web Push 落地信封(web_push:8030 + notification)", a
 			{
 				userId: 2,
 				endpoint: "https://push.example.com/2",
+				origin: "https://im.himicos.com",
 				keys: { p256dh: "k", auth: "a" },
 			},
 		],
@@ -89,7 +90,7 @@ test("发送 Declarative Web Push 落地信封(web_push:8030 + notification)", a
 	assert.equal(captured[0].notification.navigate, "https://im.himicos.com/");
 });
 
-test("私信标题取发送者昵称,未配 SITE_URL 时 navigate 回落相对路径", async () => {
+test("私信标题取发送者昵称,navigate 用订阅携带的 origin 拼绝对地址", async () => {
 	const captured = [];
 	const projection = createPushProjection({
 		listMemberIds: async () => [3],
@@ -97,6 +98,7 @@ test("私信标题取发送者昵称,未配 SITE_URL 时 navigate 回落相对�
 			{
 				userId: 3,
 				endpoint: "https://push.example.com/3",
+				origin: "https://im.himicos.com",
 				keys: { p256dh: "k", auth: "a" },
 			},
 		],
@@ -118,7 +120,7 @@ test("私信标题取发送者昵称,未配 SITE_URL 时 navigate 回落相对�
 		},
 	);
 	assert.equal(captured[0].notification.title, "王五");
-	assert.equal(captured[0].notification.navigate, "/");
+	assert.equal(captured[0].notification.navigate, "https://im.himicos.com/");
 });
 
 test("推送服务返回 410 时清理失效订阅,其他错误只记录不中断", async () => {

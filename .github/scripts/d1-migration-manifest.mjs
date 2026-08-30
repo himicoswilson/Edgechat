@@ -101,4 +101,9 @@ export const D1_MIGRATIONS = [
     file: "worker/migrations/2026-08-30-push-subscriptions.sql",
     artifacts: ["table:push_subscriptions"],
   },
+  {
+    id: "2026-08-31-push-subscription-origin",
+    file: "worker/migrations/2026-08-31-push-subscription-origin.sql",
+    artifacts: ["column:push_subscriptions.origin"],
+  },
 ];

@@ -104,7 +104,10 @@ export default {
     return request('/push-subscriptions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: normalizePushSubscription(subscription)
+      body: {
+        ...normalizePushSubscription(subscription),
+        origin: typeof window !== 'undefined' ? window.location.origin : ''
+      }
     });
   },
   deletePushSubscription(endpoint) {
