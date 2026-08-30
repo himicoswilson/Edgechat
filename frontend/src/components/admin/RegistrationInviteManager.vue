@@ -1,20 +1,28 @@
 <script setup>
-import { Ban, Copy, Ellipsis } from '@lucide/vue';
+import { Ban, Copy, Ellipsis, Pencil } from '@lucide/vue';
 import { computed, onMounted, reactive, ref } from 'vue';
 import api from '../../api.js';
 import UiButton from '../ui/Button.vue';
 import UiSurface from '../ui/Surface.vue';
 import { formatDate, formatDateTime, t } from '../../i18n.js';
 
+const TOKEN_PATTERN = /^[A-Za-z0-9_-]{3,64}$/;
+
 const loading = ref(false);
 const error = ref('');
 const inviteSubmitting = ref(false);
 const invites = ref([]);
 const copiedInviteId = ref(0);
+const renamingInvite = ref(false);
+const editingInviteId = ref(0);
+const editToken = ref('');
 const inviteForm = reactive({
   note: '',
   maxUses: 1
 });
+
+const registerPrefix = computed(() => `${window.location.origin}/register/`);
+const editTokenValid = computed(() => TOKEN_PATTERN.test(editToken.value));
 
 const inviteMaxUsesValid = computed(
   () => Number.isInteger(inviteForm.maxUses) && inviteForm.maxUses >= 1 && inviteForm.maxUses <= 1000
@@ -100,6 +108,46 @@ async function revokeInvite(invite, event) {
   }
 }
 
+function startEditToken(invite, event) {
+  event?.currentTarget.closest('details')?.removeAttribute('open');
+  editingInviteId.value = invite.id;
+  editToken.value = invite.token;
+}
+
+function cancelEditToken() {
+  editingInviteId.value = 0;
+  editToken.value = '';
+}
+
+async function saveToken(invite, event) {
+  event?.currentTarget.closest('details')?.removeAttribute('open');
+  const token = String(editToken.value || '').trim();
+  if (!token) {
+    cancelEditToken();
+    return;
+  }
+  if (token === invite.token) {
+    cancelEditToken();
+    return;
+  }
+  if (!TOKEN_PATTERN.test(token)) {
+    error.value = t('invites.tokenInvalid');
+    return;
+  }
+
+  renamingInvite.value = true;
+  error.value = '';
+  try {
+    const payload = await api.renameAdminRegisterLink(invite.id, token);
+    invite.token = payload.token || token;
+    cancelEditToken();
+  } catch (currentError) {
+    error.value = currentError.message;
+  } finally {
+    renamingInvite.value = false;
+  }
+}
+
 onMounted(loadInvites);
 </script>
 
@@ -152,7 +200,30 @@ onMounted(loadInvites);
             {{ inviteStatusLabel(invite) }}
           </span>
         </div>
-        <div class="admin-invite-card__url">{{ inviteLinkUrl(invite.token) }}</div>
+        <div v-if="editingInviteId === invite.id" class="admin-invite-card__edit">
+          <div class="admin-invite-card__edit-field">
+            <span class="admin-invite-card__edit-prefix">{{ registerPrefix }}</span>
+            <input
+              v-model.trim="editToken"
+              class="admin-invite-card__edit-input"
+              :aria-label="t('invites.tokenLabel')"
+              spellcheck="false"
+              autocomplete="off"
+              @keydown.enter="saveToken(invite, $event)"
+              @keydown.esc="cancelEditToken"
+            />
+          </div>
+          <p class="admin-invite-card__edit-hint">{{ t('invites.tokenHint') }}</p>
+          <div class="admin-invite-card__edit-actions">
+            <UiButton variant="secondary" size="sm" :disabled="renamingInvite" @click="cancelEditToken">
+              {{ t('common.cancel') }}
+            </UiButton>
+            <UiButton size="sm" :disabled="renamingInvite || !editTokenValid" @click="saveToken(invite, $event)">
+              {{ renamingInvite ? t('common.saving') : t('common.save') }}
+            </UiButton>
+          </div>
+        </div>
+        <div v-else class="admin-invite-card__url">{{ inviteLinkUrl(invite.token) }}</div>
         <p class="admin-invite-card__usage">
           {{ t('invites.usage', { used: invite.usedCount, max: invite.maxUses }) }}
           <span class="admin-invite-card__remaining">{{ t('invites.remaining', { count: invite.remainingUses }) }}</span>
@@ -186,7 +257,11 @@ onMounted(loadInvites);
                 <Ellipsis :size="18" aria-hidden="true" />
               </summary>
               <div class="admin-invite-menu__popover">
-                <button type="button" @click="revokeInvite(invite, $event)">
+                <button type="button" class="admin-invite-menu__popover-button" @click="startEditToken(invite, $event)">
+                  <Pencil :size="15" aria-hidden="true" />
+                  {{ t('invites.customizeLink') }}
+                </button>
+                <button type="button" class="admin-invite-menu__popover-button admin-invite-menu__popover-button--danger" @click="revokeInvite(invite, $event)">
                   <Ban :size="15" aria-hidden="true" />
                   {{ t('invites.revoke') }}
                 </button>

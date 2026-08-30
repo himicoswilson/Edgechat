@@ -319,6 +319,13 @@ export default {
       method: 'DELETE'
     });
   },
+  renameAdminRegisterLink(inviteId, token) {
+    return request(`/admin/register-links/${inviteId}/token`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: { token }
+    });
+  },
   updateAdminSiteSettings(payload) {
     return request('/admin/site-settings', {
       method: 'PATCH',

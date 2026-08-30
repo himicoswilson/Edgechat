@@ -79,6 +79,20 @@ export async function revokeRegistrationInvite(db, inviteId) {
     .run();
 }
 
+export async function renameRegistrationInvite(db, inviteId, token) {
+  // 与已用次数无关,改后缀只是让旧链接失效、新链接继承剩余次数;
+  // token 撞车由 UNIQUE 约束抛错,调用方转成友好提示。
+  const result = await db.prepare(
+    `UPDATE registration_invites
+     SET token = ?
+     WHERE id = ?
+       AND deleted_at IS NULL`
+  )
+    .bind(token, inviteId)
+    .run();
+  return (result.meta?.changes ?? 0) > 0;
+}
+
 export async function getAvailableRegistrationInvite(db, token) {
   const row = await db.prepare(
     `SELECT id, note, max_uses, used_count, created_at

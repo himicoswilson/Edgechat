@@ -484,6 +484,21 @@ export async function requestDemo(path, options = {}) {
     return { ok: true };
   }
 
+  match = pathname.match(/^\/admin\/register-links\/(\d+)\/token$/);
+  if (method === 'PATCH' && match) {
+    const invite = demoState.invites.find((item) => Number(item.id) === Number(match[1]));
+    if (!invite) fail('注册链接不存在', 404);
+    const token = String(body.token || '').trim();
+    if (!/^[A-Za-z0-9_-]{3,64}$/.test(token)) {
+      fail('自定义链接只能包含字母、数字、- 和 _，长度 3-64 位');
+    }
+    if (demoState.invites.some((item) => item.token === token && Number(item.id) !== Number(match[1]))) {
+      fail(`自定义链接 /register/${token} 已被使用`);
+    }
+    invite.token = token;
+    return { ok: true, token };
+  }
+
   if (method === 'GET' && pathname === '/admin/telegram') {
     return telegramPayload();
   }

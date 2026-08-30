@@ -8,6 +8,7 @@ import {
 	createUserWithRegistrationInvite,
 	getAvailableRegistrationInvite,
 	listActiveRegistrationInvites,
+	renameRegistrationInvite,
 } from "../worker/src/data/registration-invites.js";
 
 function createStatementDb(handlers = {}) {
@@ -39,6 +40,32 @@ function createStatementDb(handlers = {}) {
 
 	return { db, calls };
 }
+
+test("重命名邀请链接写入新 token 并返回是否命中", async () => {
+	const { db, calls } = createStatementDb({
+		run() {
+			return { meta: { changes: 1 } };
+		},
+	});
+
+	const renamed = await renameRegistrationInvite(db, 7, "friend-alice");
+
+	assert.equal(renamed, true);
+	assert.match(calls[0].sql, /UPDATE registration_invites/);
+	assert.match(calls[0].sql, /SET token = \?/);
+	assert.match(calls[0].sql, /deleted_at IS NULL/);
+	assert.deepEqual(calls[0].binds, ["friend-alice", 7]);
+});
+
+test("重命名不存在的邀请返回 false", async () => {
+	const { db } = createStatementDb({
+		run() {
+			return { meta: { changes: 0 } };
+		},
+	});
+
+	assert.equal(await renameRegistrationInvite(db, 999, "friend-alice"), false);
+});
 
 test("管理端邀请列表返回已用、总量和剩余次数", async () => {
 	const { db, calls } = createStatementDb({

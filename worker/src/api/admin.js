@@ -6,6 +6,7 @@ import {
   createRegistrationInvite,
   listActiveRegistrationInvites,
   MAX_INVITE_USES,
+  renameRegistrationInvite,
   revokeRegistrationInvite
 } from '../data/registration-invites.js';
 import { getSiteSettings, updateSiteSettings } from '../data/site-settings.js';
@@ -132,6 +133,33 @@ export function registerAdminRoutes(app) {
     await revokeRegistrationInvite(c.env.DB, inviteId);
 
     return c.json({ ok: true });
+  });
+
+  app.patch('/api/admin/register-links/:inviteId/token', async (c) => {
+    const inviteId = Number(c.req.param('inviteId'));
+    if (!Number.isFinite(inviteId)) {
+      return errorResponse('注册链接不存在', 404);
+    }
+
+    const payload = await parseJsonRequest(c.req.raw);
+    const token = String(payload.token || '').trim();
+    if (!/^[A-Za-z0-9_-]{3,64}$/.test(token)) {
+      return errorResponse('自定义链接只能包含字母、数字、- 和 _，长度 3-64 位');
+    }
+
+    try {
+      const renamed = await renameRegistrationInvite(c.env.DB, inviteId, token);
+      if (!renamed) {
+        return errorResponse('注册链接不存在', 404);
+      }
+    } catch (error) {
+      if (String(error?.message || '').includes('UNIQUE')) {
+        return errorResponse(`自定义链接 /register/${token} 已被使用`);
+      }
+      throw error;
+    }
+
+    return c.json({ ok: true, token });
   });
 
   app.get('/api/admin/users', async (c) => {
