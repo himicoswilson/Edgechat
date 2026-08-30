@@ -68,13 +68,18 @@ self.addEventListener("push", (event) => {
   } catch {
     data = { body: payloadText };
   }
-  // 兼容 Declarative Web Push 信封(title/options/default_action_url)与旧式信封(title/body/tag/url)
-  const options = data.options || {};
-  const title = data.title || "Edgechat";
-  const body = options.body || data.body || "";
-  const tag = options.tag || data.tag || "edgechat";
-  const url = data.default_action_url || data.url || "/";
-  const renotify = options.renotify !== undefined ? options.renotify : true;
+  // 兼容 Declarative Web Push 落地版信封(web_push:8030 + notification)与旧式信封(title/body/tag/url)
+  const declarative = data.web_push === 8030 && data.notification ? data.notification : null;
+  const title = (declarative ? declarative.title : data.title) || "Edgechat";
+  const body = declarative ? declarative.body || "" : data.body || "";
+  const tag = declarative ? declarative.tag || "edgechat" : data.tag || "edgechat";
+  const url = declarative ? declarative.navigate || "/" : data.url || "/";
+  const renotify =
+    declarative && declarative.renotify !== undefined
+      ? declarative.renotify
+      : data.renotify !== undefined
+        ? data.renotify
+        : true;
   const notificationOptions = {
     body,
     tag,

@@ -52,14 +52,8 @@ test("只推送给非发送者,标题/正文按房间与消息生成", async () 
 	]);
 });
 
-test("发送 Declarative Web Push 信封(title/options/default_action_url)", async () => {
+test("发送 Declarative Web Push 落地信封(web_push:8030 + notification)", async () => {
 	const captured = [];
-	const env = {
-		DB: {},
-		VAPID_PRIVATE_KEY: "pk",
-		VAPID_PUBLIC_KEY: "pub",
-		VAPID_SUBJECT: "mailto:admin@example.com",
-	};
 	const projection = createPushProjection({
 		listMemberIds: async () => [2, 3],
 		listSubscriptions: async () => [
@@ -73,16 +67,58 @@ test("发送 Declarative Web Push 信封(title/options/default_action_url)", asy
 			captured.push(JSON.parse(payload));
 		},
 	});
-	await projection(env, {
-		room: { id: 7, kind: "public", name: "产品协作" },
-		senderId: 2,
-		message: { content: "发布新版本", sender: { displayName: "Alice" } },
-	});
+	await projection(
+		{
+			DB: {},
+			VAPID_PRIVATE_KEY: "pk",
+			VAPID_PUBLIC_KEY: "pub",
+			VAPID_SUBJECT: "mailto:admin@himicos.com",
+			SITE_URL: "https://im.himicos.com/",
+		},
+		{
+			room: { id: 7, kind: "public", name: "产品协作" },
+			senderId: 2,
+			message: { content: "发布新版本", sender: { displayName: "Alice" } },
+		},
+	);
 	assert.equal(captured.length, 1);
-	assert.equal(captured[0].title, "产品协作");
-	assert.equal(captured[0].options.body, "发布新版本");
-	assert.equal(captured[0].default_action_url, "/");
-	assert.equal(captured[0].mutable, false);
+	assert.equal(captured[0].web_push, 8030);
+	assert.equal(captured[0].notification.title, "产品协作");
+	assert.equal(captured[0].notification.body, "发布新版本");
+	assert.equal(captured[0].notification.tag, "public:7");
+	assert.equal(captured[0].notification.navigate, "https://im.himicos.com/");
+});
+
+test("私信标题取发送者昵称,未配 SITE_URL 时 navigate 回落相对路径", async () => {
+	const captured = [];
+	const projection = createPushProjection({
+		listMemberIds: async () => [3],
+		listSubscriptions: async () => [
+			{
+				userId: 3,
+				endpoint: "https://push.example.com/3",
+				keys: { p256dh: "k", auth: "a" },
+			},
+		],
+		sendPush: async (_env, _sub, payload) => {
+			captured.push(JSON.parse(payload));
+		},
+	});
+	await projection(
+		{
+			DB: {},
+			VAPID_PRIVATE_KEY: "pk",
+			VAPID_PUBLIC_KEY: "pub",
+			VAPID_SUBJECT: "mailto:admin@himicos.com",
+		},
+		{
+			room: { id: 7, kind: "dm", name: "1:2" },
+			senderId: 2,
+			message: { content: "明天开会", sender: { displayName: "王五" } },
+		},
+	);
+	assert.equal(captured[0].notification.title, "王五");
+	assert.equal(captured[0].notification.navigate, "/");
 });
 
 test("推送服务返回 410 时清理失效订阅,其他错误只记录不中断", async () => {
