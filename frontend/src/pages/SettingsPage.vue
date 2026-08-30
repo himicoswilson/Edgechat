@@ -749,8 +749,15 @@ async function testBark() {
   flex-wrap: wrap;
 }
 
+/* 全局 .save-btn 自带 margin-top(用于输入框下方的普通段落),在 flex 行里会
+   把按钮顶下去并撑高行高,这里归零让两个按钮水平对齐 */
+.bark-actions .save-btn {
+  margin-top: 0;
+}
+
 .test-btn {
-  padding: 9px 18px;
+  /* border 占 2px,补 1px padding 使外尺寸与 save-btn 一致,按钮水平对齐 */
+  padding: 8px 18px;
   border-radius: var(--radius-control);
   border: 1px solid var(--accent);
   background: transparent;

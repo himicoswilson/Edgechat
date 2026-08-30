@@ -1,7 +1,10 @@
 <script setup>
+import { computed } from 'vue';
+import store from '../store.js';
 import { useI18n } from '../i18n.js';
 
 const { t, isEnglish } = useI18n();
+const siteName = computed(() => String(store.site.siteName || '').trim() || 'Edgechat');
 
 const example = {
   title: isEnglish.value ? 'Alice' : '王五',
@@ -28,7 +31,7 @@ const example = {
 
       <section class="bark-section">
         <h2>{{ t('bark.whatIsTitle') }}</h2>
-        <p class="bark-body">{{ t('bark.whatIsBody') }}</p>
+        <p class="bark-body">{{ t('bark.whatIsBody', { siteName }) }}</p>
       </section>
 
       <section class="bark-section">
@@ -53,7 +56,7 @@ const example = {
             <div class="bark-step__num">3</div>
             <div class="bark-step__content">
               <h3>{{ t('bark.step3Title') }}</h3>
-              <p>{{ t('bark.step3Body') }}</p>
+              <p>{{ t('bark.step3Body', { siteName }) }}</p>
             </div>
           </li>
           <li class="bark-step">
@@ -72,6 +75,7 @@ const example = {
         <div class="bark-template">
           <pre class="bark-template__json"><code>{
   "title": "{{ example.title }}",
+  "subtitle": "{{ siteName }}",
   "body": "{{ example.body }}",
   "device_key": "ynJ5Ft4atkMkWeo2PAvFhF",
   "group": "edgechat:7",
@@ -80,6 +84,7 @@ const example = {
 }</code></pre>
           <ul class="bark-template__notes">
             <li><strong>title</strong> — {{ t('bark.templateTitleNote') }}</li>
+            <li><strong>subtitle</strong> — {{ t('bark.templateSubtitleNote', { siteName }) }}</li>
             <li><strong>body</strong> — {{ t('bark.templateBodyNote') }}</li>
             <li><strong>group</strong> — {{ t('bark.templateGroupNote') }}</li>
             <li><strong>icon</strong> — {{ t('bark.templateIconNote') }}</li>
@@ -90,12 +95,12 @@ const example = {
           <div class="bark-mock__statusbar">9:41</div>
           <div class="bark-mock__card">
             <div class="bark-mock__app">Bark</div>
+            <div class="bark-mock__subtitle">{{ siteName }}</div>
             <div class="bark-mock__row">
               <span class="bark-mock__title">{{ example.title }}</span>
               <span class="bark-mock__time">now</span>
             </div>
             <div class="bark-mock__body">{{ example.body }}</div>
-            <div class="bark-mock__meta">Edgechat · 私信</div>
           </div>
         </div>
       </section>
@@ -362,6 +367,13 @@ const example = {
   margin-bottom: 6px;
 }
 
+.bark-mock__subtitle {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 8px;
+}
+
 .bark-mock__row {
   display: flex;
   align-items: baseline;
@@ -385,12 +397,6 @@ const example = {
   font-size: 0.8rem;
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.85);
-}
-
-.bark-mock__meta {
-  margin-top: 6px;
-  font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.45);
 }
 
 .bark-faq {

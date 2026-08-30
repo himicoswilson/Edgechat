@@ -24,6 +24,7 @@ test("sendBarkPush 默认发往公共服务器并携带标准字段", async () =
 			{
 				deviceKey: "key-abc",
 				title: "测试",
+				subtitle: "公司内部沟通",
 				body: "hello",
 				group: "edgechat:7",
 				icon: "https://im.example.com/logo.svg",
@@ -35,6 +36,7 @@ test("sendBarkPush 默认发往公共服务器并携带标准字段", async () =
 		assert.match(captured[0].options.headers["Content-Type"], /application\/json/);
 		assert.deepEqual(JSON.parse(captured[0].options.body), {
 			title: "测试",
+			subtitle: "公司内部沟通",
 			body: "hello",
 			device_key: "key-abc",
 			group: "edgechat:7",
@@ -51,13 +53,14 @@ test("sendBarkPush 默认发往公共服务器并携带标准字段", async () =
 	assert.equal(result.body, '{"code":200,"message":"success"}');
 });
 
-test("sendBarkPush 未提供 icon 时不发该字段,交回 Bark 默认样式", async () => {
+test("sendBarkPush 未提供 subtitle/icon 时不发这两个字段", async () => {
 	await withCapturedFetch(async (captured) => {
 		await sendBarkPush(
 			{},
 			{ deviceKey: "key-abc", title: "T", body: "B", group: "g" },
 		);
 		const payload = JSON.parse(captured[0].options.body);
+		assert.equal(payload.subtitle, undefined);
 		assert.equal(payload.icon, undefined);
 	}, () => ({ status: 200, text: async () => "{}" }));
 });

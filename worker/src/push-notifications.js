@@ -4,6 +4,7 @@ import {
 	deletePushSubscription,
 } from "./data/push-subscriptions.js";
 import { listBarkKeysForUsers } from "./data/users.js";
+import { getSiteSettings } from "./data/site-settings.js";
 import { sendBarkPush } from "./integrations/bark.js";
 import {
 	PushSubscriptionGoneError,
@@ -14,6 +15,7 @@ export function createPushProjection({
 	listMemberIds = listRoomMemberIds,
 	listSubscriptions = listSubscriptionsForUsers,
 	listBarkKeys = listBarkKeysForUsers,
+	loadSiteName = async (db) => String((await getSiteSettings(db)).siteName || "").trim(),
 	sendPush = sendPushNotification,
 	sendBark = sendBarkPush,
 	removeSubscription = deletePushSubscription,
@@ -141,11 +143,23 @@ export function createPushProjection({
 
 		if (barkTargets.length) {
 			const icon = barkIconUrl(room, message, siteOrigin);
+			// subtitle 用站点名称,让每条通知都标明来自哪个站点;
+			// 读不到站点名时只是少一行小字,不影响推送本身。
+			let subtitle = "";
+			try {
+				subtitle = await loadSiteName(env.DB);
+			} catch (error) {
+				logFailure("bark subtitle failed", {
+					roomId: Number(room.id),
+					error: error instanceof Error ? error.message : String(error),
+				});
+			}
 			await Promise.allSettled(
 				barkTargets.map((target) =>
 					sendBark(env, {
 						deviceKey: target.deviceKey,
 						title,
+						...(subtitle ? { subtitle } : {}),
 						body: body || "收到一条新消息",
 						group: `edgechat:${room.id}`,
 						icon,

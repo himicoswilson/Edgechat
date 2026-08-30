@@ -18,6 +18,7 @@ function createProjection({ overlays = {}, logFailure = () => {} } = {}) {
 					keys: { p256dh: "k", auth: "a" },
 				}))),
 		listBarkKeys: overlays.listBarkKeys || (async () => []),
+		loadSiteName: overlays.loadSiteName || (async () => ""),
 		sendPush: overlays.sendPush || (async (_env, sub) => calls.sends.push(sub.endpoint)),
 		sendBark: overlays.sendBark || (async (_env, target) => calls.bark.push(target)),
 		removeSubscription: overlays.removeSubscription || (async (_db, endpoint) => calls.removed.push(endpoint)),
@@ -230,6 +231,7 @@ test("Bark 推送失败只记录日志,不影响其他推送", async () => {
 	const projection = createPushProjection({
 		listMemberIds: async () => [1, 2],
 		listBarkKeys: async () => [{ userId: 1, deviceKey: "key-for-1" }],
+		loadSiteName: async () => "",
 		sendBark: async () => {
 			throw new Error("bark server down");
 		},
@@ -246,6 +248,32 @@ test("Bark 推送失败只记录日志,不影响其他推送", async () => {
 	assert.equal(failures.length, 1);
 	assert.equal(failures[0].message, "bark push failed");
 	assert.equal(failures[0].data.userId, 1);
+});
+
+test("Bark 推送带站点名称 subtitle,标明消息来自哪个站点", async () => {
+	const barkCalls = [];
+	const { projection } = createProjection({
+		overlays: {
+			listBarkKeys: async () => [{ userId: 1, deviceKey: "key-for-1" }],
+			loadSiteName: async () => "公司内部沟通",
+			sendBark: async (_env, target) => barkCalls.push(target),
+		},
+	});
+	await projection(
+		{
+			DB: {},
+			VAPID_PRIVATE_KEY: "pk",
+			VAPID_PUBLIC_KEY: "pub",
+			VAPID_SUBJECT: "mailto:admin@example.com",
+		},
+		{
+			room: { id: 9, kind: "public", name: "运维" },
+			senderId: 2,
+			message: { content: "hi" },
+		},
+	);
+	assert.equal(barkCalls.length, 1);
+	assert.equal(barkCalls[0].subtitle, "公司内部沟通");
 });
 
 test("Bark 图标:私聊带发送者头像,群聊带群头像,没有则回退站点 logo", async () => {

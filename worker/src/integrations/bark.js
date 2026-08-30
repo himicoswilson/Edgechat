@@ -3,10 +3,11 @@
 // API V2:POST {server}/push,body {title, body, device_key, group, ...}
 const DEFAULT_BARK_SERVER = "https://api.day.app";
 
-export async function sendBarkPush(env, { deviceKey, title, body, group, icon }) {
+export async function sendBarkPush(env, { deviceKey, title, subtitle, body, group, icon }) {
 	const server = String(env?.BARK_SERVER_URL || "").trim().replace(/\/+$/, "") || DEFAULT_BARK_SERVER;
 	const payload = {
 		title,
+		...(subtitle ? { subtitle } : {}),
 		body,
 		device_key: deviceKey,
 		group,
