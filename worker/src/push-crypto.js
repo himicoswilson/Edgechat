@@ -283,6 +283,8 @@ export async function sendPushNotification(env, subscription, payloadText) {
 			...headers,
 			Authorization: authorization,
 			"Content-Length": String(body.length),
+			// Declarative Web Push:标记 payload 为可解析的通知 JSON,平台直接展示
+			"Content-Type": "application/notification+json",
 		},
 		body,
 	});

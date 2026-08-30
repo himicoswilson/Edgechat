@@ -52,6 +52,39 @@ test("只推送给非发送者,标题/正文按房间与消息生成", async () 
 	]);
 });
 
+test("发送 Declarative Web Push 信封(title/options/default_action_url)", async () => {
+	const captured = [];
+	const env = {
+		DB: {},
+		VAPID_PRIVATE_KEY: "pk",
+		VAPID_PUBLIC_KEY: "pub",
+		VAPID_SUBJECT: "mailto:admin@example.com",
+	};
+	const projection = createPushProjection({
+		listMemberIds: async () => [2, 3],
+		listSubscriptions: async () => [
+			{
+				userId: 2,
+				endpoint: "https://push.example.com/2",
+				keys: { p256dh: "k", auth: "a" },
+			},
+		],
+		sendPush: async (_env, _sub, payload) => {
+			captured.push(JSON.parse(payload));
+		},
+	});
+	await projection(env, {
+		room: { id: 7, kind: "public", name: "产品协作" },
+		senderId: 2,
+		message: { content: "发布新版本", sender: { displayName: "Alice" } },
+	});
+	assert.equal(captured.length, 1);
+	assert.equal(captured[0].title, "产品协作");
+	assert.equal(captured[0].options.body, "发布新版本");
+	assert.equal(captured[0].default_action_url, "/");
+	assert.equal(captured[0].mutable, false);
+});
+
 test("推送服务返回 410 时清理失效订阅,其他错误只记录不中断", async () => {
 	const env = {
 		DB: {},

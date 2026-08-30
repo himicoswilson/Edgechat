@@ -68,18 +68,24 @@ self.addEventListener("push", (event) => {
   } catch {
     data = { body: payloadText };
   }
+  // 兼容 Declarative Web Push 信封(title/options/default_action_url)与旧式信封(title/body/tag/url)
+  const options = data.options || {};
   const title = data.title || "Edgechat";
-  const options = {
-    body: data.body || "",
-    tag: data.tag || "edgechat",
+  const body = options.body || data.body || "";
+  const tag = options.tag || data.tag || "edgechat";
+  const url = data.default_action_url || data.url || "/";
+  const renotify = options.renotify !== undefined ? options.renotify : true;
+  const notificationOptions = {
+    body,
+    tag,
     icon: "/icon-192.png",
     badge: "/icon-192.png",
-    renotify: true,
-    data: { url: data.url || "/" },
+    renotify,
+    data: { url },
   };
   event.waitUntil(
     self.registration
-      .showNotification(title, options)
+      .showNotification(title, notificationOptions)
       .then(() => {
         console.log("[edgechat] notification shown");
         recordPushDiag("last", { ts: Date.now(), shown: true, payload: payloadText.slice(0, 120) });

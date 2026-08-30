@@ -42,11 +42,19 @@ export function createPushProjection({
 				room.kind === "dm"
 					? message?.sender?.displayName || "私信"
 					: room.name || "群聊";
+			// Declarative Web Push(iOS 26+/Safari 26+):immutable 通知由平台直接展示,
+			// 不唤醒 Service Worker;老客户端把该 payload 当作普通推送交给 SW 的 push
+			// 事件,sw.js 已兼容解析。
 			const payload = JSON.stringify({
 				title,
-				body: body || "收到一条新消息",
-				tag: `${room.kind}:${room.id}`,
-				url: "/",
+				options: {
+					body: body || "收到一条新消息",
+					tag: `${room.kind}:${room.id}`,
+					renotify: true,
+					data: { url: "/" },
+				},
+				default_action_url: "/",
+				mutable: false,
 			});
 
 			await Promise.allSettled(
