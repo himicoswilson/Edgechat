@@ -4,6 +4,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { isDemoMode } from '../runtime.js';
 import AddConversationDialog from '../components/chat/AddConversationDialog.vue';
+import UserDetailPanel from '../components/chat/UserDetailPanel.vue';
 import CreateGroupDialog from '../components/chat/CreateGroupDialog.vue';
 import GroupSettingsDialog from '../components/chat/GroupSettingsDialog.vue';
 import MemberPanel from '../components/chat/MemberPanel.vue';
@@ -140,6 +141,27 @@ const {
 } = useReadReceipts({ activeRoom, messages, isOwnMessage });
 scheduleReadReceiptsRefresh = scheduleRefresh;
 const readReceiptMessage = ref(null);
+const userPanelUser = ref(null);
+const userPanelRole = computed(() =>
+  groupMembers.value.find((member) => Number(member.id) === Number(userPanelUser.value?.id))?.role || ''
+);
+
+function openUserPanel(user) {
+  if (!user || activeRoom.value?.kind === 'dm') {
+    return;
+  }
+  userPanelUser.value = user;
+  void presence.touch([Number(user.id)]);
+}
+
+function closeUserPanel() {
+  userPanelUser.value = null;
+}
+
+function startDmFromPanel(user) {
+  closeUserPanel();
+  openDm(user);
+}
 const readReceiptReaders = computed(() =>
   readReceiptMessage.value ? readersFor(readReceiptMessage.value.id) : []
 );
@@ -654,10 +676,16 @@ onBeforeUnmount(() => {
             <UiAvatar
               v-if="!isOwnMessage(msg)"
               class="message-avatar"
+              :class="{ 'message-avatar--clickable': activeRoom.kind !== 'dm' }"
+              :role="activeRoom.kind !== 'dm' ? 'button' : undefined"
+              :tabindex="activeRoom.kind !== 'dm' ? 0 : undefined"
               :src="msg.sender.avatarUrl"
               :alt="msg.sender.displayName"
               :fallback="msg.sender.displayName"
               size="sm"
+              @click="openUserPanel(msg.sender)"
+              @keydown.enter="openUserPanel(msg.sender)"
+              @keydown.space.prevent="openUserPanel(msg.sender)"
             />
             <div
               class="message-bubble"
@@ -765,6 +793,7 @@ onBeforeUnmount(() => {
           @update:invite-user-id="inviteUserId = $event"
           @invite="inviteMember"
           @remove-member="removeMember"
+          @member-click="openUserPanel"
           @delete-group="deleteGroup"
         />
       </aside>
@@ -794,6 +823,17 @@ onBeforeUnmount(() => {
       @close="closeAddConversation"
       @create-group="startGroupCreation"
       @open-dm="openDm"
+    />
+
+    <UserDetailPanel
+      :user="userPanelUser"
+      :room="activeRoom"
+      :my-user-id="session?.userId"
+      :role="userPanelRole"
+      :is-online="presence.isOnline"
+      :last-seen-label="presence.lastSeenLabel"
+      @close="closeUserPanel"
+      @start-dm="startDmFromPanel"
     />
 
     <CreateGroupDialog
@@ -1369,6 +1409,15 @@ onBeforeUnmount(() => {
   height: 34px;
   border-radius: 8px;
   box-shadow: none;
+}
+
+.message-avatar--clickable {
+  cursor: pointer;
+  transition: transform 120ms ease;
+}
+
+.message-avatar--clickable:hover {
+  transform: scale(1.06);
 }
 
 .message-bubble {

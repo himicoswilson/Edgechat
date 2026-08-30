@@ -41,6 +41,13 @@
   border-radius: var(--radius-panel);
   background: var(--surface-solid);
   border: 1px solid var(--line-soft);
+  cursor: pointer;
+  transition: background var(--transition-soft), border-color var(--transition-soft);
+}
+
+.member-chip:hover {
+  background: var(--surface-1);
+  border-color: var(--line-strong);
 }
 
 .member-chip__text {

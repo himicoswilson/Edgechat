@@ -75,7 +75,16 @@ const emit = defineEmits(['close', 'update:inviteUserId', 'invite', 'remove-memb
     </div>
 
     <div class="member-chip-list">
-      <div v-for="member in members" :key="member.id" class="member-chip">
+      <div
+        v-for="member in members"
+        :key="member.id"
+        class="member-chip"
+        role="button"
+        tabindex="0"
+        @click="emit('member-click', member)"
+        @keydown.enter="emit('member-click', member)"
+        @keydown.space.prevent="emit('member-click', member)"
+      >
         <span class="member-chip__avatar">
           <UiAvatar :src="member.avatarUrl" :fallback="member.displayName" size="sm" />
           <span
