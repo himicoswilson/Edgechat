@@ -19,16 +19,21 @@ export function useChatViewport({ activeRoom }) {
 	function syncViewportHeight() {
 		const visualViewport = window.visualViewport;
 		const layoutHeight = window.innerHeight;
-		// 仅当键盘明显可见(视觉视口远矮于布局视口)时跟随视觉视口高度;
-		// 地址栏收展等场景不再改动布局高度,避免整页反向位移。
-		// 不做 offsetTop 平移:固定定位布局始终贴视口顶(键盘弹出时底部自然贴键盘上方),
-		// 跟随 offsetTop 会把整个布局顶到键盘下方,输入框出现"弹飞"。
+		// 键盘可见判定:Android(interactive-widget)键盘弹出会缩小视觉高度;
+		// iOS Safari 键盘弹出时高度不变,只把 visualViewport.offsetTop 顶上去,
+		// 两个特征都认,否则 iOS 上布局不缩高,输入框被压到键盘下面。
 		const keyboardVisible = Boolean(
-			visualViewport && visualViewport.height < layoutHeight * 0.75,
+			visualViewport &&
+				(visualViewport.height < layoutHeight * 0.75 ||
+					(visualViewport.offsetTop > 0 && visualViewport.height <= layoutHeight)),
 		);
+		// iOS 平移型:可见高度 = 布局高 - 键盘偏移;Android 缩小型:视觉高度即可见高。
+		const viewportHeight = keyboardVisible
+			? Math.min(visualViewport.height, layoutHeight - visualViewport.offsetTop)
+			: layoutHeight;
 		document.documentElement.style.setProperty(
 			"--chat-viewport-height",
-			`${Math.round(keyboardVisible ? visualViewport.height : layoutHeight)}px`,
+			`${Math.round(viewportHeight)}px`,
 		);
 	}
 

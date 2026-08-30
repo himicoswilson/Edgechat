@@ -83,6 +83,14 @@ test("移动端首次进入只显示会话列表，选择后可进入并返回",
 	assert.equal(browser.properties.get("--chat-viewport-height"), "740px");
 	assert.equal(browser.properties.has("--chat-viewport-offset-top"), false);
 
+	// iOS Safari 键盘弹出:高度不变、仅 offsetTop 顶起,布局应缩到键盘上沿
+	window.visualViewport.height = 740;
+	window.visualViewport.offsetTop = 300;
+	for (const listener of browser.viewportListeners.get("scroll")) {
+		listener();
+	}
+	assert.equal(browser.properties.get("--chat-viewport-height"), "440px");
+
 	activeRoom.value = { kind: "dm", id: 3 };
 	viewport.openConversationView();
 	assert.equal(viewport.mobileView.value, "chat");
