@@ -234,7 +234,6 @@ watch(
 .add-conversation-person__avatar {
   position: relative;
   flex-shrink: 0;
-  line-height: 0;
 }
 
 .add-conversation-person__presence-dot {

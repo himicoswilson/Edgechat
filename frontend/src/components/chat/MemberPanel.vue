@@ -151,11 +151,6 @@ const emit = defineEmits(['close', 'update:inviteUserId', 'invite', 'remove-memb
 .member-chip__avatar {
   position: relative;
   flex-shrink: 0;
-  line-height: 0;
-}
-
-.member-chip__avatar .ui-avatar {
-  display: block;
 }
 
 .member-chip__presence-dot {

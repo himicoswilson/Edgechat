@@ -960,11 +960,6 @@ onBeforeUnmount(() => {
 .sidebar-item__avatar {
   position: relative;
   flex-shrink: 0;
-  line-height: 0;
-}
-
-.sidebar-item__avatar .ui-avatar {
-  display: block;
 }
 
 .presence-dot {
