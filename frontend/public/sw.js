@@ -11,6 +11,8 @@ self.addEventListener("activate", (event) => {
       const keys = await caches.keys();
       await Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)));
       await self.clients.claim();
+      // 激活标记:证明新版 SW 已在这台设备接管,区分"SW 没跑"与"跑了但没收推送"
+      recordPushDiag("sw", { ts: Date.now(), sw: "activated" });
     })(),
   );
 });
@@ -41,7 +43,7 @@ const PUSH_DIAG_DB = "edgechat-push-diag";
 const PUSH_DIAG_VERSION = 2;
 const PUSH_DIAG_STORE = "state";
 
-function recordPushDiag(entry) {
+function recordPushDiag(key, entry) {
   try {
     const openRequest = indexedDB.open(PUSH_DIAG_DB, PUSH_DIAG_VERSION);
     openRequest.onupgradeneeded = () => {
@@ -50,7 +52,7 @@ function recordPushDiag(entry) {
     openRequest.onsuccess = () => {
       const db = openRequest.result;
       const tx = db.transaction(PUSH_DIAG_STORE, "readwrite");
-      tx.objectStore(PUSH_DIAG_STORE).put(entry, "last");
+      tx.objectStore(PUSH_DIAG_STORE).put(entry, key);
     };
   } catch {
     // 诊断记录失败不影响推送展示
@@ -80,11 +82,11 @@ self.addEventListener("push", (event) => {
       .showNotification(title, options)
       .then(() => {
         console.log("[edgechat] notification shown");
-        recordPushDiag({ ts: Date.now(), shown: true, payload: payloadText.slice(0, 120) });
+        recordPushDiag("last", { ts: Date.now(), shown: true, payload: payloadText.slice(0, 120) });
       })
       .catch((error) => {
         console.error("[edgechat] showNotification failed:", error);
-        recordPushDiag({ ts: Date.now(), shown: false, payload: payloadText.slice(0, 120), error: String(error) });
+        recordPushDiag("last", { ts: Date.now(), shown: false, payload: payloadText.slice(0, 120), error: String(error) });
       }),
   );
 });
