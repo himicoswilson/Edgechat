@@ -17,6 +17,7 @@ export function useChatRoom({
 	error,
 	onRoomActivity = () => {},
 	onRoomAccessRevoked = () => {},
+	onMessageRead = () => {},
 	roomApi = api,
 	openRoomConnection = connectRoomSocket,
 }) {
@@ -136,6 +137,9 @@ export function useChatRoom({
 				// 自己发送的消息强制跟随;他人的消息仅在贴近底部时跟随,读历史不被拽走
 				scrollToBottomIfSticky(isOwnMessage(payload.message));
 				applyActiveRoomActivity(payload.message);
+			}
+			if (payload.type === "message_read") {
+				onMessageRead();
 			}
 			if (payload.type === "message_deleted") {
 				const messageId = Number(payload.messageId);

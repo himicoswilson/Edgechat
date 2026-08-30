@@ -1,5 +1,5 @@
 import { listMessages } from '../data/messages.js';
-import { markRoomRead } from '../data/unread.js';
+import { listMessageReaders, markRoomRead, readersByMessage } from '../data/unread.js';
 import { authorizeRoom, isRoomKind } from '../room-access.js';
 import { errorResponse, parseJsonRequest, sanitizeLimit } from '../utils.js';
 
@@ -36,6 +36,38 @@ export function registerMessageRoutes(app) {
       },
       messages
     });
+  });
+
+  app.get('/api/messages/read-by', async (c) => {
+    const session = c.get('session');
+    const kind = c.req.query('kind');
+    const roomId = Number(c.req.query('roomId'));
+    const messageIds = String(c.req.query('messageIds') || '')
+      .split(',')
+      .map((value) => Number(value))
+      .filter((value) => Number.isInteger(value) && value > 0);
+
+    if (
+      !isRoomKind(kind) ||
+      !Number.isInteger(roomId) ||
+      roomId <= 0 ||
+      messageIds.length === 0 ||
+      messageIds.length > 50
+    ) {
+      return errorResponse('参数无效');
+    }
+
+    const access = await authorizeRoom(c.env.DB, session, kind, roomId);
+
+    if (!access.ok) {
+      return errorResponse('无权访问该会话', 403);
+    }
+
+    const readers = await listMessageReaders(c.env.DB, {
+      channelId: Number(access.room.id),
+      excludeUserId: session.userId
+    });
+    return c.json({ reads: readersByMessage(readers, messageIds) });
   });
 
   app.post('/api/messages/read', async (c) => {

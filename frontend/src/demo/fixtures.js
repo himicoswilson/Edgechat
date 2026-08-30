@@ -268,6 +268,13 @@ export function createDemoFixtures() {
     ]
   };
 
+  // 每个会话中 userId -> 已读到的最大消息 id（用于展示已读回执）
+  const reads = {
+    'public:1': { 3: 104, 4: 104 },
+    'public:3': { 2: 121, 3: 121, 4: 121 },
+    'dm:10': { 2: 142 }
+  };
+
   return {
     site: { siteName: 'EdgeChat Demo', siteIconUrl: '/logo.svg' },
     session: {
@@ -283,6 +290,7 @@ export function createDemoFixtures() {
     channels,
     dms,
     messages,
+    reads,
     files: new Map(),
     invites: [
       {

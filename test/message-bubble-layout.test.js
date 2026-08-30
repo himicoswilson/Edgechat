@@ -20,7 +20,7 @@ function getStyleRule(selector) {
 	return chatPage.slice(start, end + 1);
 }
 
-test("短文本消息为右下角时间戳预留末行空间", () => {
+test("短消息时间戳与已读回执位于气泡底部元信息行，不与正文重叠", () => {
 	assert.match(
 		chatPage,
 		/:class="\{ 'message-bubble--with-attachment': msg\.attachment \}"/,
@@ -30,17 +30,15 @@ test("短文本消息为右下角时间戳预留末行空间", () => {
 	assert.match(bubble, /padding:\s*6px 10px 7px;/);
 
 	const attachmentBubble = getStyleRule(".message-bubble--with-attachment");
-	assert.match(attachmentBubble, /padding-bottom:\s*20px;/);
+	assert.match(attachmentBubble, /padding-bottom:\s*4px;/);
+
+	const meta = getStyleRule(".message-meta");
+	assert.match(meta, /justify-content:\s*flex-end;/);
+	assert.match(meta, /gap:\s*6px;/);
 
 	const time = getStyleRule(".message-time");
-	assert.match(time, /position:\s*absolute;/);
+	assert.doesNotMatch(time, /position:\s*absolute;/);
 	assert.match(time, /white-space:\s*nowrap;/);
-
-	const reserve = getStyleRule(
-		".message-bubble:not(.message-bubble--with-attachment) p::after",
-	);
-	assert.match(reserve, /display:\s*inline-block;/);
-	assert.match(reserve, /width:\s*3\.5em;/);
 });
 
 test("非本人消息在气泡前显示圆角方形发送者头像", () => {

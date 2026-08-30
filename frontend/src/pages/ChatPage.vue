@@ -14,6 +14,8 @@ import SenderSourceBadge from '../components/chat/SenderSourceBadge.vue';
 import PendingAttachmentPreview from '../components/chat/PendingAttachmentPreview.vue';
 import PublicGroupDiscovery from '../components/chat/PublicGroupDiscovery.vue';
 import PublicGroupJoinDialog from '../components/chat/PublicGroupJoinDialog.vue';
+import ReadReceipts from '../components/chat/ReadReceipts.vue';
+import ReadReceiptsDialog from '../components/chat/ReadReceiptsDialog.vue';
 import UiAvatar from '../components/ui/Avatar.vue';
 import UiTextarea from '../components/ui/Textarea.vue';
 import { useActiveRoom } from '../composables/useActiveRoom.js';
@@ -22,6 +24,7 @@ import { useChatRoom } from '../composables/useChatRoom.js';
 import { useChatSidebar } from '../composables/useChatSidebar.js';
 import { useChatViewport } from '../composables/useChatViewport.js';
 import { useConversationCreation } from '../composables/useConversationCreation.js';
+import { useReadReceipts } from '../composables/useReadReceipts.js';
 import { useRoomManagement } from '../composables/useRoomManagement.js';
 import { useUnreadInbox } from '../composables/useUnreadInbox.js';
 import store from '../store.js';
@@ -30,6 +33,7 @@ import { useI18n } from '../i18n.js';
 const router = useRouter();
 const { formatTime: formatLocaleTime, t } = useI18n();
 const error = ref('');
+let scheduleReadReceiptsRefresh = () => {};
 const activeRoom = ref(null);
 const showMobileNavigation = ref(false);
 const publicGroupPreview = ref(null);
@@ -112,7 +116,8 @@ const {
   session,
   error,
   onRoomActivity: handleRoomActivity,
-  onRoomAccessRevoked: handleRoomAccessRevoked
+  onRoomAccessRevoked: handleRoomAccessRevoked,
+  onMessageRead: scheduleReadReceiptsRefresh
 });
 
 const { connectUnreadInbox, disconnectUnreadInbox } = useUnreadInbox({
@@ -121,6 +126,27 @@ const { connectUnreadInbox, disconnectUnreadInbox } = useUnreadInbox({
   applyConversationActivity,
   notifyRoom
 });
+
+const {
+  readersFor,
+  refreshReadReceipts,
+  scheduleRefresh,
+  disposeReadReceipts
+} = useReadReceipts({ activeRoom, messages, isOwnMessage });
+scheduleReadReceiptsRefresh = scheduleRefresh;
+const readReceiptMessage = ref(null);
+const readReceiptReaders = computed(() =>
+  readReceiptMessage.value ? readersFor(readReceiptMessage.value.id) : []
+);
+
+function openReadReceipts(message) {
+  readReceiptMessage.value = message;
+  void refreshReadReceipts();
+}
+
+function closeReadReceipts() {
+  readReceiptMessage.value = null;
+}
 
 const wsConnected = computed(() => wsStatus.value === 'open');
 const activeRoomSubtitle = computed(() => {
@@ -379,6 +405,7 @@ onBeforeUnmount(() => {
   disconnectUnreadInbox();
   disconnectSocket();
   stopViewportSync();
+  disposeReadReceipts();
 });
 </script>
 
@@ -615,7 +642,15 @@ onBeforeUnmount(() => {
               </div>
               <p v-if="msg.content">{{ msg.content }}</p>
               <MessageAttachment v-if="msg.attachment" :attachment="msg.attachment" />
-              <span class="message-time">{{ formatBubbleTime(msg.createdAt) }}</span>
+              <div class="message-meta">
+                <span class="message-time">{{ formatBubbleTime(msg.createdAt) }}</span>
+                <ReadReceipts
+                  v-if="isOwnMessage(msg)"
+                  :readers="readersFor(msg.id)"
+                  :is-dm="activeRoom.kind === 'dm'"
+                  @open="openReadReceipts(msg)"
+                />
+              </div>
             </div>
           </article>
         </section>
@@ -753,6 +788,12 @@ onBeforeUnmount(() => {
       @close="closeGroupEditor"
       @upload-avatar="uploadGroupAvatar"
       @save="saveGroupSettings"
+    />
+
+    <ReadReceiptsDialog
+      :show="Boolean(readReceiptMessage)"
+      :readers="readReceiptReaders"
+      @close="closeReadReceipts"
     />
   </div>
 </template>
@@ -1296,7 +1337,7 @@ onBeforeUnmount(() => {
 }
 
 .message-bubble--with-attachment {
-  padding-bottom: 20px;
+  padding-bottom: 4px;
 }
 
 .message-row--own .message-bubble {
@@ -1313,10 +1354,15 @@ onBeforeUnmount(() => {
   margin-bottom: 4px;
 }
 
+.message-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 3px;
+}
+
 .message-time {
-  position: absolute;
-  right: 8px;
-  bottom: 6px;
   font-size: 11px;
   line-height: 1;
   color: #667781;
@@ -1331,14 +1377,6 @@ onBeforeUnmount(() => {
   color: #111b21;
   white-space: pre-wrap;
   word-break: break-word;
-}
-
-/* 短消息在末行预留时间戳宽度，避免气泡收缩后正文与右下角时间重叠。 */
-.message-bubble:not(.message-bubble--with-attachment) p::after {
-  content: '';
-  display: inline-block;
-  width: 3.5em;
-  height: 0;
 }
 
 .chat-composer {

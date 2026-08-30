@@ -167,6 +167,14 @@ export default {
       }
     });
   },
+  messageReaders(kind, roomId, messageIds) {
+    const query = new URLSearchParams({
+      kind,
+      roomId: String(roomId),
+      messageIds: messageIds.map(String).join(',')
+    });
+    return request(`/messages/read-by?${query.toString()}`);
+  },
   openDm(userId) {
     return request('/dm/open', {
       method: 'POST',

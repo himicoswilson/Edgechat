@@ -61,6 +61,18 @@ function hasEnabledTelegramMapping(kind, roomId) {
   );
 }
 
+function roomWatermarkReads(kind, roomId) {
+  const roomMemberIds = kind === 'dm'
+    ? demoState.dms.find((dm) => Number(dm.id) === Number(roomId))?.participantIds || []
+    : demoState.channels.find((channel) => Number(channel.id) === Number(roomId))?.memberIds || [];
+  const messageIds = demoState.messages[roomKey(kind, roomId)] || [];
+  if (!roomMemberIds.length || messageIds.length === 0) return null;
+  const otherIds = roomMemberIds.filter((userId) => Number(userId) !== demoState.session.userId);
+  if (!otherIds.length) return null;
+  const latestId = Number(messageIds.at(-1).id);
+  return { key: roomKey(kind, roomId), otherIds, latestId };
+}
+
 function handleRoomFrame(socket, frame) {
   const payload = JSON.parse(frame);
   if (payload.type === 'send') {
@@ -72,6 +84,21 @@ function handleRoomFrame(socket, frame) {
       sender: currentSender()
     });
     publishRoom(socket.kind, socket.roomId, { type: 'message', message: cloneDemo(message) });
+
+    const seed = roomWatermarkReads(socket.kind, socket.roomId);
+    if (seed) {
+      // 模拟群内其他成员稍后阅读新消息，触发已读回执刷新
+      globalThis.setTimeout(() => {
+        demoState.reads[seed.key] ||= {};
+        for (const userId of seed.otherIds) {
+          demoState.reads[seed.key][userId] = Math.max(
+            demoState.reads[seed.key][userId] || 0,
+            seed.latestId
+          );
+        }
+        publishRoom(socket.kind, socket.roomId, { type: 'message_read', messageId: seed.latestId });
+      }, 1200);
+    }
 
     if (hasEnabledTelegramMapping(socket.kind, socket.roomId)) {
       globalThis.setTimeout(() => {

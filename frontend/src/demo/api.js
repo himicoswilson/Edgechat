@@ -341,11 +341,41 @@ export async function requestDemo(path, options = {}) {
     const filtered = before ? allMessages.filter((message) => Number(message.id) < before) : allMessages;
     return { messages: cloneDemo(filtered.slice(-30)) };
   }
+  if (method === 'GET' && pathname === '/messages/read-by') {
+    const kind = url.searchParams.get('kind');
+    const roomId = Number(url.searchParams.get('roomId'));
+    const messageIds = String(url.searchParams.get('messageIds') || '')
+      .split(',')
+      .map(Number)
+      .filter((value) => Number.isInteger(value) && value > 0);
+    const watermarks = demoState.reads[roomKey(kind, roomId)] || {};
+    const reads = {};
+    for (const messageId of messageIds) {
+      reads[messageId] = Object.entries(watermarks)
+        .filter(([userId, watermark]) =>
+          Number(userId) !== demoState.session.userId && Number(watermark) >= messageId
+        )
+        .map(([userId]) => {
+          const user = findDemoUser(userId);
+          return user ? { id: user.id, username: user.username, displayName: user.displayName, avatarUrl: user.avatarUrl } : null;
+        })
+        .filter(Boolean);
+    }
+    return { reads };
+  }
   if (method === 'POST' && pathname === '/messages/read') {
     const room = body.kind === 'dm'
       ? demoState.dms.find((dm) => Number(dm.id) === Number(body.roomId))
       : findDemoChannel(body.roomId);
     if (room) room.unreadCount = 0;
+    const key = roomKey(body.kind, body.roomId);
+    if (body.messageId) {
+      demoState.reads[key] ||= {};
+      demoState.reads[key][demoState.session.userId] = Math.max(
+        demoState.reads[key][demoState.session.userId] || 0,
+        Number(body.messageId)
+      );
+    }
     return { ok: true };
   }
   if (method === 'POST' && pathname === '/dm/open') {

@@ -153,6 +153,48 @@ test('demo room socket echoes sent messages through the real-time contract', asy
   inboxSocket.close();
 });
 
+test('demo read receipts derive from per-user watermarks and exclude the requester', async () => {
+  const reads = await requestDemo(
+    '/messages/read-by?kind=public&roomId=1&messageIds=101,102,103,104,999'
+  );
+  assert.deepEqual(reads.reads['102'].map((reader) => reader.id), [3, 4]);
+  assert.deepEqual(reads.reads['103'].map((reader) => reader.id), [3, 4]);
+  assert.deepEqual(reads.reads['999'], []);
+
+  // 私信：对方已读后在自己的消息上显示
+  const dm = await requestDemo('/messages/read-by?kind=dm&roomId=10&messageIds=142');
+  assert.deepEqual(dm.reads['142'].map((reader) => reader.id), [2]);
+});
+
+test('demo room simulates other members reading a freshly sent message', async () => {
+  const frames = [];
+  let socket;
+  await new Promise((resolve) => {
+    socket = connectDemoRoomSocket({
+      kind: 'private',
+      roomId: 2,
+      onMessage(frame) {
+        frames.push(JSON.parse(frame));
+      },
+      onStatus(event) {
+        if (event.status === 'open') resolve();
+      }
+    });
+  });
+
+  socket.send(JSON.stringify({ type: 'send', content: '回执演示', attachment: null }));
+  await new Promise((resolve) => setTimeout(resolve, 1350));
+
+  assert.equal(frames.some((frame) => frame.type === 'message_read'), true);
+  const history = await requestDemo('/messages?kind=private&roomId=2');
+  const sent = history.messages.at(-1);
+  const reads = await requestDemo(
+    `/messages/read-by?kind=private&roomId=2&messageIds=${sent.id}`
+  );
+  assert.deepEqual(reads.reads[String(sent.id)].map((reader) => reader.id), [2, 3]);
+  socket.close();
+});
+
 test('Telegram replies increment the inbox unread projection', async () => {
   const inboxFrames = [];
   await requestDemo('/messages/read', {
