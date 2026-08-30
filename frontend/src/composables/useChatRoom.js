@@ -18,6 +18,7 @@ export function useChatRoom({
 	onRoomActivity = () => {},
 	onRoomAccessRevoked = () => {},
 	onMessageRead = () => {},
+	isMobileViewport = { value: false },
 	roomApi = api,
 	openRoomConnection = connectRoomSocket,
 }) {
@@ -281,7 +282,14 @@ export function useChatRoom({
 	}
 
 	function handleComposerKeydown(event) {
-		if (event.key === "Enter" && !event.shiftKey) {
+		// 移动端回车只换行,必须点发送按钮;桌面端回车发送。
+		// 注意:条件写在 handler 内部而非模板三元表达式——三元会编译成
+		// `$event => (cond ? null : fn)` 包装,返回值永远不会被调用。
+		if (
+			event.key === "Enter" &&
+			!event.shiftKey &&
+			!isMobileViewport.value
+		) {
 			event.preventDefault();
 			sendMessage();
 		}

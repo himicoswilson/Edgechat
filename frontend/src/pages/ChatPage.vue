@@ -116,6 +116,7 @@ const {
   activeRoom,
   session,
   error,
+  isMobileViewport,
   onRoomActivity: handleRoomActivity,
   onRoomAccessRevoked: handleRoomAccessRevoked,
   onMessageRead: scheduleReadReceiptsRefresh
@@ -719,7 +720,7 @@ onBeforeUnmount(() => {
               :disabled="!activeRoom || roomEveryoneMuted"
               :enterkeyhint="isMobileViewport ? 'enter' : 'send'"
               :placeholder="roomEveryoneMuted ? t('chat.muteEveryoneEnabled') : t('chat.messagePlaceholder')"
-              @keydown="isMobileViewport ? null : handleComposerKeydown"
+              @keydown="handleComposerKeydown"
             />
             <button
               type="button"
