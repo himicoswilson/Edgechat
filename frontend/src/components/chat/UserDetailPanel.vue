@@ -152,14 +152,15 @@ useOverlayLifecycle({
     max(16px, env(safe-area-inset-right))
     max(16px, env(safe-area-inset-bottom))
     max(16px, env(safe-area-inset-left));
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(15, 23, 42, 0.5);
 }
 
 .user-panel-card {
   width: min(360px, 100%);
-  border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-panel);
+  background: var(--surface-solid);
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
 }
 
@@ -187,7 +188,7 @@ useOverlayLifecycle({
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #111b21;
+  color: var(--text);
   font-size: 17px;
   line-height: 1.3;
   overflow-wrap: anywhere;
@@ -195,12 +196,12 @@ useOverlayLifecycle({
 
 .user-panel-identity__text p {
   margin: 4px 0 0;
-  color: #667781;
+  color: var(--text-soft);
   font-size: 13px;
 }
 
 .user-panel-identity__text .user-panel-identity__external {
-  color: #959ea6;
+  color: var(--text-faint);
   font-size: 12px;
 }
 
@@ -215,14 +216,14 @@ useOverlayLifecycle({
   border: 0;
   border-radius: 50%;
   background: transparent;
-  color: #54656f;
+  color: var(--text-soft);
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .user-panel-card__close:hover,
 .user-panel-card__close:active {
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--surface-1);
 }
 
 .user-panel-detail {
@@ -233,7 +234,7 @@ useOverlayLifecycle({
 
 .user-panel-detail__room {
   margin: 0;
-  color: #667781;
+  color: var(--text-faint);
   font-size: 13px;
 }
 
@@ -246,18 +247,19 @@ useOverlayLifecycle({
 
 .user-panel-badge {
   padding: 3px 10px;
-  border-radius: 999px;
-  background: #17a2b8;
-  color: #fff;
+  border-radius: var(--radius-pill);
+  background: var(--surface-1);
+  border: 1px solid var(--line-strong);
+  color: var(--text-soft);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .user-panel-status {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #8696a0;
+  color: var(--text-soft);
   font-size: 13px;
 }
 
@@ -265,20 +267,21 @@ useOverlayLifecycle({
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #cbd5d1;
+  background: var(--line-strong);
 }
 
+/* 在线绿点与全站 presence 点一致(success 语义色,非装饰色) */
 .user-panel-status--online {
-  color: #10b981;
+  color: var(--success);
 }
 
 .user-panel-status--online .user-panel-status__dot {
-  background: #10b981;
+  background: var(--success);
 }
 
 .user-panel-detail__self {
   margin: 0;
-  color: #8696a0;
+  color: var(--text-faint);
   font-size: 12px;
 }
 
@@ -294,18 +297,18 @@ useOverlayLifecycle({
   justify-content: center;
   gap: 8px;
   border: 0;
-  border-radius: 8px;
-  background: #0a7d84;
+  border-radius: var(--radius-control);
+  background: var(--btn);
   color: #fff;
   font-size: 14px;
-  font-weight: 650;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background var(--transition-soft);
 }
 
 .user-panel-card__action:hover,
 .user-panel-card__action:active {
-  background: #086b71;
+  background: var(--btn-hover);
 }
 
 .user-panel-fade-enter-active,
