@@ -717,9 +717,9 @@ onBeforeUnmount(() => {
             <UiTextarea
               v-model="composerText" class="composer-input" auto-grow :max-height="120" rows="1"
               :disabled="!activeRoom || roomEveryoneMuted"
-              enterkeyhint="send"
+              :enterkeyhint="isMobileViewport ? 'enter' : 'send'"
               :placeholder="roomEveryoneMuted ? t('chat.muteEveryoneEnabled') : t('chat.messagePlaceholder')"
-              @keydown="handleComposerKeydown"
+              @keydown="isMobileViewport ? null : handleComposerKeydown"
             />
             <button
               type="button"

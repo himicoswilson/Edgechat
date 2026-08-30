@@ -29,7 +29,9 @@ function syncHeight() {
 }
 
 function handleInput(event) {
-  emit('update:modelValue', event.target.value);
+  const value = event.target.value;
+  // 移动端删空后会残留不可见的换行符,清掉以免输入框撑高、出现删不掉的空白行
+  emit('update:modelValue', value.trim() === '' ? '' : value);
   syncHeight();
 }
 
