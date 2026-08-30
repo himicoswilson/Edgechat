@@ -20,6 +20,7 @@ export function registerPushSubscriptionRoutes(app) {
 			return c.json({ error: "推送订阅信息不完整" }, 400);
 		}
 		await upsertPushSubscription(c.env.DB, subscription);
+		console.log(JSON.stringify({ message: "push subscription saved", userId: subscription.userId, endpoint: subscription.endpoint }));
 		return c.json({ ok: true });
 	});
 
@@ -31,6 +32,7 @@ export function registerPushSubscriptionRoutes(app) {
 			return c.json({ error: "推送订阅信息不完整" }, 400);
 		}
 		await deletePushSubscription(c.env.DB, endpoint);
+		console.log(JSON.stringify({ message: "push subscription deleted", endpoint }));
 		return c.json({ ok: true });
 	});
 }
