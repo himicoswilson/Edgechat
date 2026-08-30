@@ -764,8 +764,10 @@ onBeforeUnmount(() => {
   left: 0;
   display: flex;
   width: 100%;
-  height: var(--chat-viewport-height, 100dvh);
-  min-height: 100dvh;
+  /* 键盘打开时 bottom 被 --chat-keyboard-height 抬高,布局/输入栏紧贴键盘上沿;
+     普通视图下 bottom:0 即铺满视口 */
+  bottom: var(--chat-keyboard-height, 0px);
+  height: auto;
   overflow: hidden;
   background: #f0f1f2;
 }
@@ -1219,7 +1221,9 @@ onBeforeUnmount(() => {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 20px 24px;
+  /* 常驻可滚衬垫:让内容永远高于容器,iOS 手势滚动永不升级为文档滚动,
+     避免键盘打开时滑动把整个 fixed 布局带离屏幕 */
+  padding: 20px 24px 140px;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
   touch-action: pan-y;
@@ -1637,7 +1641,8 @@ onBeforeUnmount(() => {
   }
 
   .chat-messages {
-    padding: 14px max(10px, env(safe-area-inset-right)) 18px max(10px, env(safe-area-inset-left));
+    /* 底部 140px 常驻衬垫在移动端保留:保证列表永远可滚,iOS 手势不升级 */
+    padding: 14px max(10px, env(safe-area-inset-right)) 140px max(10px, env(safe-area-inset-left));
     scrollbar-gutter: auto;
   }
 

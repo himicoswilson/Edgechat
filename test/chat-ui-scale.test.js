@@ -28,7 +28,7 @@ function getStyleRule(source, selector) {
 test("聊天界面使用原始控件尺寸铺满整个视口", () => {
 	const layout = getStyleRule(chatPage, ".chat-layout");
 	assert.match(layout, /width:\s*100%;/);
-	assert.match(layout, /height:\s*var\(--chat-viewport-height,\s*100dvh\);/);
+	assert.match(layout, /bottom:\s*var\(--chat-keyboard-height,\s*0px\);/);
 	assert.match(layout, /position:\s*fixed;/);
 	assert.match(layout, /top:\s*0;/);
 	assert.match(layout, /overflow:\s*hidden;/);

@@ -80,6 +80,7 @@ test("移动端首次进入只显示会话列表，选择后可进入并返回",
 	assert.equal(viewport.isMobileViewport.value, true);
 	assert.equal(viewport.mobileView.value, "list");
 	assert.equal(browser.properties.get("--chat-viewport-height"), "740px");
+	assert.equal(browser.properties.get("--chat-keyboard-height"), "0px");
 	assert.equal(browser.properties.has("--chat-viewport-offset-top"), false);
 
 	window.visualViewport.height = 420;
@@ -88,6 +89,7 @@ test("移动端首次进入只显示会话列表，选择后可进入并返回",
 		listener();
 	}
 	assert.equal(browser.properties.get("--chat-viewport-height"), "420px");
+	assert.equal(browser.properties.get("--chat-keyboard-height"), "320px");
 	// 不做 offsetTop 平移,布局始终贴视口顶
 	assert.equal(browser.properties.has("--chat-viewport-offset-top"), false);
 
@@ -98,6 +100,7 @@ test("移动端首次进入只显示会话列表，选择后可进入并返回",
 		listener();
 	}
 	assert.equal(browser.properties.get("--chat-viewport-height"), "740px");
+	assert.equal(browser.properties.get("--chat-keyboard-height"), "0px");
 	assert.equal(browser.properties.has("--chat-viewport-offset-top"), false);
 
 	// iOS Safari 键盘弹出:高度不变、仅 offsetTop 顶起,布局应缩到键盘上沿
@@ -107,6 +110,7 @@ test("移动端首次进入只显示会话列表，选择后可进入并返回",
 		listener();
 	}
 	assert.equal(browser.properties.get("--chat-viewport-height"), "440px");
+	assert.equal(browser.properties.get("--chat-keyboard-height"), "300px");
 	assert.equal(browser.classes.has("chat-keyboard-open"), true);
 
 	// 键盘收起后解除页面滚动锁
