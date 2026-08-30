@@ -4,6 +4,34 @@ import { getRuntimeFileUrl, isDemoMode, requestRuntime } from './runtime.js';
 
 const API_PREFIX = '/api';
 
+// iOS Safari 的 PushSubscription 可能不暴露 keys 属性(web-push-libs/web-push#939 同类问题),
+// 退化为标准 getKey() 读取 p256dh/auth,两种来源统一编码为 base64url。
+export function normalizePushSubscription(subscription) {
+  const keys = subscription?.keys || {};
+  function keyValue(type) {
+    const buffer = subscription?.getKey?.(type);
+    if (!buffer) {
+      return '';
+    }
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    for (const byte of bytes) {
+      binary += String.fromCharCode(byte);
+    }
+    return btoa(binary)
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/g, '');
+  }
+  return {
+    endpoint: String(subscription?.endpoint || ''),
+    keys: {
+      p256dh: String(keys.p256dh || '') || keyValue('p256dh'),
+      auth: String(keys.auth || '') || keyValue('auth')
+    }
+  };
+}
+
 function buildHeaders(extra = {}) {
   const headers = { ...extra };
   const token = getStoredToken();
@@ -76,10 +104,7 @@ export default {
     return request('/push-subscriptions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: {
-        endpoint: subscription.endpoint,
-        keys: subscription.keys
-      }
+      body: normalizePushSubscription(subscription)
     });
   },
   deletePushSubscription(endpoint) {
