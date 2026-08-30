@@ -68,6 +68,8 @@ export function createPushProjection({
 								status: result?.status ?? 0,
 								responseBody: result?.body || "",
 								responseHeaders: result?.headers || {},
+								requestContentType: result?.requestContentType || "",
+								requestPayload: result?.requestPayload || "",
 							}));
 						})
 						.catch(async (error) => {

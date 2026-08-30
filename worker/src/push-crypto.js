@@ -305,6 +305,8 @@ export async function sendPushNotification(env, subscription, payloadText) {
 		status: response.status,
 		body: detail.slice(0, 200),
 		headers: Object.fromEntries(response.headers),
+		requestContentType: "application/notification+json",
+		requestPayload: payloadText.slice(0, 200),
 	};
 }
 
