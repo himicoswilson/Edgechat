@@ -35,13 +35,35 @@ self.addEventListener("pushsubscriptionchange", (event) => {
   );
 });
 
+// 推送到达记录器:应用关闭时收到的推送写进 IndexedDB,下次打开用一条 console 命令读取,
+// 不依赖 Web Inspector 是否挂在 SW 目标上(关闭的应用检查器挂不上)。
+const PUSH_DIAG_DB = "edgechat-push-diag";
+const PUSH_DIAG_STORE = "state";
+
+function recordPushDiag(entry) {
+  try {
+    const openRequest = indexedDB.open(PUSH_DIAG_DB, 1);
+    openRequest.onupgradeneeded = () => {
+      openRequest.result.createObjectStore(PUSH_DIAG_STORE);
+    };
+    openRequest.onsuccess = () => {
+      const db = openRequest.result;
+      const tx = db.transaction(PUSH_DIAG_STORE, "readwrite");
+      tx.objectStore(PUSH_DIAG_STORE).put(entry, "last");
+    };
+  } catch {
+    // 诊断记录失败不影响推送展示
+  }
+}
+
 self.addEventListener("push", (event) => {
-  console.log("[edgechat] push received:", String(event.data ? event.data.text() : "").slice(0, 200));
+  const payloadText = event.data ? event.data.text() : "";
+  console.log("[edgechat] push received:", payloadText.slice(0, 200));
   let data = {};
   try {
     data = event.data ? event.data.json() : {};
   } catch {
-    data = { body: String(event.data || "") };
+    data = { body: payloadText };
   }
   const title = data.title || "Edgechat";
   const options = {
@@ -55,8 +77,14 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration
       .showNotification(title, options)
-      .then(() => console.log("[edgechat] notification shown"))
-      .catch((error) => console.error("[edgechat] showNotification failed:", error)),
+      .then(() => {
+        console.log("[edgechat] notification shown");
+        recordPushDiag({ ts: Date.now(), shown: true, payload: payloadText.slice(0, 120) });
+      })
+      .catch((error) => {
+        console.error("[edgechat] showNotification failed:", error);
+        recordPushDiag({ ts: Date.now(), shown: false, payload: payloadText.slice(0, 120), error: String(error) });
+      }),
   );
 });
 
