@@ -2,6 +2,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router.js';
 import store from './store.js';
+import { isDemoMode } from './runtime.js';
 import './styles/base.css';
 import './styles.css';
 import './styles/tokens.css';
@@ -18,6 +19,9 @@ if (customBg) {
 }
 
 store.initialize().finally(() => {
+  if (!isDemoMode && 'serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
   const app = createApp(App);
   app.use(router);
   app.mount('#app');

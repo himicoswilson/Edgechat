@@ -5,6 +5,7 @@ import { forwardEdgeChatMessageToTelegram } from '../integrations/telegram/bridg
 import { authorizeRoom } from '../room-access.js';
 import { validateSession } from '../session.js';
 import { projectUnreadMessage } from '../unread-projection.js';
+import { projectPushNotifications } from '../push-notifications.js';
 import { isVerifiedInternalRequest, parseVerifiedPrincipal } from '../verified-identity.js';
 
 const MESSAGE_SIZE_LIMIT = 10 * 1024;
@@ -149,7 +150,12 @@ export class ChannelRoom {
           senderId: message.sender.kind === 'local' ? message.sender.id : null,
           message
         }),
-        forwardEdgeChatMessageToTelegram(this.env, { room, message })
+        forwardEdgeChatMessageToTelegram(this.env, { room, message }),
+        projectPushNotifications(this.env, {
+          room,
+          senderId: message.sender.kind === 'local' ? message.sender.id : null,
+          message
+        })
       ])
     );
   }

@@ -72,6 +72,23 @@ export default {
   getSite() {
     return request('/site');
   },
+  savePushSubscription(subscription) {
+    return request('/push-subscriptions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: {
+        endpoint: subscription.endpoint,
+        keys: subscription.keys
+      }
+    });
+  },
+  deletePushSubscription(endpoint) {
+    return request('/push-subscriptions', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: { endpoint }
+    });
+  },
   changePassword(payload) {
     return request('/auth/change-password', {
       method: 'POST',

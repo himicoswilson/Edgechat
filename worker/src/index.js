@@ -30,6 +30,7 @@ import {
   registerTelegramAdminRoutes,
   registerTelegramPublicRoutes
 } from './api/telegram.js';
+import { registerPushSubscriptionRoutes } from './api/push-subscriptions.js';
 import { ChannelRoom } from './do/ChannelRoom.js';
 import { Scheduler } from './do/Scheduler.js';
 import { UserInbox } from './do/UserInbox.js';
@@ -63,7 +64,12 @@ app.get('/api/health', (c) => c.json({ ok: true }));
 
 app.get('/api/site', async (c) => {
   const site = await getSiteSettings(c.env.DB);
-  return c.json({ site });
+  return c.json({
+    site: {
+      ...site,
+      vapidPublicKey: String(c.env.VAPID_PUBLIC_KEY || ""),
+    },
+  });
 });
 
 registerTelegramPublicRoutes(app);
@@ -304,6 +310,7 @@ registerUploadRoutes(app);
 registerChannelRoutes(app);
 registerAdminRoutes(app);
 registerTelegramAdminRoutes(app);
+registerPushSubscriptionRoutes(app);
 
 app.get('/api/ws/:kind/:id', async (c) => {
   const session = c.get('session');

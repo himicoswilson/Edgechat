@@ -57,3 +57,7 @@ run_worker_first = ["/api/*", "/files/*"]
 [triggers]
 # Cloudflare Cron 按 UTC 执行；19:00 UTC = 北京时间每天 03:00
 crons = ["0 19 * * *"]
+
+# Web Push (VAPID) 通过部署时注入的 secrets 配置(GitHub Actions 的
+# VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / VAPID_SUBJECT),无需写在此文件。
+# 本地调试:  node .github/scripts/generate-vapid-keys.mjs

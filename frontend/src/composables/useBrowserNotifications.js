@@ -1,6 +1,7 @@
 import { computed, ref } from "vue";
 import { t } from "../i18n.js";
 import store from "../store.js";
+import api from "../api.js";
 
 const STORAGE_KEY_PREFIX = "edgechat:browser-notifications";
 
@@ -81,6 +82,61 @@ export function useBrowserNotifications(options = {}) {
 		() => !supported.value || permission.value === "denied",
 	);
 
+	function urlBase64ToBytes(value) {
+		const base64 = String(value)
+			.replace(/-/g, "+")
+			.replace(/_/g, "/");
+		const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+		const binary = atob(padded);
+		const bytes = new Uint8Array(binary.length);
+		for (let i = 0; i < binary.length; i += 1) {
+			bytes[i] = binary.charCodeAt(i);
+		}
+		return bytes;
+	}
+
+	// Web Push 订阅是尽力而为的增强:无 Service Worker / 未配置 VAPID 时静默跳过,
+	// 桌面端本地通知仍照常工作(iOS 需以主屏幕图标启动的 PWA 才具备 pushManager)。
+	async function enableWebPushSubscription() {
+		try {
+			if (!browserWindow?.navigator?.serviceWorker) {
+				return;
+			}
+			const { site } = await api.getSite();
+			const applicationServerKey = site?.vapidPublicKey || "";
+			if (!applicationServerKey) {
+				return;
+			}
+			const registration = await browserWindow.navigator.serviceWorker.ready;
+			const existing = await registration.pushManager.getSubscription();
+			const subscription =
+				existing ||
+				(await registration.pushManager.subscribe({
+					userVisibleOnly: true,
+					applicationServerKey: urlBase64ToBytes(applicationServerKey),
+				}));
+			await api.savePushSubscription(subscription);
+		} catch {
+			// 推送服务不可用时保持本地通知可用,不打扰用户
+		}
+	}
+
+	async function disableWebPushSubscription() {
+		try {
+			if (!browserWindow?.navigator?.serviceWorker) {
+				return;
+			}
+			const registration = await browserWindow.navigator.serviceWorker.ready;
+			const subscription = await registration.pushManager.getSubscription();
+			if (subscription) {
+				await subscription.unsubscribe();
+				await api.deletePushSubscription(subscription.endpoint);
+			}
+		} catch {
+			// 尽最大努力清理,失败不影响本地状态
+		}
+	}
+
 	// iOS Safari 仅在安装到主屏幕(PWA)后暴露 Notification API,非安装态给出引导文案
 	const iosInstallHint = computed(() => {
 		const navigator = browserWindow?.navigator;
@@ -108,6 +164,7 @@ export function useBrowserNotifications(options = {}) {
 		if (enabled.value) {
 			enabled.value = false;
 			persistPreferences();
+			await disableWebPushSubscription();
 			return notificationActionLabel.value;
 		}
 
@@ -116,6 +173,9 @@ export function useBrowserNotifications(options = {}) {
 		}
 		enabled.value = permission.value === "granted";
 		persistPreferences();
+		if (enabled.value) {
+			await enableWebPushSubscription();
+		}
 		return notificationActionLabel.value;
 	}
 

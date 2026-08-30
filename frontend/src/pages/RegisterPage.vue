@@ -124,6 +124,7 @@ onMounted(() => {
 <style scoped>
 .login-page {
   min-height: 100vh;
+  /* biome-ignore lint/suspicious/noDuplicateProperties: 100dvh 降级兜底,老浏览器不识别则回退上一行 100vh */
   min-height: 100dvh;
   display: flex;
   align-items: center;

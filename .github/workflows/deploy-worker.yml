@@ -103,18 +103,27 @@ jobs:
           EDGECHAT_APPLY_ENCRYPTION_KEYRING: ${{ github.event_name == 'workflow_dispatch' && inputs.apply_encryption_keyring || false }}
           EDGECHAT_ROTATE_ENCRYPTION_KEY: ${{ github.event_name == 'workflow_dispatch' && inputs.rotate_encryption_key || false }}
         run: node .github/scripts/prepare-worker-encryption-secret.mjs
+      - name: Prepare Worker push secrets (VAPID)
+        env:
+          EDGECHAT_VAPID_PUBLIC_KEY: ${{ secrets.VAPID_PUBLIC_KEY }}
+          EDGECHAT_VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          EDGECHAT_VAPID_SUBJECT: ${{ secrets.VAPID_SUBJECT }}
+        run: node .github/scripts/prepare-worker-push-secrets.mjs
       - name: Deploy worker
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         shell: bash
         run: |
+          SECRET_FLAGS=""
           if [[ -f .tmp/worker-secrets.json ]]; then
-            npx wrangler deploy --config wrangler.ci.toml --secrets-file .tmp/worker-secrets.json
-          else
-            npx wrangler deploy --config wrangler.ci.toml
+            SECRET_FLAGS="--secrets-file .tmp/worker-secrets.json"
           fi
+          if [[ -f .tmp/worker-push-secrets.json ]]; then
+            SECRET_FLAGS="${SECRET_FLAGS} --secrets-file .tmp/worker-push-secrets.json"
+          fi
+          npx wrangler deploy --config wrangler.ci.toml ${SECRET_FLAGS}
       - name: Remove temporary secret files
         if: always()
         shell: bash
-        run: rm -f .tmp/worker-secrets.json
+        run: rm -f .tmp/worker-secrets.json .tmp/worker-push-secrets.json

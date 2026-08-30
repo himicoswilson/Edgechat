@@ -74,7 +74,8 @@ test("首次部署自动创建密钥，普通部署保留密钥，手动轮换�
 
 	const deployStep = getStep("Deploy worker");
 	assert.match(deployStep, /if \[\[ -f \.tmp\/worker-secrets\.json \]\]/);
-	assert.match(deployStep, /wrangler deploy --config wrangler\.ci\.toml --secrets-file/);
+	assert.match(deployStep, /--secrets-file \.tmp\/worker-secrets\.json/);
+	assert.match(deployStep, /--secrets-file \.tmp\/worker-push-secrets\.json/);
 	assert.match(deployStep, /wrangler deploy --config wrangler\.ci\.toml/);
 });
 
