@@ -109,7 +109,7 @@ function handleRoomAccessRevoked(room) {
 
 const {
   messages, loading, wsStatus, composerText, pendingAttachment, sending,
-  messagesEl, fileInputEl, isOwnMessage,
+  hasMoreMessages, messagesEl, fileInputEl, isOwnMessage,
   loadMessages, activateRoom, deactivateRoom, disconnectSocket, sendMessage, deleteMessage, handleComposerKeydown,
   openFilePicker, uploadAttachment, clearAttachment, loadOlder
 } = useChatRoom({
