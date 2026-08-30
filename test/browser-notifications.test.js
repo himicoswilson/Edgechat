@@ -141,3 +141,96 @@ test("浏览器拒绝通知权限时开关保持禁用", async () => {
 	await notifications.toggleNotifications();
 	assert.equal(notifications.notificationsEnabled.value, false);
 });
+
+function createPushBackend({ vapidPublicKey = "ABC123" } = {}) {
+	const saved = [];
+	const api = {
+		async getSite() {
+			return { site: { vapidPublicKey } };
+		},
+		async savePushSubscription(subscription) {
+			saved.push(subscription);
+		},
+		async deletePushSubscription() {},
+	};
+	const browserWindow = {
+		navigator: {
+			serviceWorker: {
+				ready: Promise.resolve({
+					pushManager: {
+						async getSubscription() {
+							return null;
+						},
+						async subscribe() {
+							return {
+								endpoint: "https://push.example.com/1",
+								keys: { p256dh: "p", auth: "a" },
+							};
+						},
+					},
+				}),
+			},
+		},
+	};
+	return { api, saved, browserWindow };
+}
+
+test("开启通知时向服务器上报 Web Push 订阅", async () => {
+	const { NotificationApi } = createNotificationApi();
+	const backend = createPushBackend();
+	const notifications = useBrowserNotifications({
+		userId: 1,
+		notificationApi: NotificationApi,
+		storage: createStorage(),
+		api: backend.api,
+		browserWindow: backend.browserWindow,
+	});
+
+	await notifications.toggleNotifications();
+	assert.equal(notifications.notificationsEnabled.value, true);
+	assert.deepEqual(backend.saved, [
+		{ endpoint: "https://push.example.com/1", keys: { p256dh: "p", auth: "a" } },
+	]);
+	assert.equal(notifications.notificationInstallHint.value, "");
+});
+
+test("服务器未配置 VAPID 时开关保持可用但如实提示推送未配置", async () => {
+	const { NotificationApi } = createNotificationApi();
+	const backend = createPushBackend({ vapidPublicKey: "" });
+	const notifications = useBrowserNotifications({
+		userId: 1,
+		notificationApi: NotificationApi,
+		storage: createStorage(),
+		api: backend.api,
+		browserWindow: backend.browserWindow,
+	});
+
+	await notifications.toggleNotifications();
+	assert.equal(notifications.notificationsEnabled.value, true);
+	assert.deepEqual(backend.saved, []);
+	assert.match(notifications.notificationInstallHint.value, /推送未配置/);
+});
+
+test("已开启过的账号在启动时自动补订阅", async () => {
+	const { NotificationApi } = createNotificationApi();
+	NotificationApi.permission = "granted";
+	const storage = createStorage();
+	storage.setItem("edgechat:browser-notifications:7", JSON.stringify({ enabled: true }));
+	const backend = createPushBackend();
+	const notifications = useBrowserNotifications({
+		userId: 7,
+		notificationApi: NotificationApi,
+		storage,
+		api: backend.api,
+		browserWindow: backend.browserWindow,
+	});
+
+	assert.equal(notifications.notificationsEnabled.value, true);
+	// 自愈在 compose 时异步启动,flush 微任务后断言已上报
+	await new Promise((resolve) => setTimeout(resolve, 0));
+	await new Promise((resolve) => setTimeout(resolve, 0));
+	assert.deepEqual(backend.saved, [
+		{ endpoint: "https://push.example.com/1", keys: { p256dh: "p", auth: "a" } },
+	]);
+	assert.equal(notifications.notificationInstallHint.value, "");
+});

@@ -35,6 +35,7 @@ export function useBrowserNotifications(options = {}) {
 			: options.notificationApi;
 	const storage =
 		options.storage === undefined ? browserWindow?.localStorage : options.storage;
+	const apiClient = options.api === undefined ? api : options.api;
 	const storageKey = `${STORAGE_KEY_PREFIX}:${options.userId || "guest"}`;
 	const savedPreferences = loadPreferences(storage, storageKey);
 	const supported = computed(() => typeof notificationApi === "function");
@@ -45,6 +46,10 @@ export function useBrowserNotifications(options = {}) {
 		savedPreferences.enabled && permission.value === "granted",
 	);
 	const mutedRoomKeys = ref(new Set(savedPreferences.mutedRooms));
+
+	// Web Push 订阅是否已在服务端登记;issue: unconfigured(服务器未配 VAPID)/failed(订阅失败)
+	const webPushReady = ref(false);
+	const webPushIssue = ref("");
 
 	function persistPreferences() {
 		storage?.setItem(
@@ -95,17 +100,19 @@ export function useBrowserNotifications(options = {}) {
 		return bytes;
 	}
 
-	// Web Push 订阅是尽力而为的增强:无 Service Worker / 未配置 VAPID 时静默跳过,
-	// 桌面端本地通知仍照常工作(iOS 需以主屏幕图标启动的 PWA 才具备 pushManager)。
+	// Web Push 订阅尽力而为:无 Service Worker 或未配置 VAPID 时本地通知仍可用,
+	// 但如实上报结果,避免 iOS 关闭应用后"已开启却收不到提醒"的假象。
 	async function enableWebPushSubscription() {
+		webPushIssue.value = "";
+		if (!browserWindow?.navigator?.serviceWorker) {
+			return { ready: false, issue: "" };
+		}
 		try {
-			if (!browserWindow?.navigator?.serviceWorker) {
-				return;
-			}
-			const { site } = await api.getSite();
+			const { site } = await apiClient.getSite();
 			const applicationServerKey = site?.vapidPublicKey || "";
 			if (!applicationServerKey) {
-				return;
+				webPushIssue.value = "unconfigured";
+				return { ready: false, issue: "unconfigured" };
 			}
 			const registration = await browserWindow.navigator.serviceWorker.ready;
 			const existing = await registration.pushManager.getSubscription();
@@ -115,9 +122,14 @@ export function useBrowserNotifications(options = {}) {
 					userVisibleOnly: true,
 					applicationServerKey: urlBase64ToBytes(applicationServerKey),
 				}));
-			await api.savePushSubscription(subscription);
+			// 已存在订阅也重复上报一次(幂等 upsert),兜底服务端记录丢失
+			await apiClient.savePushSubscription(subscription);
+			webPushReady.value = true;
+			return { ready: true, issue: "" };
 		} catch {
-			// 推送服务不可用时保持本地通知可用,不打扰用户
+			// 订阅不可用时保持本地通知可用,但如实标记推送未就绪,下次启动自愈
+			webPushIssue.value = "failed";
+			return { ready: false, issue: "failed" };
 		}
 	}
 
@@ -130,29 +142,51 @@ export function useBrowserNotifications(options = {}) {
 			const subscription = await registration.pushManager.getSubscription();
 			if (subscription) {
 				await subscription.unsubscribe();
-				await api.deletePushSubscription(subscription.endpoint);
+				await apiClient.deletePushSubscription(subscription.endpoint);
 			}
 		} catch {
 			// 尽最大努力清理,失败不影响本地状态
 		}
 	}
 
-	// iOS Safari 仅在安装到主屏幕(PWA)后暴露 Notification API,非安装态给出引导文案
-	const iosInstallHint = computed(() => {
+	// 启动自愈:上次已开启但订阅缺失/失败(如 iOS 首次授权后 subscribe 抛错)时,
+	// 下次启动补齐订阅;推送服务轮换订阅后也由页面重新上报。
+	async function restoreWebPushSubscription() {
+		syncPermission();
+		if (!enabled.value || permission.value !== "granted") {
+			return;
+		}
+		await enableWebPushSubscription();
+	}
+
+	// iOS Safari 仅在安装到主屏幕(PWA)后暴露 Notification API,非安装态给出引导文案;
+	// 推送未就绪(unconfigured/failed)时如实提示,避免"已开启却收不到"的假象。
+	const notificationInstallHint = computed(() => {
 		const navigator = browserWindow?.navigator;
 		const userAgent = navigator?.userAgent || "";
 		if (
-			supported.value ||
-			!/iphone|ipad|ipod/i.test(userAgent) ||
-			!/safari/i.test(userAgent) ||
-			/crios|fxios|edgios/i.test(userAgent)
+			!supported.value &&
+			/iphone|ipad|ipod/i.test(userAgent) &&
+			/safari/i.test(userAgent) &&
+			!/crios|fxios|edgios/i.test(userAgent)
 		) {
+			const standalone =
+				navigator?.standalone === true ||
+				browserWindow?.matchMedia?.("(display-mode: standalone)").matches;
+			if (!standalone) {
+				return t("notifications.iosInstallHint");
+			}
+		}
+		if (!supported.value || !enabled.value || webPushReady.value) {
 			return "";
 		}
-		const standalone =
-			navigator?.standalone === true ||
-			browserWindow?.matchMedia?.("(display-mode: standalone)").matches;
-		return standalone ? "" : t("notifications.iosInstallHint");
+		if (webPushIssue.value === "unconfigured") {
+			return t("notifications.pushUnavailable");
+		}
+		if (webPushIssue.value === "failed") {
+			return t("notifications.pushSubscribeFailed");
+		}
+		return "";
 	});
 
 	async function toggleNotifications() {
@@ -163,6 +197,9 @@ export function useBrowserNotifications(options = {}) {
 
 		if (enabled.value) {
 			enabled.value = false;
+			// 关闭时一并复位推送状态,避免下次开启读到陈旧标志
+			webPushReady.value = false;
+			webPushIssue.value = "";
 			persistPreferences();
 			await disableWebPushSubscription();
 			return notificationActionLabel.value;
@@ -174,6 +211,7 @@ export function useBrowserNotifications(options = {}) {
 		enabled.value = permission.value === "granted";
 		persistPreferences();
 		if (enabled.value) {
+			webPushReady.value = false;
 			await enableWebPushSubscription();
 		}
 		return notificationActionLabel.value;
@@ -217,17 +255,34 @@ export function useBrowserNotifications(options = {}) {
 		return true;
 	}
 
+	// 页面加载时自愈上次失败的订阅(见 restoreWebPushSubscription)
+	if (enabled.value && browserWindow?.navigator?.serviceWorker) {
+		void restoreWebPushSubscription();
+	}
+
 	return {
 		notificationsEnabled: enabled,
 		notificationPermission: permission,
 		notificationStateLabel,
 		notificationActionLabel,
 		notificationToggleDisabled,
-		notificationInstallHint: iosInstallHint,
+		notificationInstallHint,
 		syncNotificationPermission: syncPermission,
 		toggleNotifications,
+		restoreWebPushSubscription,
 		isRoomMuted,
 		toggleRoomMuted,
 		notifyRoom,
 	};
+}
+
+// 推送服务轮换订阅(pushsubscriptionchange)时 SW 无鉴权令牌,由页面代为保存到服务器
+const SW_SUBSCRIPTION_EVENT = "push-subscription-changed";
+if (typeof navigator !== "undefined" && navigator.serviceWorker) {
+	navigator.serviceWorker.addEventListener?.("message", (event) => {
+		if (event.data?.type !== SW_SUBSCRIPTION_EVENT || !event.data?.subscription) {
+			return;
+		}
+		api.savePushSubscription(event.data.subscription).catch(() => {});
+	});
 }

@@ -15,6 +15,26 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// 推送服务轮换订阅时 SW 拿不到鉴权令牌,把新订阅发给页面代为保存到服务器
+self.addEventListener("pushsubscriptionchange", (event) => {
+  event.waitUntil(
+    (async () => {
+      const subscription = await self.registration.pushManager.getSubscription();
+      if (!subscription) {
+        return;
+      }
+      const message = { type: "push-subscription-changed", subscription };
+      const clients = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
+      for (const client of clients) {
+        client.postMessage(message);
+      }
+    })(),
+  );
+});
+
 self.addEventListener("push", (event) => {
   let data = {};
   try {
