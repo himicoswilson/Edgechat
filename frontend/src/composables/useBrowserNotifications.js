@@ -242,14 +242,26 @@ export function useBrowserNotifications(options = {}) {
 		return nextMutedRooms.has(key);
 	}
 
-	function notifyRoom(room) {
+	function notifyRoom(room, details = {}) {
 		syncPermission();
 		if (!enabled.value || isRoomMuted(room)) {
 			return false;
 		}
 
-		const notification = new notificationApi(room.name || store.site.siteName, {
-				body: room.kind === "dm" ? t('notifications.directMessage') : t('notifications.groupMessage'),
+		// 私信标题用对方昵称,群聊标题用群名;正文展示真实消息内容,内容为空时回落通用文案
+		const isDm = room.kind === "dm";
+		const title = isDm
+			? details.senderName || room.name || store.site.siteName
+			: room.name || store.site.siteName;
+		const content = String(details.content || "").trim();
+		const body = content
+			? content
+			: isDm
+				? t("notifications.directMessage")
+				: t("notifications.groupMessage");
+
+		const notification = new notificationApi(title, {
+			body,
 			tag: `edgechat:${browserNotificationRoomKey(room)}`,
 			renotify: true,
 		});

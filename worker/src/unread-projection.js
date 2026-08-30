@@ -5,6 +5,14 @@ function logProjectionFailure(message, data) {
 	console.warn(JSON.stringify({ message, ...data }));
 }
 
+function summarizeContent(message) {
+	const content = String(message?.content || "").trim();
+	if (content) {
+		return content.length > 120 ? `${content.slice(0, 120)}…` : content;
+	}
+	return "";
+}
+
 export function createUnreadProjection({
 	countUnread = countUnreadMessages,
 	listMemberIds = listRoomMemberIds,
@@ -25,6 +33,8 @@ export function createUnreadProjection({
 					name: room.name,
 				},
 				messageId: Number(message.id),
+				content: summarizeContent(message),
+				senderName: message.sender?.displayName || "",
 				createdAt: message.createdAt,
 				unreadCount,
 			});

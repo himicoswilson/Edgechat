@@ -50,7 +50,7 @@ export function useUnreadInbox({
           lastMessageAt: payload.createdAt,
           unreadCount: payload.unreadCount
         });
-			notifyRoom(payload.room);
+		notifyRoom(payload.room, payload);
 			},
 		});
 

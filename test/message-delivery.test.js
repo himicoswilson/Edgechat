@@ -121,7 +121,7 @@ test("未读投影排除发送者，并行投影所有收件人", async () => {
 		{
 			room: { id: "4", kind: "private", name: "Team" },
 			senderId: 1,
-			message: { id: "8", createdAt: "now" },
+			message: { id: "8", createdAt: "now", content: "hello", sender: { displayName: "Alice" } },
 		},
 	);
 	await Promise.resolve();
@@ -136,6 +136,8 @@ test("未读投影排除发送者，并行投影所有收件人", async () => {
 				type: "room_message",
 				room: { id: 4, kind: "private", name: "Team" },
 				messageId: 8,
+				content: "hello",
+				senderName: "Alice",
 				createdAt: "now",
 				unreadCount: 5,
 			},
@@ -146,6 +148,8 @@ test("未读投影排除发送者，并行投影所有收件人", async () => {
 				type: "room_message",
 				room: { id: 4, kind: "private", name: "Team" },
 				messageId: 8,
+				content: "hello",
+				senderName: "Alice",
 				createdAt: "now",
 				unreadCount: 6,
 			},

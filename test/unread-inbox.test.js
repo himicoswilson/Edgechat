@@ -34,8 +34,8 @@ function createInboxHarness({ activeRoom, pageActive }) {
 			connectionHandlers.onStatus({ status: "open", socket });
 			return socket;
 		},
-		notifyRoom(room) {
-			notified.push(room);
+		notifyRoom(room, details) {
+			notified.push({ room, details });
 		},
 		isPageActive: () => pageActive,
 	});
@@ -55,6 +55,8 @@ const messagePayload = {
 	type: "room_message",
 	room: { kind: "private", id: 2, name: "产品协作" },
 	messageId: 18,
+	content: "明天下午三点开会",
+	senderName: "王五",
 	createdAt: "2026-08-16T10:00:00.000Z",
 	unreadCount: 3,
 };
@@ -81,7 +83,10 @@ test("页面失焦或消息来自其他会话时保留未读并触发通知", ()
 	});
 	hiddenActiveRoom.emit(messagePayload);
 	assert.equal(hiddenActiveRoom.activity.length, 1);
-	assert.deepEqual(hiddenActiveRoom.notified, [messagePayload.room]);
+	assert.equal(hiddenActiveRoom.notified.length, 1);
+	assert.deepEqual(hiddenActiveRoom.notified[0].room, messagePayload.room);
+	assert.equal(hiddenActiveRoom.notified[0].details.content, "明天下午三点开会");
+	assert.equal(hiddenActiveRoom.notified[0].details.senderName, "王五");
 	assert.deepEqual(hiddenActiveRoom.read, []);
 
 	const otherRoom = createInboxHarness({
@@ -90,5 +95,7 @@ test("页面失焦或消息来自其他会话时保留未读并触发通知", ()
 	});
 	otherRoom.emit(messagePayload);
 	assert.equal(otherRoom.activity[0].unreadCount, 3);
-	assert.deepEqual(otherRoom.notified, [messagePayload.room]);
+	assert.equal(otherRoom.notified.length, 1);
+	assert.deepEqual(otherRoom.notified[0].room, messagePayload.room);
+	assert.equal(otherRoom.notified[0].details.content, "明天下午三点开会");
 });

@@ -127,6 +127,33 @@ test("会话免打扰阻止通知，取消后通知可聚合并打开会话", as
 	assert.equal(shown[1].options.body, "收到一条新群聊消息");
 });
 
+test("通知标题用对方昵称/群名，正文展示真实消息内容", async () => {
+	const storage = createStorage();
+	const { NotificationApi, notifications: shown } = createNotificationApi();
+	const notifications = useBrowserNotifications({
+		userId: 10,
+		notificationApi: NotificationApi,
+		storage,
+		browserWindow: {},
+	});
+	await notifications.toggleNotifications();
+
+	const dmRoom = { kind: "dm", id: "13", name: "1:2" };
+	notifications.notifyRoom(dmRoom, { senderName: "王五", content: "明天下午开会" });
+	assert.equal(shown[0].title, "王五");
+	assert.equal(shown[0].options.body, "明天下午开会");
+
+	const groupRoom = { kind: "public", id: 3, name: "产品协作" };
+	notifications.notifyRoom(groupRoom, { senderName: "李四", content: "发布 v2 了" });
+	assert.equal(shown[1].title, "产品协作");
+	assert.equal(shown[1].options.body, "发布 v2 了");
+
+	// 无内容时回落通用文案,私信标题仍取昵称
+	notifications.notifyRoom(dmRoom, { senderName: "王五" });
+	assert.equal(shown[2].title, "王五");
+	assert.equal(shown[2].options.body, "收到一条新私信");
+});
+
 test("浏览器拒绝通知权限时开关保持禁用", async () => {
 	const { NotificationApi } = createNotificationApi();
 	NotificationApi.permission = "denied";
