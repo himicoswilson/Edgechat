@@ -50,8 +50,9 @@ a:hover {
   text-decoration: underline;
 }
 
-/* iOS 会自动把文本中的号码/日期/地址渲染成蓝色链接,桌面端看不到,统一中和为正文选色 */
-a[x-apple-data-detectors] {
+/* iOS 会自动把文本中的号码/日期/地址渲染成蓝色链接,桌面端看不到,统一中和为正文选色;
+   数据检测标记会打在任意元素上(按钮里的 span/button 本身),不限于 <a>,故用属性选择器全覆盖 */
+[x-apple-data-detectors] {
   color: inherit;
   text-decoration: none;
 }

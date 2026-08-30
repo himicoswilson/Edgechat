@@ -165,7 +165,7 @@ function openAvatarPicker() {
 
 .room-dialog__actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
 .room-dialog__secondary, .room-dialog__primary { min-height: 44px; padding: 10px 20px; border-radius: 8px; cursor: pointer; touch-action: manipulation; }
-.room-dialog__secondary { border: 1px solid #e8ecf0; background: #fff; }
+.room-dialog__secondary { border: 1px solid #e8ecf0; background: #fff; color: var(--text); }
 .room-dialog__primary { border: 0; background: var(--btn); color: #fff; }
 .room-dialog__primary:hover:not(:disabled) { background: var(--btn-hover); }
 .room-dialog__primary:disabled, .room-dialog__secondary:disabled { cursor: not-allowed; opacity: 0.55; }

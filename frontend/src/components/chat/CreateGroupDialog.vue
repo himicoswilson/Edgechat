@@ -129,11 +129,11 @@ useOverlayLifecycle({
 .room-dialog__members { margin-top: 20px; }
 .room-dialog__members > label { display: block; margin-bottom: 8px; font-size: 13px; color: #6b7c93; }
 .room-dialog__member-list { display: flex; flex-wrap: wrap; gap: 8px; max-height: 180px; overflow-y: auto; }
-.room-dialog__member { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px; border: 1px solid #e8ecf0; border-radius: 8px; background: #fff; cursor: pointer; touch-action: manipulation; }
+.room-dialog__member { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 8px 12px; border: 1px solid #e8ecf0; border-radius: 8px; background: #fff; color: var(--text); cursor: pointer; touch-action: manipulation; }
 .room-dialog__member--selected { border-color: #111b21; background: #f3f4f6; }
 .room-dialog__actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
 .room-dialog__secondary, .room-dialog__primary { min-height: 44px; padding: 10px 20px; border-radius: 8px; cursor: pointer; touch-action: manipulation; }
-.room-dialog__secondary { border: 1px solid #e8ecf0; background: #fff; }
+.room-dialog__secondary { border: 1px solid #e8ecf0; background: #fff; color: var(--text); }
 .room-dialog__primary { border: 0; background: var(--btn); color: #fff; }
 .room-dialog__primary:hover:not(:disabled) { background: var(--btn-hover); }
 .room-dialog__primary:disabled { cursor: not-allowed; opacity: 0.55; }
