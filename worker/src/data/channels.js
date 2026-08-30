@@ -10,7 +10,7 @@ function mapVisibleChannel(row) {
 		kind: row.kind,
 		isGeneral: Boolean(Number(row.is_general)),
 		ownerDisplayName: row.owner_display_name || "",
-		isMember: Boolean(Number(row.is_member)),
+		muteEveryone: Boolean(Number(row.mute_everyone || 0)),		isMember: Boolean(Number(row.is_member)),
 		myRole: row.my_role || "",
 		canManage: Boolean(Number(row.can_manage) || Number(row.is_admin_manage)),
 		memberCount: Number(row.member_count || 0),
