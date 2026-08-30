@@ -30,6 +30,7 @@ import {
   registerTelegramAdminRoutes,
   registerTelegramPublicRoutes
 } from './api/telegram.js';
+import { registerManifestRoute } from './api/site-manifest.js';
 import { registerPushSubscriptionRoutes } from './api/push-subscriptions.js';
 import { ChannelRoom } from './do/ChannelRoom.js';
 import { Scheduler } from './do/Scheduler.js';
@@ -73,6 +74,7 @@ app.get('/api/site', async (c) => {
 });
 
 registerTelegramPublicRoutes(app);
+registerManifestRoute(app);
 
 app.get('/api/register-links/:token', async (c) => {
   const token = String(c.req.param('token') || '').trim();

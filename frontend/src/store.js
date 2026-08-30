@@ -104,6 +104,15 @@ function applySiteMetadata(site) {
   } else {
     favicon.setAttribute('href', DEFAULT_SITE_ICON_URL);
   }
+
+  // iOS 安装图标读 apple-touch-icon,跟随后台配置;未配置时保留默认图标
+  let appleTouchIcon = document.querySelector('link[rel="apple-touch-icon"]');
+  if (!appleTouchIcon) {
+    appleTouchIcon = document.createElement('link');
+    appleTouchIcon.setAttribute('rel', 'apple-touch-icon');
+    document.head.appendChild(appleTouchIcon);
+  }
+  appleTouchIcon.setAttribute('href', siteIconUrl || '/apple-touch-icon.png');
 }
 
 async function loadSite() {
