@@ -38,11 +38,12 @@ self.addEventListener("pushsubscriptionchange", (event) => {
 // 推送到达记录器:应用关闭时收到的推送写进 IndexedDB,下次打开用一条 console 命令读取,
 // 不依赖 Web Inspector 是否挂在 SW 目标上(关闭的应用检查器挂不上)。
 const PUSH_DIAG_DB = "edgechat-push-diag";
+const PUSH_DIAG_VERSION = 2;
 const PUSH_DIAG_STORE = "state";
 
 function recordPushDiag(entry) {
   try {
-    const openRequest = indexedDB.open(PUSH_DIAG_DB, 1);
+    const openRequest = indexedDB.open(PUSH_DIAG_DB, PUSH_DIAG_VERSION);
     openRequest.onupgradeneeded = () => {
       openRequest.result.createObjectStore(PUSH_DIAG_STORE);
     };
