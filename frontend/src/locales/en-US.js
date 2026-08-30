@@ -98,6 +98,7 @@ export default {
   'bark.templateTitleNote': 'Sender name for DMs, room name for group chats',
   'bark.templateBodyNote': 'Message content, truncated at 120 characters',
   'bark.templateGroupNote': 'Grouped per conversation - notifications from the same chat are stacked',
+  'bark.templateIconNote': 'DM shows the sender avatar, group chats the group avatar - falls back to the site logo',
   'bark.templateArchiveNote': 'Archived, so notifications are kept in Bark history',
   'bark.faqTitle': 'FAQ',
   'bark.faq1Title': 'No notifications after saving?',

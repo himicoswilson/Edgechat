@@ -98,6 +98,7 @@ export default {
   'bark.templateTitleNote': '私聊显示对方昵称,群聊显示群名称',
   'bark.templateBodyNote': '消息内容,超过 120 字自动截断',
   'bark.templateGroupNote': '按会话分组,同一会话的通知在通知中心折叠',
+  'bark.templateIconNote': '私聊显示对方头像、群聊显示群头像,都没有则用站点 logo',
   'bark.templateArchiveNote': '带上归档标记,通知会在 Bark 应用的记录里保留',
   'bark.faqTitle': '常见问题',
   'bark.faq1Title': '保存后收不到通知?',

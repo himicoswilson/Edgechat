@@ -178,8 +178,20 @@ test("有 Bark 密钥的用户收到 Bark 推送,标题/正文/会话分组按�
 		},
 	);
 	assert.deepEqual(barkCalls, [
-		{ deviceKey: "key-for-1", title: "产品协作", body: "发布新版本", group: "edgechat:7" },
-		{ deviceKey: "key-for-3", title: "产品协作", body: "发布新版本", group: "edgechat:7" },
+		{
+			deviceKey: "key-for-1",
+			title: "产品协作",
+			body: "发布新版本",
+			group: "edgechat:7",
+			icon: "",
+		},
+		{
+			deviceKey: "key-for-3",
+			title: "产品协作",
+			body: "发布新版本",
+			group: "edgechat:7",
+			icon: "",
+		},
 	]);
 });
 
@@ -202,7 +214,13 @@ test("未配置 VAPID 时仅发 Bark,不发 Web Push", async () => {
 		},
 	);
 	assert.deepEqual(barkCalls, [
-		{ deviceKey: "key-for-1", title: "王五", body: "明天开会", group: "edgechat:3" },
+		{
+			deviceKey: "key-for-1",
+			title: "王五",
+			body: "明天开会",
+			group: "edgechat:3",
+			icon: "",
+		},
 	]);
 	assert.deepEqual(sends, []);
 });
@@ -228,4 +246,52 @@ test("Bark 推送失败只记录日志,不影响其他推送", async () => {
 	assert.equal(failures.length, 1);
 	assert.equal(failures[0].message, "bark push failed");
 	assert.equal(failures[0].data.userId, 1);
+});
+
+test("Bark 图标:私聊带发送者头像,群聊带群头像,没有则回退站点 logo", async () => {
+	const icons = [];
+	async function runProjection(input) {
+		const projection = createPushProjection({
+			listMemberIds: async () => [2],
+			listSubscriptions: async () => [],
+			listBarkKeys: async () => [{ userId: 2, deviceKey: "key-for-2" }],
+			sendBark: async (_env, target) => icons.push(target.icon),
+		});
+		await projection(
+			{ DB: {}, VAPID_PRIVATE_KEY: "pk", VAPID_PUBLIC_KEY: "pub", VAPID_SUBJECT: "mailto:a@b.c" },
+			input,
+		);
+	}
+
+	await runProjection({
+		room: { id: 1, kind: "dm", name: "1:2" },
+		senderId: 1,
+		message: { content: "hi", sender: { avatarUrl: "/files/avatar-1" } },
+		siteOrigin: "https://im.example.com",
+	});
+	await runProjection({
+		room: { id: 2, kind: "public", name: "群", avatar_key: "avatar/grp" },
+		senderId: 1,
+		message: { content: "hi" },
+		siteOrigin: "https://im.example.com/",
+	});
+	await runProjection({
+		room: { id: 3, kind: "public", name: "群", avatar_key: "" },
+		senderId: 1,
+		message: { content: "hi" },
+		siteOrigin: "https://im.example.com",
+	});
+	// 拿不到站点源时不带 icon(交回 Bark 默认样式)
+	await runProjection({
+		room: { id: 4, kind: "dm", name: "1:2" },
+		senderId: 1,
+		message: { content: "hi", sender: { avatarUrl: "/files/avatar-1" } },
+	});
+
+	assert.deepEqual(icons, [
+		"https://im.example.com/files/avatar-1",
+		"https://im.example.com/files/avatar%2Fgrp",
+		"https://im.example.com/logo.svg",
+		"",
+	]);
 });

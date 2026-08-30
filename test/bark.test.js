@@ -21,7 +21,13 @@ test("sendBarkPush 默认发往公共服务器并携带标准字段", async () =
 	const result = await withCapturedFetch(async (captured) => {
 		const result = await sendBarkPush(
 			{},
-			{ deviceKey: "key-abc", title: "测试", body: "hello", group: "edgechat:7" },
+			{
+				deviceKey: "key-abc",
+				title: "测试",
+				body: "hello",
+				group: "edgechat:7",
+				icon: "https://im.example.com/logo.svg",
+			},
 		);
 		assert.equal(captured.length, 1);
 		assert.equal(captured[0].url, "https://api.day.app/push");
@@ -32,6 +38,7 @@ test("sendBarkPush 默认发往公共服务器并携带标准字段", async () =
 			body: "hello",
 			device_key: "key-abc",
 			group: "edgechat:7",
+			icon: "https://im.example.com/logo.svg",
 			isArchive: "1",
 		});
 		return result;
@@ -42,6 +49,17 @@ test("sendBarkPush 默认发往公共服务器并携带标准字段", async () =
 
 	assert.equal(result.status, 200);
 	assert.equal(result.body, '{"code":200,"message":"success"}');
+});
+
+test("sendBarkPush 未提供 icon 时不发该字段,交回 Bark 默认样式", async () => {
+	await withCapturedFetch(async (captured) => {
+		await sendBarkPush(
+			{},
+			{ deviceKey: "key-abc", title: "T", body: "B", group: "g" },
+		);
+		const payload = JSON.parse(captured[0].options.body);
+		assert.equal(payload.icon, undefined);
+	}, () => ({ status: 200, text: async () => "{}" }));
 });
 
 test("sendBarkPush 支持通过 BARK_SERVER_URL 覆盖自建服务器并去掉尾部斜杠", async () => {

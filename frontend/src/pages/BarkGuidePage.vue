@@ -75,12 +75,14 @@ const example = {
   "body": "{{ example.body }}",
   "device_key": "ynJ5Ft4atkMkWeo2PAvFhF",
   "group": "edgechat:7",
+  "icon": "https://…/files/avatar",
   "isArchive": "1"
 }</code></pre>
           <ul class="bark-template__notes">
             <li><strong>title</strong> — {{ t('bark.templateTitleNote') }}</li>
             <li><strong>body</strong> — {{ t('bark.templateBodyNote') }}</li>
             <li><strong>group</strong> — {{ t('bark.templateGroupNote') }}</li>
+            <li><strong>icon</strong> — {{ t('bark.templateIconNote') }}</li>
             <li><strong>isArchive</strong> — {{ t('bark.templateArchiveNote') }}</li>
           </ul>
         </div>

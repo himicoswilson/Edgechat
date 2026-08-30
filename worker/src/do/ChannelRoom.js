@@ -154,7 +154,10 @@ export class ChannelRoom {
         projectPushNotifications(this.env, {
           room,
           senderId: message.sender.kind === 'local' ? message.sender.id : null,
-          message
+          message,
+          // 用于把相对头像路径拼成 Bark 可访问的绝对 URL;
+          // 来自浏览器连接的站点源,首次请求时记录后复用。
+          siteOrigin: this.siteOrigin
         })
       ])
     );
@@ -181,6 +184,9 @@ export class ChannelRoom {
 
   async fetch(request) {
     const url = new URL(request.url);
+    // 站点源只记录一次:浏览器 WebSocket 连接的 host 即站点公网地址,
+    // 后续消息投影用它把相对头像路径拼成 Bark 图标可访问的绝对 URL。
+    this.siteOrigin = this.siteOrigin || url.origin;
 
     if (url.pathname === '/external-message' && request.method === 'POST') {
       return this.receiveExternalMessage(request);

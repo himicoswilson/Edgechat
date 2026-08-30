@@ -27,7 +27,27 @@ export function createPushProjection({
 		return message?.attachment ? "收到一条新消息" : "";
 	}
 
-	return async function projectPushNotifications(env, { room, senderId, message }) {
+	// Bark 的 icon 字段需要绝对 URL(仅 iOS 15+ 生效):
+	// 私聊带发送者头像,群聊带群头像,都没有则降级为站点 logo;
+	// 拿不到站点源(未记录 origin)时干脆不带 icon,交回 Bark 默认样式。
+	function barkIconUrl(room, message, siteOrigin) {
+		const origin = String(siteOrigin || "").trim().replace(/\/+$/, "");
+		if (!origin) {
+			return "";
+		}
+		const relative =
+			room.kind === "dm"
+				? String(message?.sender?.avatarUrl || "").trim()
+				: room.avatar_key
+					? `/files/${encodeURIComponent(String(room.avatar_key))}`
+					: "";
+		return relative ? `${origin}${relative}` : `${origin}/logo.svg`;
+	}
+
+	return async function projectPushNotifications(
+		env,
+		{ room, senderId, message, siteOrigin },
+	) {
 		try {
 			const memberIds = await listMemberIds(env.DB, room.id);
 			const recipientIds = memberIds.filter(
@@ -120,6 +140,7 @@ export function createPushProjection({
 			}
 
 		if (barkTargets.length) {
+			const icon = barkIconUrl(room, message, siteOrigin);
 			await Promise.allSettled(
 				barkTargets.map((target) =>
 					sendBark(env, {
@@ -127,6 +148,7 @@ export function createPushProjection({
 						title,
 						body: body || "收到一条新消息",
 						group: `edgechat:${room.id}`,
+						icon,
 					})
 						.then((result) => {
 							console.log(JSON.stringify({
