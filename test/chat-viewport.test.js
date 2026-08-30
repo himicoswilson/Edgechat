@@ -113,6 +113,14 @@ test("移动端首次进入只显示会话列表，选择后可进入并返回",
 	assert.equal(browser.properties.get("--chat-keyboard-height"), "300px");
 	assert.equal(browser.classes.has("chat-keyboard-open"), true);
 
+	// 键盘动画中间态(offsetTop 短暂满屏)必须丢弃,否则布局底部抬满、页面消失
+	window.visualViewport.offsetTop = 700;
+	for (const listener of browser.viewportListeners.get("scroll")) {
+		listener();
+	}
+	assert.equal(browser.properties.get("--chat-keyboard-height"), "0px");
+	assert.equal(browser.properties.get("--chat-viewport-height"), "740px");
+
 	// 键盘收起后解除页面滚动锁
 	window.visualViewport.offsetTop = 0;
 	for (const listener of browser.viewportListeners.get("scroll")) {

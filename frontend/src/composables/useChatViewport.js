@@ -19,28 +19,35 @@ export function useChatViewport({ activeRoom }) {
 	function syncViewportHeight() {
 		const visualViewport = window.visualViewport;
 		const layoutHeight = window.innerHeight;
-		// 键盘可见判定:Android 键盘缩小视觉高度;iOS 键盘把 offsetTop 顶起来,
-		// 两个特征都认,否则 iOS 上不缩高,输入框被键盘盖住。
+		// 键盘可见判定:Android 键盘缩小视觉高度;iOS 键盘把 offsetTop 顶起来。
+		// visualViewport.height > 0 排除键盘动画中间态(某些 iOS 版本动画开始时短暂报 0)。
 		const keyboardVisible = Boolean(
 			visualViewport &&
+				visualViewport.height > 0 &&
+				visualViewport.height <= layoutHeight &&
 				(visualViewport.height < layoutHeight * 0.75 ||
-					(visualViewport.offsetTop > 0 && visualViewport.height <= layoutHeight)),
+					visualViewport.offsetTop > 0),
 		);
 		// 键盘高度双通道:iOS 缩小型 = 布局高 - 视觉高;平移型 = offsetTop。
-		// 布局用 bottom 锚定(而不是算 height),消除公式残差,
-		// 输入栏永远紧贴键盘上沿。
+		// 上限 60% 屏幕高:键盘动画中间态可能短暂报出全高/巨大偏移,
+		// 若超出则丢弃本次事件(下一帧会给正确值),避免布局底部抬满屏、页面消失。
 		const keyboardHeight = keyboardVisible
 			? Math.max(0, Math.max(layoutHeight - visualViewport.height, visualViewport.offsetTop))
 			: 0;
+		const boundedKeyboardHeight =
+			keyboardHeight <= layoutHeight * 0.6 ? keyboardHeight : 0;
 		document.documentElement.style.setProperty(
 			"--chat-viewport-height",
-			`${Math.round(layoutHeight - keyboardHeight)}px`,
+			`${Math.round(layoutHeight - boundedKeyboardHeight)}px`,
 		);
 		document.documentElement.style.setProperty(
 			"--chat-keyboard-height",
-			`${Math.round(keyboardHeight)}px`,
+			`${Math.round(boundedKeyboardHeight)}px`,
 		);
-		document.documentElement.classList.toggle("chat-keyboard-open", keyboardVisible);
+		document.documentElement.classList.toggle(
+			"chat-keyboard-open",
+			keyboardVisible && boundedKeyboardHeight > 0,
+		);
 	}
 
 	function startViewportSync() {
