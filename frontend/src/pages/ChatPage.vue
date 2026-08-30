@@ -27,6 +27,7 @@ import { useConversationCreation } from '../composables/useConversationCreation.
 import { useReadReceipts } from '../composables/useReadReceipts.js';
 import { useRoomManagement } from '../composables/useRoomManagement.js';
 import { useUnreadInbox } from '../composables/useUnreadInbox.js';
+import { usePresence } from '../composables/usePresence.js';
 import store from '../store.js';
 import { useI18n } from '../i18n.js';
 
@@ -120,11 +121,14 @@ const {
   onMessageRead: scheduleReadReceiptsRefresh
 });
 
+const presence = usePresence();
+
 const { connectUnreadInbox, disconnectUnreadInbox } = useUnreadInbox({
   activeRoom,
   markConversationRead,
   applyConversationActivity,
-  notifyRoom
+  notifyRoom,
+  onPresence: presence.applyEvent
 });
 
 const {
@@ -152,9 +156,12 @@ const wsConnected = computed(() => wsStatus.value === 'open');
 const activeRoomSubtitle = computed(() => {
   if (!activeRoom.value) return '';
   if (activeRoom.value.kind === 'dm') {
-    return activeRoom.value.otherUser?.username
-      ? `@${activeRoom.value.otherUser.username}`
-      : wsConnected.value ? t('chat.online') : t('chat.connecting');
+    const otherUser = activeRoom.value.otherUser;
+    if (presence.isOnline(otherUser?.id)) {
+      return t('presence.online');
+    }
+    // 尚未拉到在线状态前,先用用户名占位,避免标题抖动
+    return presence.lastSeenLabel(otherUser?.id) || (otherUser?.username ? `@${otherUser.username}` : '');
   }
   if (activeRoom.value.memberCount) {
     return t('chat.memberCount', { count: activeRoom.value.memberCount });
@@ -351,6 +358,21 @@ async function bootstrap() {
   catch (e) { error.value = e.message; }
 }
 
+watch(
+  [users, dms],
+  ([userList, dmList]) => {
+    const ids = [
+      ...userList.map((user) => user.id),
+      ...dmList.map((dm) => dm.otherUser?.id).filter((id) => id != null)
+    ];
+    void presence.touch(ids);
+  },
+  { immediate: true },
+);
+watch(groupMembers, (members) => {
+  void presence.touch(members.map((member) => member.id));
+});
+
 watch(activeRoomKey, async (k) => {
   closeMessageMenu();
   cancelMessageLongPress();
@@ -511,7 +533,16 @@ onBeforeUnmount(() => {
             class="sidebar-item" :class="{ 'sidebar-item--active': activeRoomKey === item.key }"
             @click="selectConversation(item)"
           >
-            <UiAvatar :src="item.avatarUrl" :fallback="item.fallback?.[0] || '?'" size="sm" />
+            <span class="sidebar-item__avatar">
+              <UiAvatar :src="item.avatarUrl" :fallback="item.fallback?.[0] || '?'" size="sm" />
+              <span
+                v-if="item.kind === 'dm' && presence.isOnline(item.source.otherUser?.id)"
+                class="presence-dot"
+                :title="t('presence.online')"
+                role="img"
+                :aria-label="t('presence.online')"
+              ></span>
+            </span>
             <div class="sidebar-label-group">
               <div class="sidebar-item__top">
                 <strong class="sidebar-label">{{ item.title }}</strong>
@@ -727,6 +758,8 @@ onBeforeUnmount(() => {
           :invite-user-id="inviteUserId"
           :available-invite-users="availableInviteUsers"
           :invite-submitting="inviteSubmitting"
+          :is-online="presence.isOnline"
+          :last-seen-label="presence.lastSeenLabel"
           @close="closeMemberPanel"
           @update:invite-user-id="inviteUserId = $event"
           @invite="inviteMember"
@@ -756,6 +789,7 @@ onBeforeUnmount(() => {
       :users="usersWithoutDm"
       :opening-dm-user-id="openingDmUserId"
       :error="error"
+      :is-online="presence.isOnline"
       @close="closeAddConversation"
       @create-group="startGroupCreation"
       @open-dm="openDm"
@@ -921,6 +955,27 @@ onBeforeUnmount(() => {
 
 .sidebar-item svg {
   flex-shrink: 0;
+}
+
+.sidebar-item__avatar {
+  position: relative;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.sidebar-item__avatar .ui-avatar {
+  display: block;
+}
+
+.presence-dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid #ffffff;
 }
 
 .sidebar-label-group {

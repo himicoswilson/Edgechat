@@ -11,7 +11,8 @@ import {
   Settings,
   UserCog,
   UserPlus,
-  Users
+  Users,
+  Wifi
 } from '@lucide/vue';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -47,6 +48,7 @@ const totalMessageCount = computed(() => {
 
 const metrics = computed(() => [
   { label: t('dashboard.metrics.users'), value: overview.value.users.length, icon: Users },
+  { label: t('dashboard.metrics.onlineNow'), value: overview.value.onlineCount ?? 0, icon: Wifi },
   { label: t('dashboard.metrics.groups'), value: overview.value.channels.length, icon: MessagesSquare },
   { label: t('dashboard.metrics.directMessages'), value: overview.value.dms.length, icon: MessageSquare },
   { label: t('dashboard.metrics.messages'), value: totalMessageCount.value, icon: Activity }

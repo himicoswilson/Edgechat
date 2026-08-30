@@ -11,6 +11,7 @@ import {
 import { getSiteSettings, updateSiteSettings } from '../data/site-settings.js';
 import { listAdminUsers, listStorageOwners } from '../data/users.js';
 import { ApiError } from '../errors.js';
+import { queryUserPresence } from '../do-bridge.js';
 import { summarizeR2Objects } from '../storage-statistics.js';
 import { errorResponse, parseJsonRequest, randomToken } from '../utils.js';
 import { banExpiryFromMinutes } from '../user-status.js';
@@ -53,11 +54,25 @@ export function registerAdminRoutes(app) {
       getSiteSettings(c.env.DB)
     ]);
 
+    let onlineCount = 0;
+    if (users.length) {
+      try {
+        const presence = await queryUserPresence(c.env, users.map((user) => user.id));
+        if (presence.ok) {
+          const payload = await presence.json();
+          onlineCount = (payload.presence || []).filter((item) => item.online).length;
+        }
+      } catch {
+        // 在线状态读取失败不影响概览其余数据
+      }
+    }
+
     return c.json({
       site,
       users,
       channels,
-      dms
+      dms,
+      onlineCount
     });
   });
 

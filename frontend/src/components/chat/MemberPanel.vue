@@ -6,7 +6,7 @@ import UiButton from '../ui/Button.vue';
 import UiSurface from '../ui/Surface.vue';
 import { t } from '../../i18n.js';
 
-defineProps({
+const props = defineProps({
   room: {
     type: Object,
     default: null
@@ -34,8 +34,23 @@ defineProps({
   inviteSubmitting: {
     type: Boolean,
     default: false
+  },
+  isOnline: {
+    type: Function,
+    default: null
+  },
+  lastSeenLabel: {
+    type: Function,
+    default: null
   }
 });
+
+function memberPresenceText(member) {
+  if (props.isOnline?.(member.id)) {
+    return t('presence.online');
+  }
+  return props.lastSeenLabel?.(member.id) || '';
+}
 
 const emit = defineEmits(['close', 'update:inviteUserId', 'invite', 'remove-member', 'delete-group']);
 </script>
@@ -61,10 +76,22 @@ const emit = defineEmits(['close', 'update:inviteUserId', 'invite', 'remove-memb
 
     <div class="member-chip-list">
       <div v-for="member in members" :key="member.id" class="member-chip">
-        <UiAvatar :src="member.avatarUrl" :fallback="member.displayName" size="sm" />
+        <span class="member-chip__avatar">
+          <UiAvatar :src="member.avatarUrl" :fallback="member.displayName" size="sm" />
+          <span
+            v-if="memberPresenceText(member)"
+            class="member-chip__presence-dot"
+            :class="{ 'member-chip__presence-dot--online': isOnline?.(member.id) }"
+            role="img"
+            :aria-label="memberPresenceText(member)"
+          ></span>
+        </span>
         <div class="member-chip__text">
           <strong>{{ member.displayName }}</strong>
           <span>@{{ member.username }}</span>
+          <span v-if="memberPresenceText(member)" class="member-chip__status">
+            {{ memberPresenceText(member) }}
+          </span>
         </div>
         <div class="member-chip__actions">
           <UiBadge :variant="member.role === 'owner' ? 'warm' : 'secondary'">
@@ -119,5 +146,39 @@ const emit = defineEmits(['close', 'update:inviteUserId', 'invite', 'remove-memb
 .chat-member-panel__close:hover,
 .chat-member-panel__close:active {
   background: rgba(0, 0, 0, 0.06);
+}
+
+.member-chip__avatar {
+  position: relative;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.member-chip__avatar .ui-avatar {
+  display: block;
+}
+
+.member-chip__presence-dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #cbd5d1;
+  border: 2px solid #ffffff;
+}
+
+.member-chip__presence-dot--online {
+  background: #10b981;
+}
+
+.member-chip__status {
+  color: #8696a0;
+  font-size: 12px;
+}
+
+.member-chip__status:not(:empty)::before {
+  content: '· ';
 }
 </style>

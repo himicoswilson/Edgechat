@@ -90,7 +90,19 @@ function adminOverviewPayload() {
     site: cloneDemo(demoState.site),
     users: demoState.users.map(projectDemoUser),
     channels,
-    dms
+    dms,
+    onlineCount: demoState.users.filter((user) => !user.isDisabled && Number(user.id) !== 3).length
+  };
+}
+
+// 与 adminOverviewPayload 保持一致:除 Bob(3) 外其他用户在线
+function demoPresencePayload(ids) {
+  return {
+    presence: ids.map((id) => ({
+      userId: id,
+      online: Number(id) !== 3,
+      lastSeenAt: Number(id) === 3 ? new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() : null
+    }))
   };
 }
 
@@ -261,6 +273,10 @@ export async function requestDemo(path, options = {}) {
   }
   if (method === 'GET' && pathname === '/users') {
     return { users: bootstrapPayload().users };
+  }
+  if (method === 'GET' && pathname === '/presence') {
+    const ids = (url.searchParams.get('ids') || '').split(',').map(Number).filter(Boolean);
+    return demoPresencePayload(ids);
   }
   if (method === 'GET' && pathname === '/bootstrap') {
     return bootstrapPayload();

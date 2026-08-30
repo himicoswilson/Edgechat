@@ -8,7 +8,8 @@ const props = defineProps({
   show: { type: Boolean, default: false },
   users: { type: Array, default: () => [] },
   openingDmUserId: { type: Number, default: null },
-  error: { type: String, default: '' }
+  error: { type: String, default: '' },
+  isOnline: { type: Function, default: null }
 });
 
 const emit = defineEmits(['close', 'create-group', 'open-dm']);
@@ -117,7 +118,16 @@ watch(
               :disabled="openingDmUserId !== null"
               @click="emit('open-dm', user)"
             >
-              <UiAvatar :src="user.avatarUrl" :fallback="user.displayName?.[0] || '?'" size="sm" />
+              <span class="add-conversation-person__avatar">
+                <UiAvatar :src="user.avatarUrl" :fallback="user.displayName?.[0] || '?'" size="sm" />
+                <span
+                  v-if="isOnline?.(user.id)"
+                  class="add-conversation-person__presence-dot"
+                  :title="t('presence.online')"
+                  role="img"
+                  :aria-label="t('presence.online')"
+                ></span>
+              </span>
               <span class="add-conversation-person__identity">
                 <strong>{{ user.displayName }}</strong>
                 <small>@{{ user.username }}</small>
@@ -219,6 +229,23 @@ watch(
   color: #111b21;
   cursor: pointer;
   transition: background 150ms, border-color 150ms, box-shadow 150ms;
+}
+
+.add-conversation-person__avatar {
+  position: relative;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.add-conversation-person__presence-dot {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid #ffffff;
 }
 
 .add-conversation-choice {

@@ -15,6 +15,10 @@ function getUserInboxStub(env, userId) {
 	return env.USER_INBOX.get(env.USER_INBOX.idFromName(name));
 }
 
+function getPresenceStub(env) {
+	return env.PRESENCE.get(env.PRESENCE.idFromName('global'));
+}
+
 export async function forwardVerifiedRequest({
 	stub,
 	request,
@@ -57,6 +61,22 @@ export function forwardInboxConnection({ env, request, principal }) {
 		request,
 		pathname: "/connect",
 		principal,
+	});
+}
+
+export function reportUserPresence(env, payload) {
+	return getPresenceStub(env).fetch(`${INTERNAL_ORIGIN}/report`, {
+		method: "POST",
+		headers: createInternalHeaders({ "Content-Type": "application/json" }),
+		body: JSON.stringify(payload),
+	});
+}
+
+export function queryUserPresence(env, ids) {
+	const url = new URL(`${INTERNAL_ORIGIN}/query`);
+	url.searchParams.set("ids", ids.map(Number).join(","));
+	return getPresenceStub(env).fetch(url, {
+		headers: createInternalHeaders(),
 	});
 }
 

@@ -41,6 +41,10 @@ class_name = "Scheduler"
 name = "USER_INBOX"
 class_name = "UserInbox"
 
+[[durable_objects.bindings]]
+name = "PRESENCE"
+class_name = "Presence"
+
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["ChannelRoom", "Scheduler"]
@@ -48,6 +52,10 @@ new_sqlite_classes = ["ChannelRoom", "Scheduler"]
 [[migrations]]
 tag = "v2"
 new_sqlite_classes = ["UserInbox"]
+
+[[migrations]]
+tag = "v3"
+new_sqlite_classes = ["Presence"]
 
 [assets]
 directory = "./frontend/dist"

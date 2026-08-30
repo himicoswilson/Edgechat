@@ -9,6 +9,7 @@ export function useUnreadInbox({
 	roomApi = api,
 	openInboxConnection = connectInboxSocket,
 	notifyRoom = () => {},
+	onPresence = () => {},
 	isPageActive = () =>
 		globalThis.document?.visibilityState === "visible" &&
 		globalThis.document.hasFocus()
@@ -26,6 +27,11 @@ export function useUnreadInbox({
 				return openInboxConnection(handlers);
 			},
 			onMessage(payload) {
+        if (payload.type === 'presence') {
+          onPresence(payload);
+          return;
+        }
+
         if (payload.type !== 'room_message' || !payload.room) {
           return;
         }

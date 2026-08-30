@@ -33,9 +33,14 @@ import {
 import { registerManifestRoute } from './api/site-manifest.js';
 import { registerPushSubscriptionRoutes } from './api/push-subscriptions.js';
 import { ChannelRoom } from './do/ChannelRoom.js';
+import { Presence } from './do/Presence.js';
 import { Scheduler } from './do/Scheduler.js';
 import { UserInbox } from './do/UserInbox.js';
-import { forwardInboxConnection, forwardRoomConnection } from './do-bridge.js';
+import {
+  forwardInboxConnection,
+  forwardRoomConnection,
+  queryUserPresence
+} from './do-bridge.js';
 import { runScheduledGc } from './gc.js';
 import { isUserDisabled } from './user-status.js';
 import {
@@ -304,6 +309,23 @@ app.get('/api/bootstrap', async (c) => {
   return c.json({ users, channels, dms });
 });
 
+app.get('/api/presence', async (c) => {
+  const rawIds = String(c.req.query('ids') || '')
+    .split(',')
+    .map(Number)
+    .filter((id) => Number.isInteger(id) && id > 0);
+  const ids = [...new Set(rawIds)].slice(0, 500);
+  if (!ids.length) {
+    return errorResponse('缺少有效的用户 ID', 400);
+  }
+
+  const response = await queryUserPresence(c.env, ids);
+  if (!response.ok) {
+    throw new ApiError('在线状态读取失败', response.status);
+  }
+  return c.json(await response.json());
+});
+
 app.use('/api/admin/*', adminMiddleware);
 
 registerMessageRoutes(app);
@@ -361,4 +383,4 @@ export default {
     ctx.waitUntil(runScheduledGc(env));
   }
 };
-export { ChannelRoom, Scheduler, UserInbox };
+export { ChannelRoom, Presence, Scheduler, UserInbox };

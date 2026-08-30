@@ -227,3 +227,17 @@ test('Telegram replies increment the inbox unread projection', async () => {
   roomSocket.close();
   inboxSocket.close();
 });
+
+test('demo presence 暴露在线状态与概览在线人数', async () => {
+  const overview = await requestDemo('/admin/overview');
+  assert.equal(overview.onlineCount, 3);
+
+  const presence = await requestDemo('/presence?ids=2,3,4');
+  const byId = Object.fromEntries(
+    presence.presence.map((item) => [item.userId, item])
+  );
+  assert.equal(byId[2].online, true);
+  assert.equal(byId[4].online, true);
+  assert.equal(byId[3].online, false);
+  assert.ok(byId[3].lastSeenAt);
+});

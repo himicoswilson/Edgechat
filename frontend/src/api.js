@@ -109,6 +109,10 @@ export default {
   bootstrap() {
     return request('/bootstrap');
   },
+  presence(ids) {
+    const query = new URLSearchParams({ ids: ids.map(String).join(',') });
+    return request(`/presence?${query.toString()}`);
+  },
   getChannels() {
     return request('/channels');
   },
