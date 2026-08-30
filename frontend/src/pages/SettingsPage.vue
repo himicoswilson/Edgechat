@@ -742,17 +742,13 @@ async function testBark() {
   color: var(--text-soft);
 }
 
+/* 全局 .save-btn 自带 margin-top(用于输入框下方的普通段落),在 flex 行里会
+   把按钮顶下去并撑高行高,这里归零让两个按钮水平对齐 */
 .bark-actions {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-}
-
-/* 全局 .save-btn 自带 margin-top(用于输入框下方的普通段落),在 flex 行里会
-   把按钮顶下去并撑高行高,这里归零让两个按钮水平对齐 */
-.bark-actions .save-btn {
-  margin-top: 0;
 }
 
 .test-btn {
@@ -866,6 +862,10 @@ async function testBark() {
 .save-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.bark-actions .save-btn {
+  margin-top: 0;
 }
 
 .settings-nav {

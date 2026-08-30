@@ -98,7 +98,7 @@ export default {
   'bark.templateTitleNote': 'Sender name for DMs, room name for group chats',
   'bark.templateSubtitleNote': 'The site name, so you know which site the message came from',
   'bark.templateBodyNote': 'Message content, truncated at 120 characters',
-  'bark.templateGroupNote': 'Grouped per conversation - notifications from the same chat are stacked',
+  'bark.templateGroupNote': 'Prefixed with the site name and grouped per conversation - notifications from the same chat are stacked',
   'bark.templateIconNote': 'DM shows the sender avatar, group chats the group avatar - falls back to the site logo',
   'bark.templateArchiveNote': 'Archived, so notifications are kept in Bark history',
   'bark.faqTitle': 'FAQ',

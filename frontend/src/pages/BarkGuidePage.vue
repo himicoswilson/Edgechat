@@ -78,7 +78,7 @@ const example = {
   "subtitle": "{{ siteName }}",
   "body": "{{ example.body }}",
   "device_key": "ynJ5Ft4atkMkWeo2PAvFhF",
-  "group": "edgechat:7",
+  "group": "{{ siteName }}:7",
   "icon": "https://…/files/avatar",
   "isArchive": "1"
 }</code></pre>

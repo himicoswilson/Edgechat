@@ -250,7 +250,7 @@ test("Bark 推送失败只记录日志,不影响其他推送", async () => {
 	assert.equal(failures[0].data.userId, 1);
 });
 
-test("Bark 推送带站点名称 subtitle,标明消息来自哪个站点", async () => {
+test("Bark 推送带站点名称:subtitle 标明来源,group 前缀也用站点名", async () => {
 	const barkCalls = [];
 	const { projection } = createProjection({
 		overlays: {
@@ -274,6 +274,7 @@ test("Bark 推送带站点名称 subtitle,标明消息来自哪个站点", async
 	);
 	assert.equal(barkCalls.length, 1);
 	assert.equal(barkCalls[0].subtitle, "公司内部沟通");
+	assert.equal(barkCalls[0].group, "公司内部沟通:9");
 });
 
 test("Bark 图标:私聊带发送者头像,群聊带群头像,没有则回退站点 logo", async () => {

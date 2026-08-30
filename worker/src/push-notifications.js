@@ -143,25 +143,26 @@ export function createPushProjection({
 
 		if (barkTargets.length) {
 			const icon = barkIconUrl(room, message, siteOrigin);
-			// subtitle 用站点名称,让每条通知都标明来自哪个站点;
-			// 读不到站点名时只是少一行小字,不影响推送本身。
-			let subtitle = "";
+			// 站点名称同时用作 subtitle 与 group 前缀,标明消息来自哪个站点,
+			// 也让不同站点的通知分组互不干扰;读不到站点名时回退 edgechat 前缀。
+			let siteName = "";
 			try {
-				subtitle = await loadSiteName(env.DB);
+				siteName = await loadSiteName(env.DB);
 			} catch (error) {
-				logFailure("bark subtitle failed", {
+				logFailure("bark site name failed", {
 					roomId: Number(room.id),
 					error: error instanceof Error ? error.message : String(error),
 				});
 			}
+			const groupPrefix = siteName || "edgechat";
 			await Promise.allSettled(
 				barkTargets.map((target) =>
 					sendBark(env, {
 						deviceKey: target.deviceKey,
 						title,
-						...(subtitle ? { subtitle } : {}),
+						...(siteName ? { subtitle: siteName } : {}),
 						body: body || "收到一条新消息",
-						group: `edgechat:${room.id}`,
+						group: `${groupPrefix}:${room.id}`,
 						icon,
 					})
 						.then((result) => {
