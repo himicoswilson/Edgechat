@@ -36,6 +36,7 @@ self.addEventListener("pushsubscriptionchange", (event) => {
 });
 
 self.addEventListener("push", (event) => {
+  console.log("[edgechat] push received:", String(event.data ? event.data.text() : "").slice(0, 200));
   let data = {};
   try {
     data = event.data ? event.data.json() : {};
@@ -51,7 +52,12 @@ self.addEventListener("push", (event) => {
     renotify: true,
     data: { url: data.url || "/" },
   };
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(
+    self.registration
+      .showNotification(title, options)
+      .then(() => console.log("[edgechat] notification shown"))
+      .catch((error) => console.error("[edgechat] showNotification failed:", error)),
+  );
 });
 
 self.addEventListener("notificationclick", (event) => {
