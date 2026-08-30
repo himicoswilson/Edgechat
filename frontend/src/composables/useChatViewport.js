@@ -35,6 +35,7 @@ export function useChatViewport({ activeRoom }) {
 			"--chat-viewport-height",
 			`${Math.round(viewportHeight)}px`,
 		);
+		document.documentElement.classList.toggle("chat-keyboard-open", keyboardVisible);
 	}
 
 	function startViewportSync() {
@@ -52,6 +53,7 @@ export function useChatViewport({ activeRoom }) {
 		window.visualViewport?.removeEventListener("resize", syncViewportHeight);
 		window.visualViewport?.removeEventListener("scroll", syncViewportHeight);
 		document.documentElement.style.removeProperty("--chat-viewport-height");
+		document.documentElement.classList.remove("chat-keyboard-open");
 	}
 
 	function openConversationView() {

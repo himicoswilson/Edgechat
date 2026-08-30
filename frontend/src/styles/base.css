@@ -14,6 +14,14 @@ body {
   overflow-x: clip;
 }
 
+/* iOS 键盘打开时锁定页面滚动:fixed 布局若随视觉视口滚动,
+   输入框会在滑动时被带离屏幕(用户滑一下输入框就消失的根因)。
+   键盘可见时由 useChatViewport 在 <html> 上加 .chat-keyboard-open。 */
+html.chat-keyboard-open,
+html.chat-keyboard-open body {
+  overflow: hidden;
+}
+
 html {
   background: var(--bg);
   scrollbar-width: none;

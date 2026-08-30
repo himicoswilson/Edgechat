@@ -49,9 +49,26 @@ function createBrowser(width, height = 760) {
 					properties.delete(name);
 				},
 			},
+			classList: {
+				add(name) {
+					classes.add(name);
+				},
+				remove(name) {
+					classes.delete(name);
+				},
+				toggle(name, force) {
+					if (force) {
+						classes.add(name);
+						return true;
+					}
+					classes.delete(name);
+					return false;
+				},
+			},
 		},
 	};
-	return { listeners, viewportListeners, properties };
+	const classes = new Set();
+	return { listeners, viewportListeners, properties, classes };
 }
 
 test("移动端首次进入只显示会话列表，选择后可进入并返回", () => {
@@ -90,6 +107,14 @@ test("移动端首次进入只显示会话列表，选择后可进入并返回",
 		listener();
 	}
 	assert.equal(browser.properties.get("--chat-viewport-height"), "440px");
+	assert.equal(browser.classes.has("chat-keyboard-open"), true);
+
+	// 键盘收起后解除页面滚动锁
+	window.visualViewport.offsetTop = 0;
+	for (const listener of browser.viewportListeners.get("scroll")) {
+		listener();
+	}
+	assert.equal(browser.classes.has("chat-keyboard-open"), false);
 
 	activeRoom.value = { kind: "dm", id: 3 };
 	viewport.openConversationView();
