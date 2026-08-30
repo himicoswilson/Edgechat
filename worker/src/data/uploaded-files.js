@@ -76,14 +76,15 @@ export async function canAccessFile(db, key, userId = null) {
 	const cleanKey = String(key || "");
 	if (!cleanKey) return false;
 
-	// 头像本来就是公开资料，保持无会话访问，避免登录页和成员列表出现破图。
+	// 头像与站点图标本来就是公开资料，保持无会话访问，避免登录页、成员列表和 PWA 图标出现破图。
 	const publicRefs = await db
 		.prepare(
 			`SELECT 1 AS found
 			 WHERE EXISTS (SELECT 1 FROM users WHERE avatar_key = ? AND deleted_at IS NULL)
-			    OR EXISTS (SELECT 1 FROM channels WHERE avatar_key = ? AND deleted_at IS NULL)`,
+			    OR EXISTS (SELECT 1 FROM channels WHERE avatar_key = ? AND deleted_at IS NULL)
+			    OR EXISTS (SELECT 1 FROM site_settings WHERE setting_value IN (?, '/files/' || ?))`,
 		)
-		.bind(cleanKey, cleanKey)
+		.bind(cleanKey, cleanKey, cleanKey, encodeURIComponent(cleanKey))
 		.all();
 	if (publicRefs.results[0]) return true;
 	if (!Number.isFinite(Number(userId))) return false;
