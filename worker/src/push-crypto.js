@@ -291,6 +291,11 @@ export async function sendPushNotification(env, subscription, payloadText) {
 	}
 	if (!response.ok) {
 		const detail = await response.text().catch(() => "");
+		if (detail.includes("VapidPkHashMismatch")) {
+			throw new Error(
+				`Push service responded ${response.status}: ${detail} (订阅绑定旧 VAPID 密钥——脚本换了密钥后需在页面重新订阅:关闭再开启通知)`,
+			);
+		}
 		throw new Error(`Push service responded ${response.status}: ${detail}`);
 	}
 	return { sent: true };
