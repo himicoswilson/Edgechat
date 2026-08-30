@@ -86,8 +86,9 @@ test("发送 Declarative Web Push 落地信封(web_push:8030 + notification)", a
 	assert.equal(captured[0].web_push, 8030);
 	assert.equal(captured[0].notification.title, "产品协作");
 	assert.equal(captured[0].notification.body, "发布新版本");
-	assert.equal(captured[0].notification.tag, "public:7");
 	assert.equal(captured[0].notification.navigate, "https://im.himicos.com/");
+	assert.equal(captured[0].notification.tag, undefined);
+	assert.equal(captured[0].notification.renotify, undefined);
 });
 
 test("私信标题取发送者昵称,navigate 用订阅携带的 origin 拼绝对地址", async () => {

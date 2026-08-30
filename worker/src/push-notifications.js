@@ -46,6 +46,8 @@ export function createPushProjection({
 			// iOS 26+/Safari 26+ 直接在平台层展示 immutable 通知,不唤醒 SW;
 			// 老客户端把该 payload 当作普通推送交给 SW 的 push 事件,sw.js 已兼容解析。
 			// navigate 用订阅保存时捎带的站点 origin,拼绝对地址便于点击跳转。
+			// iOS 对 declarative 信封里的 tag/renotify 组合存在解析问题(与 WebKit 旧 tag 分组
+			// 缺陷同族),信封保持最小化:仅 title/body/navigate。
 			const payloadFor = (subscription) => {
 				const origin = String(subscription.origin || "").replace(/\/+$/, "");
 				return JSON.stringify({
@@ -53,8 +55,6 @@ export function createPushProjection({
 					notification: {
 						title,
 						body: body || "收到一条新消息",
-						tag: `${room.kind}:${room.id}`,
-						renotify: true,
 						navigate: origin ? `${origin}/` : "/",
 					},
 				});
