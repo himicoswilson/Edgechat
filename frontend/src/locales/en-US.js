@@ -132,7 +132,7 @@ export default {
   'notifications.groupMessage': 'You received a new group message',
   'notifications.iosInstallHint': 'On iOS, install the app to your Home Screen first (Share → Add to Home Screen), then launch it from the Home Screen icon before enabling notifications.',
   'notifications.pushUnavailable': 'Web push is not configured: the server lacks VAPID keys, so you will not be notified after closing the app. Ask the admin to configure them, then enable again.',
-  'notifications.pushSubscribeFailed': 'Web push subscription failed: you may miss notifications while the app is closed. Reopen the app to retry.',
+  'notifications.pushSubscribeFailed': 'Web push subscription failed ({detail}): you may miss notifications while the app is closed. Reopen the app to retry.',
   'conversation.chooseContact': 'Choose a contact you have not chatted with',
   'conversation.chooseType': 'Choose a conversation type',
   'conversation.startNew': 'Start a new conversation',

@@ -50,6 +50,7 @@ export function useBrowserNotifications(options = {}) {
 	// Web Push 订阅是否已在服务端登记;issue: unconfigured(服务器未配 VAPID)/failed(订阅失败)
 	const webPushReady = ref(false);
 	const webPushIssue = ref("");
+	const webPushFailureDetail = ref("");
 
 	function persistPreferences() {
 		storage?.setItem(
@@ -129,6 +130,8 @@ export function useBrowserNotifications(options = {}) {
 		} catch (error) {
 			// 订阅不可用时保持本地通知可用,但如实标记推送未就绪,下次启动自愈
 			console.warn("[edgechat] web push subscribe failed:", error);
+			webPushFailureDetail.value =
+				error instanceof Error ? error.message : String(error);
 			webPushIssue.value = "failed";
 			return { ready: false, issue: "failed" };
 		}
@@ -185,7 +188,9 @@ export function useBrowserNotifications(options = {}) {
 			return t("notifications.pushUnavailable");
 		}
 		if (webPushIssue.value === "failed") {
-			return t("notifications.pushSubscribeFailed");
+			return t("notifications.pushSubscribeFailed", {
+				detail: webPushFailureDetail.value,
+			});
 		}
 		return "";
 	});

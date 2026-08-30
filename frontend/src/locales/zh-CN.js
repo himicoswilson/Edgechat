@@ -132,7 +132,7 @@ export default {
   'notifications.groupMessage': '收到一条新群聊消息',
   'notifications.iosInstallHint': 'iOS 需要先安装到主屏幕：分享 → 添加到主屏幕，通过桌面图标启动后再开启通知。',
   'notifications.pushUnavailable': '推送未配置：服务器缺少 VAPID 密钥，关闭应用后收不到提醒。请管理员配置后重新开启。',
-  'notifications.pushSubscribeFailed': '推送订阅失败：关闭应用后可能收不到提醒，请重新打开应用重试。',
+  'notifications.pushSubscribeFailed': '推送订阅失败（{detail}）：关闭应用后可能收不到提醒，请重新打开应用重试。',
   'conversation.chooseContact': '选择一位尚未聊天的联系人',
   'conversation.chooseType': '选择要创建的会话类型',
   'conversation.startNew': '发起新对话',
