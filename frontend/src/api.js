@@ -131,6 +131,9 @@ export default {
       body: payload
     });
   },
+  testBark() {
+    return request('/bark/test', { method: 'POST' });
+  },
   getUsers() {
     return request('/users');
   },

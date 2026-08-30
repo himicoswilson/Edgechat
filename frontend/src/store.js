@@ -52,6 +52,7 @@ function normalizeSessionCached(cached) {
     userId: Number(cached.userId) || 0,
     username: String(cached.username || ''),
     displayName: String(cached.displayName || ''),
+    barkKey: String(cached.barkKey || ''),
     avatarUrl: String(cached.avatarUrl || ''),
     isAdmin: Boolean(cached.isAdmin)
   };

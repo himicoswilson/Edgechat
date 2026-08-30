@@ -3,6 +3,8 @@ import {
 	listSubscriptionsForUsers,
 	deletePushSubscription,
 } from "./data/push-subscriptions.js";
+import { listBarkKeysForUsers } from "./data/users.js";
+import { sendBarkPush } from "./integrations/bark.js";
 import {
 	PushSubscriptionGoneError,
 	sendPushNotification,
@@ -11,7 +13,9 @@ import {
 export function createPushProjection({
 	listMemberIds = listRoomMemberIds,
 	listSubscriptions = listSubscriptionsForUsers,
+	listBarkKeys = listBarkKeysForUsers,
 	sendPush = sendPushNotification,
+	sendBark = sendBarkPush,
 	removeSubscription = deletePushSubscription,
 	logFailure = (message, data) => console.warn(JSON.stringify({ message, ...data })),
 } = {}) {
@@ -24,80 +28,133 @@ export function createPushProjection({
 	}
 
 	return async function projectPushNotifications(env, { room, senderId, message }) {
-		if (!env.VAPID_PRIVATE_KEY || !env.VAPID_PUBLIC_KEY || !env.VAPID_SUBJECT) {
-			return;
-		}
 		try {
 			const memberIds = await listMemberIds(env.DB, room.id);
 			const recipientIds = memberIds.filter(
 				(userId) => Number(userId) !== Number(senderId),
 			);
-			const subscriptions = await listSubscriptions(env.DB, recipientIds);
-			if (!subscriptions.length) {
-				return;
-			}
 
 			const body = summarizeMessage(message);
 			const title =
 				room.kind === "dm"
 					? message?.sender?.displayName || "私信"
 					: room.name || "群聊";
-			// Declarative Web Push (WebKit 落地版):web_push: 8030 魔法值声明信封,
-			// iOS 26+/Safari 26+ 直接在平台层展示 immutable 通知,不唤醒 SW;
-			// 老客户端把该 payload 当作普通推送交给 SW 的 push 事件,sw.js 已兼容解析。
-			// navigate 用订阅保存时捎带的站点 origin,拼绝对地址便于点击跳转。
-			// iOS 对 declarative 信封里的 tag/renotify 组合存在解析问题(与 WebKit 旧 tag 分组
-			// 缺陷同族),信封保持最小化:仅 title/body/navigate。
-			const payloadFor = (subscription) => {
-				const origin = String(subscription.origin || "").replace(/\/+$/, "");
-				return JSON.stringify({
-					web_push: 8030,
-					notification: {
+
+			const webPushConfigured = Boolean(
+				env.VAPID_PRIVATE_KEY && env.VAPID_PUBLIC_KEY && env.VAPID_SUBJECT,
+			);
+			// Web Push 与 Bark 是两条独立通道:Bark 不依赖 VAPID 配置,
+			// 任一通道的查询/发送失败都不影响另一通道。
+			let subscriptions = [];
+			if (webPushConfigured) {
+				try {
+					subscriptions = await listSubscriptions(env.DB, recipientIds);
+				} catch (error) {
+					logFailure("push projection failed", {
+						roomId: Number(room.id),
+						error: error instanceof Error ? error.message : String(error),
+					});
+				}
+			}
+
+			let barkTargets = [];
+			try {
+				barkTargets = await listBarkKeys(env.DB, recipientIds);
+			} catch (error) {
+				logFailure("bark projection failed", {
+					roomId: Number(room.id),
+					error: error instanceof Error ? error.message : String(error),
+				});
+			}
+
+			if (webPushConfigured && subscriptions.length) {
+				// Declarative Web Push (WebKit 落地版):web_push: 8030 魔法值声明信封,
+				// iOS 26+/Safari 26+ 直接在平台层展示 immutable 通知,不唤醒 SW;
+				// 老客户端把该 payload 当作普通推送交给 SW 的 push 事件,sw.js 已兼容解析。
+				// navigate 用订阅保存时捎带的站点 origin,拼绝对地址便于点击跳转。
+				// iOS 对 declarative 信封里的 tag/renotify 组合存在解析问题(与 WebKit 旧 tag 分组
+				// 缺陷同族),信封保持最小化:仅 title/body/navigate。
+				const payloadFor = (subscription) => {
+					const origin = String(subscription.origin || "").replace(/\/+$/, "");
+					return JSON.stringify({
+						web_push: 8030,
+						notification: {
+							title,
+							body: body || "收到一条新消息",
+							navigate: origin ? `${origin}/` : "/",
+						},
+					});
+				};
+
+				await Promise.allSettled(
+					subscriptions.map((subscription) =>
+						sendPush(env, subscription, payloadFor(subscription))
+							.then((result) => {
+								console.log(JSON.stringify({
+									message: "push sent",
+									roomId: Number(room.id),
+									endpoint: subscription.endpoint,
+									status: result?.status ?? 0,
+									responseBody: result?.body || "",
+									responseHeaders: result?.headers || {},
+									requestContentType: result?.requestContentType || "",
+									requestPayload: result?.requestPayload || "",
+								}));
+							})
+							.catch(async (error) => {
+								if (error instanceof PushSubscriptionGoneError) {
+									// 订阅已被推送服务丢弃(410/404),同步清理
+									await removeSubscription(env.DB, subscription.endpoint).catch(
+										() => {},
+									);
+									return;
+								}
+								logFailure("push projection failed", {
+									roomId: Number(room.id),
+									endpoint: subscription.endpoint,
+									error: error instanceof Error ? error.message : String(error),
+								});
+							}),
+					),
+				);
+			}
+
+		if (barkTargets.length) {
+			await Promise.allSettled(
+				barkTargets.map((target) =>
+					sendBark(env, {
+						deviceKey: target.deviceKey,
 						title,
 						body: body || "收到一条新消息",
-						navigate: origin ? `${origin}/` : "/",
-					},
-				});
-			};
-
-			await Promise.allSettled(
-				subscriptions.map((subscription) =>
-					sendPush(env, subscription, payloadFor(subscription))
+						group: `edgechat:${room.id}`,
+					})
 						.then((result) => {
 							console.log(JSON.stringify({
-								message: "push sent",
+								message: "bark push sent",
 								roomId: Number(room.id),
-								endpoint: subscription.endpoint,
+								userId: target.userId,
 								status: result?.status ?? 0,
 								responseBody: result?.body || "",
-								responseHeaders: result?.headers || {},
-								requestContentType: result?.requestContentType || "",
 								requestPayload: result?.requestPayload || "",
 							}));
 						})
-						.catch(async (error) => {
-							if (error instanceof PushSubscriptionGoneError) {
-								// 订阅已被推送服务丢弃(410/404),同步清理
-								await removeSubscription(env.DB, subscription.endpoint).catch(
-									() => {},
-								);
-								return;
-							}
-							logFailure("push projection failed", {
+						.catch((error) => {
+							logFailure("bark push failed", {
 								roomId: Number(room.id),
-								endpoint: subscription.endpoint,
+								userId: target.userId,
 								error: error instanceof Error ? error.message : String(error),
 							});
 						}),
 				),
 			);
-		} catch (error) {
-			logFailure("push projection failed", {
-				roomId: Number(room.id),
-				error: error instanceof Error ? error.message : String(error),
-			});
 		}
-	};
+	} catch (error) {
+		logFailure("push projection failed", {
+			roomId: Number(room.id),
+			error: error instanceof Error ? error.message : String(error),
+		});
+	}
+};
 }
 
 export const projectPushNotifications = createPushProjection();

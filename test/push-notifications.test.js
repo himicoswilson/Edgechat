@@ -6,7 +6,7 @@ import { PushSubscriptionGoneError } from "../worker/src/push-crypto.js";
 
 // biome-ignore lint/correctness/noUnusedFunctionParameters: logFailure 仅部分用例注入
 function createProjection({ overlays = {}, logFailure = () => {} } = {}) {
-	const calls = { sends: [], removed: [], failures: [] };
+	const calls = { sends: [], removed: [], failures: [], bark: [] };
 	const projection = createPushProjection({
 		listMemberIds: overlays.listMemberIds || (async () => [1, 2, 3]),
 		listSubscriptions:
@@ -17,7 +17,9 @@ function createProjection({ overlays = {}, logFailure = () => {} } = {}) {
 					endpoint: `https://push.example.com/${userId}`,
 					keys: { p256dh: "k", auth: "a" },
 				}))),
+		listBarkKeys: overlays.listBarkKeys || (async () => []),
 		sendPush: overlays.sendPush || (async (_env, sub) => calls.sends.push(sub.endpoint)),
+		sendBark: overlays.sendBark || (async (_env, target) => calls.bark.push(target)),
 		removeSubscription: overlays.removeSubscription || (async (_db, endpoint) => calls.removed.push(endpoint)),
 		logFailure: (message, data) => calls.failures.push({ message, data }),
 	});
@@ -149,4 +151,81 @@ test("推送服务返回 410 时清理失效订阅,其他错误只记录不中�
 	assert.deepEqual(calls.removed, ["https://push.example.com/1"]);
 	assert.equal(calls.failures.length, 1);
 	assert.equal(calls.failures[0].message, "push projection failed");
+});
+
+test("有 Bark 密钥的用户收到 Bark 推送,标题/正文/会话分组按房间生成", async () => {
+	const barkCalls = [];
+	const projection = createPushProjection({
+		listMemberIds: async () => [1, 2, 3],
+		listSubscriptions: async () => [],
+		listBarkKeys: async () => [
+			{ userId: 1, deviceKey: "key-for-1" },
+			{ userId: 3, deviceKey: "key-for-3" },
+		],
+		sendBark: async (_env, target) => barkCalls.push(target),
+	});
+	await projection(
+		{
+			DB: {},
+			VAPID_PRIVATE_KEY: "pk",
+			VAPID_PUBLIC_KEY: "pub",
+			VAPID_SUBJECT: "mailto:admin@example.com",
+		},
+		{
+			room: { id: 7, kind: "public", name: "产品协作" },
+			senderId: 2,
+			message: { content: "发布新版本" },
+		},
+	);
+	assert.deepEqual(barkCalls, [
+		{ deviceKey: "key-for-1", title: "产品协作", body: "发布新版本", group: "edgechat:7" },
+		{ deviceKey: "key-for-3", title: "产品协作", body: "发布新版本", group: "edgechat:7" },
+	]);
+});
+
+test("未配置 VAPID 时仅发 Bark,不发 Web Push", async () => {
+	const barkCalls = [];
+	const sends = [];
+	const projection = createPushProjection({
+		listMemberIds: async () => [1, 2],
+		listSubscriptions: async () => [{ userId: 1, endpoint: "e" }],
+		listBarkKeys: async () => [{ userId: 1, deviceKey: "key-for-1" }],
+		sendBark: async (_env, target) => barkCalls.push(target),
+		sendPush: async (_env, sub) => sends.push(sub.endpoint),
+	});
+	await projection(
+		{ DB: {} },
+		{
+			room: { id: 3, kind: "dm", name: "1:2" },
+			senderId: 2,
+			message: { content: "明天开会", sender: { displayName: "王五" } },
+		},
+	);
+	assert.deepEqual(barkCalls, [
+		{ deviceKey: "key-for-1", title: "王五", body: "明天开会", group: "edgechat:3" },
+	]);
+	assert.deepEqual(sends, []);
+});
+
+test("Bark 推送失败只记录日志,不影响其他推送", async () => {
+	const failures = [];
+	const projection = createPushProjection({
+		listMemberIds: async () => [1, 2],
+		listBarkKeys: async () => [{ userId: 1, deviceKey: "key-for-1" }],
+		sendBark: async () => {
+			throw new Error("bark server down");
+		},
+		logFailure: (message, data) => failures.push({ message, data }),
+	});
+	await projection(
+		{ DB: {} },
+		{
+			room: { id: 3, kind: "public", name: "运维" },
+			senderId: 2,
+			message: { content: "hi" },
+		},
+	);
+	assert.equal(failures.length, 1);
+	assert.equal(failures[0].message, "bark push failed");
+	assert.equal(failures[0].data.userId, 1);
 });

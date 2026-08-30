@@ -269,7 +269,13 @@ export async function requestDemo(path, options = {}) {
       user.avatarUrl = demoState.files.get(body.avatarKey) || '';
       demoState.session.avatarUrl = user.avatarUrl;
     }
+    if (body.barkKey !== undefined) {
+      demoState.session.barkKey = String(body.barkKey || '').trim();
+    }
     return { session: cloneDemo(demoState.session) };
+  }
+  if (method === 'POST' && pathname === '/bark/test') {
+    return { ok: true };
   }
   if (method === 'GET' && pathname === '/users') {
     return { users: bootstrapPayload().users };

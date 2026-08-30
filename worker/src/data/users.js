@@ -32,6 +32,26 @@ export async function getUserByUsername(db, username) {
 	return results[0] || null;
 }
 
+export async function listBarkKeysForUsers(db, userIds) {
+	if (!userIds.length) {
+		return [];
+	}
+	const placeholders = userIds.map(() => "?").join(",");
+	const { results } = await db
+		.prepare(
+			`SELECT id, bark_key
+			 FROM users
+			 WHERE id IN (${placeholders})
+			   AND bark_key != ''`,
+		)
+		.bind(...userIds.map(Number))
+		.all();
+	return results.map((row) => ({
+		userId: Number(row.id),
+		deviceKey: String(row.bark_key).trim(),
+	}));
+}
+
 export async function isUserActiveById(db, userId) {
 	const { results } = await db
 		.prepare(

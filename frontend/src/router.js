@@ -12,6 +12,7 @@ import AdminInvitesPage from './pages/AdminInvitesPage.vue';
 import AdminSitePage from './pages/AdminSitePage.vue';
 import AdminTelegramPage from './pages/AdminTelegramPage.vue';
 import SettingsPage from './pages/SettingsPage.vue';
+import BarkGuidePage from './pages/BarkGuidePage.vue';
 import { addAuthInvalidListener } from './auth-storage.js';
 
 const router = createRouter({
@@ -86,6 +87,12 @@ const router = createRouter({
       path: '/settings',
       name: 'settings',
       component: SettingsPage,
+      meta: { transition: 'page' }
+    },
+    {
+      path: '/settings/bark',
+      name: 'bark-guide',
+      component: BarkGuidePage,
       meta: { transition: 'page' }
     }
   ]

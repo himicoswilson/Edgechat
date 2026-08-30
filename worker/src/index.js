@@ -32,6 +32,7 @@ import {
 } from './api/telegram.js';
 import { registerManifestRoute } from './api/site-manifest.js';
 import { registerPushSubscriptionRoutes } from './api/push-subscriptions.js';
+import { sendBarkPush } from './integrations/bark.js';
 import { ChannelRoom } from './do/ChannelRoom.js';
 import { Presence } from './do/Presence.js';
 import { Scheduler } from './do/Scheduler.js';
@@ -169,7 +170,7 @@ app.use('/api/*', authMiddleware);
 app.get('/api/auth/session', async (c) => {
   const session = c.get('session');
   const user = await c.env.DB.prepare(
-    `SELECT display_name, avatar_key, is_disabled, disabled_until
+    `SELECT display_name, avatar_key, bark_key, is_disabled, disabled_until
      FROM users
      WHERE id = ?
        AND deleted_at IS NULL
@@ -186,6 +187,7 @@ app.get('/api/auth/session', async (c) => {
   const freshSession = {
     ...session,
     displayName: user.results[0].display_name,
+    barkKey: String(user.results[0].bark_key || ''),
     avatarUrl: user.results[0].avatar_key ? `/files/${encodeURIComponent(user.results[0].avatar_key)}` : ''
   };
   await putSession(c.env, freshSession);
@@ -268,6 +270,12 @@ app.patch('/api/me/profile', async (c) => {
     updates.splice(1, 0, 'avatar_key = ?');
     binds.push(avatarUpdate.key);
   }
+  const barkKey =
+    payload.barkKey !== undefined ? String(payload.barkKey || '').trim() : undefined;
+  if (barkKey !== undefined) {
+    updates.push('bark_key = ?');
+    binds.push(barkKey);
+  }
   await c.env.DB.prepare(
     `UPDATE users
      SET ${updates.join(', ')}
@@ -280,6 +288,7 @@ app.patch('/api/me/profile', async (c) => {
   const merged = {
     ...nextSession,
     displayName,
+    barkKey: barkKey !== undefined ? barkKey : String(nextSession.barkKey || ''),
     avatarUrl: avatarUpdate.provided
       ? avatarUpdate.key
         ? `/files/${encodeURIComponent(avatarUpdate.key)}`
@@ -289,6 +298,34 @@ app.patch('/api/me/profile', async (c) => {
   await putSession(c.env, merged);
 
   return c.json({ session: merged });
+});
+
+app.post('/api/bark/test', async (c) => {
+  const session = c.get('session');
+  const { results } = await c.env.DB.prepare(
+    `SELECT bark_key
+     FROM users
+     WHERE id = ?
+       AND deleted_at IS NULL
+     LIMIT 1`
+  )
+    .bind(session.userId)
+    .all();
+  const barkKey = String(results[0]?.bark_key || '').trim();
+  if (!barkKey) {
+    return errorResponse('请先在设置中填写 Bark 密钥', 400);
+  }
+
+  const site = await getSiteSettings(c.env.DB);
+  const result = await sendBarkPush(c.env, {
+    deviceKey: barkKey,
+    title: String(site.siteName || 'Edgechat').trim() || 'Edgechat',
+    body: '这是一条用于验证配置的测试通知',
+  });
+  if (result.status >= 400) {
+    return errorResponse(`Bark 推送失败(${result.status}): ${result.body}`, 502);
+  }
+  return c.json({ ok: true, response: result.body });
 });
 
 app.get('/api/users', async (c) => {

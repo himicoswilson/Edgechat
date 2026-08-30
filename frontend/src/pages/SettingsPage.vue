@@ -20,13 +20,20 @@ const passwordForm = reactive({
   currentPassword: '',
   newPassword: ''
 });
+const barkForm = reactive({
+  deviceKey: session.value?.barkKey || ''
+});
 
 const info = ref('');
 const error = ref('');
 const savingProfile = ref(false);
 const savingPassword = ref(false);
+const savingBark = ref(false);
+const testingBark = ref(false);
 const uploadingAvatar = ref(false);
 const avatarInputEl = ref(null);
+
+const canTestBark = computed(() => Boolean(String(barkForm.deviceKey || '').trim()));
 
 const showCropper = ref(false);
 const avatarMenuOpen = ref(false);
@@ -277,6 +284,33 @@ async function changePassword() {
     savingPassword.value = false;
   }
 }
+
+async function saveBark() {
+  clearMessage();
+  savingBark.value = true;
+  try {
+    const payload = await api.updateProfile({ barkKey: String(barkForm.deviceKey || '').trim() });
+    store.setSession(payload.session);
+    info.value = t('settings.barkSaved');
+  } catch (currentError) {
+    error.value = currentError.message;
+  } finally {
+    savingBark.value = false;
+  }
+}
+
+async function testBark() {
+  clearMessage();
+  testingBark.value = true;
+  try {
+    await api.testBark();
+    info.value = t('settings.barkTestSent');
+  } catch (currentError) {
+    error.value = currentError.message;
+  } finally {
+    testingBark.value = false;
+  }
+}
 </script>
 
 <template>
@@ -391,6 +425,34 @@ async function changePassword() {
           <button type="button" class="save-btn" :disabled="savingPassword" @click="changePassword">
             {{ savingPassword ? t('settings.updatingPassword') : t('settings.updatePassword') }}
           </button>
+        </section>
+
+        <section class="settings-section settings-section--bark">
+          <h2>{{ t('settings.barkSection') }}</h2>
+          <p class="bark-intro">{{ t('settings.barkIntro') }}</p>
+          <label class="field-compact">
+            <span>{{ t('settings.barkKey') }}</span>
+            <input
+              v-model.trim="barkForm.deviceKey"
+              :placeholder="t('settings.barkKeyHint')"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </label>
+          <div class="bark-actions">
+            <button type="button" class="save-btn" :disabled="savingBark" @click="saveBark">
+              {{ savingBark ? t('settings.savingBark') : t('settings.saveBark') }}
+            </button>
+            <button
+              type="button"
+              class="test-btn"
+              :disabled="!canTestBark || testingBark"
+              @click="testBark"
+            >
+              {{ testingBark ? t('settings.testingBark') : t('settings.testBark') }}
+            </button>
+            <router-link class="guide-link" to="/settings/bark">{{ t('settings.barkGuideLink') }}</router-link>
+          </div>
         </section>
       </div>
 
@@ -668,6 +730,56 @@ async function changePassword() {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+}
+
+.settings-section--bark {
+  grid-column: 1 / -1;
+}
+
+.bark-intro {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.bark-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.test-btn {
+  padding: 9px 18px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-soft), color var(--transition-soft);
+}
+
+.test-btn:hover:not(:disabled) {
+  background: var(--accent-soft);
+}
+
+.test-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.guide-link {
+  margin-left: auto;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.guide-link:hover {
+  text-decoration: underline;
 }
 
 .settings-section {

@@ -106,4 +106,9 @@ export const D1_MIGRATIONS = [
     file: "worker/migrations/2026-08-31-push-subscription-origin.sql",
     artifacts: ["column:push_subscriptions.origin"],
   },
+  {
+    id: "2026-09-01-bark-notifications",
+    file: "worker/migrations/2026-09-01-bark-notifications.sql",
+    artifacts: ["column:users.bark_key"],
+  },
 ];

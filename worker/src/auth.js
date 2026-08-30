@@ -94,6 +94,7 @@ export async function createSession(env, user) {
     userId: Number(user.id),
     username: user.username,
     displayName: user.display_name,
+    barkKey: String(user.bark_key || ''),
     avatarUrl: user.avatar_key ? `/files/${encodeURIComponent(user.avatar_key)}` : '',
     isAdmin: isAdminUser(env, user),
     sessionVersion: toSessionVersion(user.session_version)
