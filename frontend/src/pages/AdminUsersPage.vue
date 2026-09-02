@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import api from '../api.js';
 import UiButton from '../components/ui/Button.vue';
 import UiSurface from '../components/ui/Surface.vue';
+import UserIpRecords from '../components/admin/UserIpRecords.vue';
 import { formatDateTime, t } from '../i18n.js';
 
 const loading = ref(false);
@@ -11,6 +12,8 @@ const users = ref([]);
 const banEditorUserId = ref(null);
 const banDuration = ref(1);
 const banUnit = ref('days');
+
+const ipUserId = ref(null);
 
 const BAN_UNIT_MINUTES = {
   minutes: 1,
@@ -87,6 +90,10 @@ async function removeUser(user) {
   await loadUsers();
 }
 
+async function toggleIpRecords(user) {
+  ipUserId.value = ipUserId.value === user.id ? null : user.id;
+}
+
 onMounted(loadUsers);
 </script>
 
@@ -156,9 +163,17 @@ onMounted(loadUsers);
                       <UiButton size="sm" @click="disableUser(user)">{{ t('users.confirmDisable') }}</UiButton>
                       <UiButton variant="secondary" size="sm" @click="closeBanEditor">{{ t('common.cancel') }}</UiButton>
                     </div>
+                    <UiButton variant="secondary" size="sm" @click="toggleIpRecords(user)">
+                      {{ t('users.ipRecords') }}
+                    </UiButton>
                     <UiButton variant="secondary" size="sm" @click="resetPassword(user)">{{ t('users.resetPassword') }}</UiButton>
                     <UiButton variant="destructive" size="sm" @click="removeUser(user)">{{ t('common.delete') }}</UiButton>
                   </div>
+                </td>
+              </tr>
+              <tr v-if="ipUserId === user.id" class="user-ip-row">
+                <td colspan="4">
+                  <UserIpRecords :user-id="user.id" />
                 </td>
               </tr>
             </tbody>
@@ -188,5 +203,10 @@ onMounted(loadUsers);
 .user-ban-editor input,
 .user-ban-editor select {
   min-height: 34px;
+}
+
+.user-ip-row td {
+  background: var(--admin-color-surface-muted, var(--admin-surface-2));
+  padding: var(--admin-space-sm);
 }
 </style>

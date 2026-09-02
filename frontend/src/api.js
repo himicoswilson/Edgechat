@@ -347,6 +347,9 @@ export default {
       body: payload
     });
   },
+  adminUserIps(userId) {
+    return request(`/admin/users/${userId}/ips`);
+  },
   resetPassword(userId, password) {
     return request(`/admin/users/${userId}/reset-password`, {
       method: 'POST',

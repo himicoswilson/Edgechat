@@ -11,6 +11,7 @@ import {
 } from '../data/registration-invites.js';
 import { getSiteSettings, updateSiteSettings } from '../data/site-settings.js';
 import { listAdminUsers, listStorageOwners } from '../data/users.js';
+import { listUserIpEvents } from '../data/ip-audit.js';
 import { ApiError } from '../errors.js';
 import { queryUserPresence } from '../do-bridge.js';
 import { summarizeR2Objects } from '../storage-statistics.js';
@@ -207,6 +208,16 @@ export function registerAdminRoutes(app) {
         disabledUntil: null
       }
     });
+  });
+
+  app.get('/api/admin/users/:userId/ips', async (c) => {
+    const userId = Number(c.req.param('userId'));
+    if (!Number.isFinite(userId)) {
+      return errorResponse('用户不存在', 404);
+    }
+
+    const events = await listUserIpEvents(c.env.DB, userId);
+    return c.json({ events });
   });
 
   app.patch('/api/admin/users/:userId', async (c) => {

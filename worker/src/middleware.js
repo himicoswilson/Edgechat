@@ -1,5 +1,7 @@
-import { errorResponse } from './utils.js';
+import { errorResponse, clientIp } from './utils.js';
+import { putSession } from './auth.js';
 import { validateSession } from './session.js';
+import { recordIpEvent } from './data/ip-audit.js';
 
 function extractToken(request) {
   const authHeader = request.headers.get('authorization') || '';
@@ -18,7 +20,21 @@ export async function authMiddleware(c, next) {
     return errorResponse(result.message, result.status);
   }
 
-  c.set('session', result.session);
+  const session = result.session;
+  const ip = clientIp(c);
+  if (ip && session.lastIp !== ip) {
+    // 每个会话只在 IP 变化时写一条审计，避免每请求动表。
+    await recordIpEvent(c.env.DB, {
+      userId: session.userId,
+      event: 'access',
+      ip,
+      userAgent: c.req.header('user-agent') || ''
+    }).catch(() => {});
+    session.lastIp = ip;
+    await putSession(c.env, session).catch(() => {});
+  }
+
+  c.set('session', session);
   await next();
 }
 

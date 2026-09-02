@@ -111,4 +111,9 @@ export const D1_MIGRATIONS = [
     file: "worker/migrations/2026-09-01-bark-notifications.sql",
     artifacts: ["column:users.bark_key"],
   },
+  {
+    id: "2026-09-02-user-ip-events",
+    file: "worker/migrations/2026-09-02-user-ip-events.sql",
+    artifacts: ["table:user_ip_events", "index:idx_user_ip_events_user"],
+  },
 ];

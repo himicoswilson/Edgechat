@@ -77,6 +77,17 @@ export function nextDailyUtcHour(hour) {
   return target;
 }
 
+// Cloudflare 注入的真实客户端 IP；回退到 X-Forwarded-For 首段（仅限非 CF 部署）。
+export function clientIp(c) {
+  const request = c.req.raw;
+  const cfIp = request.headers.get('CF-Connecting-IP');
+  if (cfIp) {
+    return cfIp;
+  }
+  const forwarded = request.headers.get('X-Forwarded-For');
+  return forwarded ? String(forwarded).split(',')[0].trim() : '';
+}
+
 export function randomToken(byteLength = 24) {
   const bytes = crypto.getRandomValues(new Uint8Array(byteLength));
   const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join('');

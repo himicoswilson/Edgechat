@@ -18,6 +18,7 @@ import {
 } from './data/registration-invites.js';
 import { getSiteSettings } from './data/site-settings.js';
 import { getUserByUsername, listActiveUsers } from './data/users.js';
+import { recordIpEvent } from './data/ip-audit.js';
 import { ApiError } from './errors.js';
 import { resolveAvatarKeyUpdate } from './avatar-policy.js';
 import { adminMiddleware, authMiddleware } from './middleware.js';
@@ -47,7 +48,8 @@ import { isUserDisabled } from './user-status.js';
 import {
   errorResponse,
   parseJsonRequest,
-  requestBodyTooLarge
+  requestBodyTooLarge,
+  clientIp
 } from './utils.js';
 
 const app = new Hono();
@@ -136,6 +138,16 @@ app.post('/api/register-links/:token/register', async (c) => {
   });
 
   await ensureGeneralChannelMembership(c.env.DB, userId);
+
+  const ip = clientIp(c);
+  if (ip) {
+    await recordIpEvent(c.env.DB, {
+      userId,
+      event: 'register',
+      ip,
+      userAgent: c.req.header('user-agent') || ''
+    }).catch(() => {});
+  }
 
   return c.json({ ok: true });
 });
