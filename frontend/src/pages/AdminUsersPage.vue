@@ -131,51 +131,53 @@ onMounted(loadUsers);
               <tr v-else-if="!users.length">
                 <td colspan="4" class="muted">{{ t('users.empty') }}</td>
               </tr>
-              <tr v-for="user in users" :key="user.id">
-                <td>
-                  <strong>{{ user.displayName }}</strong>
-                  <div class="muted">@{{ user.username }}</div>
-                </td>
-                <td>{{ userStatus(user) }}</td>
-                <td>{{ formatDateTime(user.createdAt) }}</td>
-                <td>
-                  <div class="inline-actions">
-                    <UiButton v-if="user.isDisabled" variant="secondary" size="sm" @click="enableUser(user)">
-                      {{ t('users.enable') }}
-                    </UiButton>
-                    <UiButton v-else-if="banEditorUserId !== user.id" variant="secondary" size="sm" @click="openBanEditor(user)">
-                      {{ t('users.disable') }}
-                    </UiButton>
-                    <div v-else class="user-ban-editor">
-                      <label v-if="banUnit !== 'permanent'" class="field user-ban-editor__duration">
-                        <span class="sr-only">{{ t('users.durationValue') }}</span>
-                        <input v-model.number="banDuration" type="number" min="1" step="1">
-                      </label>
-                      <label class="field user-ban-editor__unit">
-                        <span class="sr-only">{{ t('users.durationUnit') }}</span>
-                        <select v-model="banUnit">
-                          <option value="days">{{ t('users.units.days') }}</option>
-                          <option value="hours">{{ t('users.units.hours') }}</option>
-                          <option value="minutes">{{ t('users.units.minutes') }}</option>
-                          <option value="permanent">{{ t('users.units.permanent') }}</option>
-                        </select>
-                      </label>
-                      <UiButton size="sm" @click="disableUser(user)">{{ t('users.confirmDisable') }}</UiButton>
-                      <UiButton variant="secondary" size="sm" @click="closeBanEditor">{{ t('common.cancel') }}</UiButton>
+              <template v-for="user in users" :key="user.id">
+                <tr>
+                  <td>
+                    <strong>{{ user.displayName }}</strong>
+                    <div class="muted">@{{ user.username }}</div>
+                  </td>
+                  <td>{{ userStatus(user) }}</td>
+                  <td>{{ formatDateTime(user.createdAt) }}</td>
+                  <td>
+                    <div class="inline-actions">
+                      <UiButton v-if="user.isDisabled" variant="secondary" size="sm" @click="enableUser(user)">
+                        {{ t('users.enable') }}
+                      </UiButton>
+                      <UiButton v-else-if="banEditorUserId !== user.id" variant="secondary" size="sm" @click="openBanEditor(user)">
+                        {{ t('users.disable') }}
+                      </UiButton>
+                      <div v-else class="user-ban-editor">
+                        <label v-if="banUnit !== 'permanent'" class="field user-ban-editor__duration">
+                          <span class="sr-only">{{ t('users.durationValue') }}</span>
+                          <input v-model.number="banDuration" type="number" min="1" step="1">
+                        </label>
+                        <label class="field user-ban-editor__unit">
+                          <span class="sr-only">{{ t('users.durationUnit') }}</span>
+                          <select v-model="banUnit">
+                            <option value="days">{{ t('users.units.days') }}</option>
+                            <option value="hours">{{ t('users.units.hours') }}</option>
+                            <option value="minutes">{{ t('users.units.minutes') }}</option>
+                            <option value="permanent">{{ t('users.units.permanent') }}</option>
+                          </select>
+                        </label>
+                        <UiButton size="sm" @click="disableUser(user)">{{ t('users.confirmDisable') }}</UiButton>
+                        <UiButton variant="secondary" size="sm" @click="closeBanEditor">{{ t('common.cancel') }}</UiButton>
+                      </div>
+                      <UiButton variant="secondary" size="sm" @click="toggleIpRecords(user)">
+                        {{ t('users.ipRecords') }}
+                      </UiButton>
+                      <UiButton variant="secondary" size="sm" @click="resetPassword(user)">{{ t('users.resetPassword') }}</UiButton>
+                      <UiButton variant="destructive" size="sm" @click="removeUser(user)">{{ t('common.delete') }}</UiButton>
                     </div>
-                    <UiButton variant="secondary" size="sm" @click="toggleIpRecords(user)">
-                      {{ t('users.ipRecords') }}
-                    </UiButton>
-                    <UiButton variant="secondary" size="sm" @click="resetPassword(user)">{{ t('users.resetPassword') }}</UiButton>
-                    <UiButton variant="destructive" size="sm" @click="removeUser(user)">{{ t('common.delete') }}</UiButton>
-                  </div>
-                </td>
-              </tr>
-              <tr v-if="ipUserId === user.id" class="user-ip-row">
-                <td colspan="4">
-                  <UserIpRecords :user-id="user.id" />
-                </td>
-              </tr>
+                  </td>
+                </tr>
+                <tr v-if="ipUserId === user.id" class="user-ip-row">
+                  <td colspan="4">
+                    <UserIpRecords :user-id="user.id" />
+                  </td>
+                </tr>
+              </template>
             </tbody>
           </table>
         </div>
